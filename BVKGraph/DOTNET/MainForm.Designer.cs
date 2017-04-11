@@ -69,6 +69,7 @@
             this.graph_groupBox = new System.Windows.Forms.GroupBox();
             this.btnResetGraph = new System.Windows.Forms.Button();
             this.control_groupBox = new System.Windows.Forms.GroupBox();
+            this.servicemode_button = new System.Windows.Forms.Button();
             this.Sync_checkBox = new System.Windows.Forms.CheckBox();
             this.com_tabControl = new System.Windows.Forms.TabControl();
             this.com1_tabPage = new System.Windows.Forms.TabPage();
@@ -89,6 +90,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.control_tabPage = new System.Windows.Forms.TabPage();
             this.measure_tabPage = new System.Windows.Forms.TabPage();
+            this.cbAdmission = new System.Windows.Forms.CheckBox();
             this.gbScale = new System.Windows.Forms.GroupBox();
             this.btnScale9 = new System.Windows.Forms.Button();
             this.btnScale17 = new System.Windows.Forms.Button();
@@ -249,7 +251,7 @@
             // 
             // startbvk_button
             // 
-            this.startbvk_button.Location = new System.Drawing.Point(385, 19);
+            this.startbvk_button.Location = new System.Drawing.Point(465, 17);
             this.startbvk_button.Name = "startbvk_button";
             this.startbvk_button.Size = new System.Drawing.Size(80, 23);
             this.startbvk_button.TabIndex = 15;
@@ -279,7 +281,7 @@
             // 
             // limitation_button
             // 
-            this.limitation_button.Location = new System.Drawing.Point(304, 19);
+            this.limitation_button.Location = new System.Drawing.Point(384, 17);
             this.limitation_button.Name = "limitation_button";
             this.limitation_button.Size = new System.Drawing.Size(75, 23);
             this.limitation_button.TabIndex = 19;
@@ -289,7 +291,7 @@
             // 
             // derivation_button
             // 
-            this.derivation_button.Location = new System.Drawing.Point(385, 46);
+            this.derivation_button.Location = new System.Drawing.Point(465, 46);
             this.derivation_button.Name = "derivation_button";
             this.derivation_button.Size = new System.Drawing.Size(80, 23);
             this.derivation_button.TabIndex = 20;
@@ -306,7 +308,7 @@
             this.error_TextBox.Name = "error_TextBox";
             this.error_TextBox.ReadOnly = true;
             this.error_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.error_TextBox.Size = new System.Drawing.Size(740, 36);
+            this.error_TextBox.Size = new System.Drawing.Size(830, 36);
             this.error_TextBox.TabIndex = 22;
             // 
             // zedGraph
@@ -323,7 +325,7 @@
             this.zedGraph.ScrollMinX = 0D;
             this.zedGraph.ScrollMinY = 0D;
             this.zedGraph.ScrollMinY2 = 0D;
-            this.zedGraph.Size = new System.Drawing.Size(740, 492);
+            this.zedGraph.Size = new System.Drawing.Size(830, 492);
             this.zedGraph.TabIndex = 25;
             this.zedGraph.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.zedGraph_MouseDoubleClick);
             // 
@@ -359,7 +361,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataResiveProgressBar.Location = new System.Drawing.Point(7, 625);
             this.dataResiveProgressBar.Name = "dataResiveProgressBar";
-            this.dataResiveProgressBar.Size = new System.Drawing.Size(740, 23);
+            this.dataResiveProgressBar.Size = new System.Drawing.Size(830, 23);
             this.dataResiveProgressBar.TabIndex = 32;
             this.dataResiveProgressBar.Visible = false;
             // 
@@ -369,15 +371,15 @@
             this.normalmode_button.Name = "normalmode_button";
             this.normalmode_button.Size = new System.Drawing.Size(75, 23);
             this.normalmode_button.TabIndex = 33;
-            this.normalmode_button.Text = "Нормал.";
+            this.normalmode_button.Text = "Координ.";
             this.normalmode_button.UseVisualStyleBackColor = true;
             this.normalmode_button.Click += new System.EventHandler(this.normalmode_button_Click);
             // 
             // engineeringmode_button
             // 
-            this.engineeringmode_button.Location = new System.Drawing.Point(62, 46);
+            this.engineeringmode_button.Location = new System.Drawing.Point(223, 17);
             this.engineeringmode_button.Name = "engineeringmode_button";
-            this.engineeringmode_button.Size = new System.Drawing.Size(75, 23);
+            this.engineeringmode_button.Size = new System.Drawing.Size(75, 52);
             this.engineeringmode_button.TabIndex = 34;
             this.engineeringmode_button.Text = "Инженер.";
             this.engineeringmode_button.UseVisualStyleBackColor = true;
@@ -385,17 +387,17 @@
             // 
             // kdo_button
             // 
-            this.kdo_button.Location = new System.Drawing.Point(143, 17);
+            this.kdo_button.Location = new System.Drawing.Point(62, 46);
             this.kdo_button.Name = "kdo_button";
             this.kdo_button.Size = new System.Drawing.Size(75, 23);
             this.kdo_button.TabIndex = 35;
-            this.kdo_button.Text = "Служебные";
+            this.kdo_button.Text = "Поправки";
             this.kdo_button.UseVisualStyleBackColor = true;
             this.kdo_button.Click += new System.EventHandler(this.kdo_button_Click);
             // 
             // yac1_button
             // 
-            this.yac1_button.Location = new System.Drawing.Point(224, 18);
+            this.yac1_button.Location = new System.Drawing.Point(304, 17);
             this.yac1_button.Name = "yac1_button";
             this.yac1_button.Size = new System.Drawing.Size(75, 23);
             this.yac1_button.TabIndex = 36;
@@ -405,7 +407,7 @@
             // 
             // yac2_button
             // 
-            this.yac2_button.Location = new System.Drawing.Point(224, 46);
+            this.yac2_button.Location = new System.Drawing.Point(304, 46);
             this.yac2_button.Name = "yac2_button";
             this.yac2_button.Size = new System.Drawing.Size(75, 23);
             this.yac2_button.TabIndex = 37;
@@ -461,7 +463,7 @@
             // 
             this.clean_error_linkLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.clean_error_linkLabel.AutoSize = true;
-            this.clean_error_linkLabel.Location = new System.Drawing.Point(698, 693);
+            this.clean_error_linkLabel.Location = new System.Drawing.Point(788, 693);
             this.clean_error_linkLabel.Name = "clean_error_linkLabel";
             this.clean_error_linkLabel.Size = new System.Drawing.Size(49, 13);
             this.clean_error_linkLabel.TabIndex = 42;
@@ -475,7 +477,7 @@
             this.graph_groupBox.Controls.Add(this.save_button);
             this.graph_groupBox.Controls.Add(this.load_button);
             this.graph_groupBox.Controls.Add(this.cleangraph_button);
-            this.graph_groupBox.Location = new System.Drawing.Point(483, 3);
+            this.graph_groupBox.Location = new System.Drawing.Point(568, 3);
             this.graph_groupBox.Name = "graph_groupBox";
             this.graph_groupBox.Size = new System.Drawing.Size(178, 81);
             this.graph_groupBox.TabIndex = 43;
@@ -494,6 +496,7 @@
             // 
             // control_groupBox
             // 
+            this.control_groupBox.Controls.Add(this.servicemode_button);
             this.control_groupBox.Controls.Add(this.Sync_checkBox);
             this.control_groupBox.Controls.Add(this.stopbvk_button);
             this.control_groupBox.Controls.Add(this.startbvk_button);
@@ -507,15 +510,25 @@
             this.control_groupBox.Controls.Add(this.normalmode_button);
             this.control_groupBox.Location = new System.Drawing.Point(3, 3);
             this.control_groupBox.Name = "control_groupBox";
-            this.control_groupBox.Size = new System.Drawing.Size(474, 81);
+            this.control_groupBox.Size = new System.Drawing.Size(559, 81);
             this.control_groupBox.TabIndex = 44;
             this.control_groupBox.TabStop = false;
             this.control_groupBox.Text = "Управление";
             // 
+            // servicemode_button
+            // 
+            this.servicemode_button.Location = new System.Drawing.Point(143, 17);
+            this.servicemode_button.Name = "servicemode_button";
+            this.servicemode_button.Size = new System.Drawing.Size(75, 23);
+            this.servicemode_button.TabIndex = 51;
+            this.servicemode_button.Text = "Служебные";
+            this.servicemode_button.UseVisualStyleBackColor = true;
+            this.servicemode_button.Click += new System.EventHandler(this.btnServiceMode_Click);
+            // 
             // Sync_checkBox
             // 
             this.Sync_checkBox.Appearance = System.Windows.Forms.Appearance.Button;
-            this.Sync_checkBox.Location = new System.Drawing.Point(304, 46);
+            this.Sync_checkBox.Location = new System.Drawing.Point(384, 46);
             this.Sync_checkBox.Name = "Sync_checkBox";
             this.Sync_checkBox.Size = new System.Drawing.Size(75, 23);
             this.Sync_checkBox.TabIndex = 50;
@@ -532,7 +545,7 @@
             this.com_tabControl.Location = new System.Drawing.Point(36, -1);
             this.com_tabControl.Name = "com_tabControl";
             this.com_tabControl.SelectedIndex = 0;
-            this.com_tabControl.Size = new System.Drawing.Size(675, 114);
+            this.com_tabControl.Size = new System.Drawing.Size(760, 114);
             this.com_tabControl.TabIndex = 46;
             // 
             // com1_tabPage
@@ -554,7 +567,7 @@
             this.com1_tabPage.Location = new System.Drawing.Point(4, 22);
             this.com1_tabPage.Name = "com1_tabPage";
             this.com1_tabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.com1_tabPage.Size = new System.Drawing.Size(667, 88);
+            this.com1_tabPage.Size = new System.Drawing.Size(752, 88);
             this.com1_tabPage.TabIndex = 0;
             this.com1_tabPage.Text = "Порт 1";
             // 
@@ -586,7 +599,7 @@
             this.com2_tabPage.Location = new System.Drawing.Point(4, 22);
             this.com2_tabPage.Name = "com2_tabPage";
             this.com2_tabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.com2_tabPage.Size = new System.Drawing.Size(667, 88);
+            this.com2_tabPage.Size = new System.Drawing.Size(752, 88);
             this.com2_tabPage.TabIndex = 1;
             this.com2_tabPage.Text = "Порт 2";
             // 
@@ -730,12 +743,13 @@
             this.control_tabPage.Location = new System.Drawing.Point(4, 22);
             this.control_tabPage.Name = "control_tabPage";
             this.control_tabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.control_tabPage.Size = new System.Drawing.Size(667, 88);
+            this.control_tabPage.Size = new System.Drawing.Size(752, 88);
             this.control_tabPage.TabIndex = 2;
             this.control_tabPage.Text = "Управление";
             // 
             // measure_tabPage
             // 
+            this.measure_tabPage.Controls.Add(this.cbAdmission);
             this.measure_tabPage.Controls.Add(this.gbScale);
             this.measure_tabPage.Controls.Add(this.gbLimitation2);
             this.measure_tabPage.Controls.Add(this.gbAmplitude);
@@ -750,17 +764,27 @@
             this.measure_tabPage.Controls.Add(this.checkBoxMeasuring);
             this.measure_tabPage.Location = new System.Drawing.Point(4, 22);
             this.measure_tabPage.Name = "measure_tabPage";
-            this.measure_tabPage.Size = new System.Drawing.Size(667, 88);
+            this.measure_tabPage.Size = new System.Drawing.Size(752, 88);
             this.measure_tabPage.TabIndex = 3;
             this.measure_tabPage.Text = "Измерения";
             this.measure_tabPage.UseVisualStyleBackColor = true;
+            // 
+            // cbAdmission
+            // 
+            this.cbAdmission.AutoSize = true;
+            this.cbAdmission.Location = new System.Drawing.Point(300, 18);
+            this.cbAdmission.Name = "cbAdmission";
+            this.cbAdmission.Size = new System.Drawing.Size(90, 17);
+            this.cbAdmission.TabIndex = 52;
+            this.cbAdmission.Text = "Допуск ДРВ";
+            this.cbAdmission.UseVisualStyleBackColor = true;
             // 
             // gbScale
             // 
             this.gbScale.Controls.Add(this.btnScale9);
             this.gbScale.Controls.Add(this.btnScale17);
             this.gbScale.Controls.Add(this.btnScale35);
-            this.gbScale.Location = new System.Drawing.Point(535, 7);
+            this.gbScale.Location = new System.Drawing.Point(604, 7);
             this.gbScale.Name = "gbScale";
             this.gbScale.Size = new System.Drawing.Size(129, 78);
             this.gbScale.TabIndex = 51;
@@ -801,7 +825,7 @@
             // 
             this.gbLimitation2.Controls.Add(this.btnChangeFrame);
             this.gbLimitation2.Controls.Add(this.btnLimitation2);
-            this.gbLimitation2.Location = new System.Drawing.Point(333, 7);
+            this.gbLimitation2.Location = new System.Drawing.Point(418, 7);
             this.gbLimitation2.Name = "gbLimitation2";
             this.gbLimitation2.Size = new System.Drawing.Size(87, 78);
             this.gbLimitation2.TabIndex = 13;
@@ -832,7 +856,7 @@
             // gbAmplitude
             // 
             this.gbAmplitude.Controls.Add(this.btnShowAmpl);
-            this.gbAmplitude.Location = new System.Drawing.Point(426, 7);
+            this.gbAmplitude.Location = new System.Drawing.Point(511, 7);
             this.gbAmplitude.Name = "gbAmplitude";
             this.gbAmplitude.Size = new System.Drawing.Size(87, 78);
             this.gbAmplitude.TabIndex = 9;
@@ -974,7 +998,7 @@
             this.timeGraphName_label.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.timeGraphName_label.AutoSize = true;
             this.timeGraphName_label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.timeGraphName_label.Location = new System.Drawing.Point(362, 610);
+            this.timeGraphName_label.Location = new System.Drawing.Point(407, 610);
             this.timeGraphName_label.Name = "timeGraphName_label";
             this.timeGraphName_label.Size = new System.Drawing.Size(60, 13);
             this.timeGraphName_label.TabIndex = 50;
@@ -984,7 +1008,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(753, 712);
+            this.ClientSize = new System.Drawing.Size(843, 712);
             this.Controls.Add(this.timeGraphName_label);
             this.Controls.Add(this.syncstatus_label);
             this.Controls.Add(this.comstatus2_label);
@@ -1107,6 +1131,8 @@
         private System.Windows.Forms.Label lbBVK;
         private System.Windows.Forms.Label lbInfoSync;
         private System.Windows.Forms.Button btnScale9;
+        private System.Windows.Forms.Button servicemode_button;
+        private System.Windows.Forms.CheckBox cbAdmission;
     }
 }
 
