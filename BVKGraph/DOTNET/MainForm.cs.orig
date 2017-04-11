@@ -1,0 +1,1499 @@
+﻿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO.Ports;
+using System.Threading;
+using System.Windows.Forms;
+using ZedGraph;
+using System.IO;
+
+////////////////////////////
+// Автор: Ланденок Владимир
+// Редакция от 27.10.2016
+///////////////////////////
+
+namespace DOTNET
+{
+    public partial class WorkForm : Form
+    {
+        #region Variables
+
+        GraphPane pane1 = new GraphPane();
+        GraphPane pane2 = new GraphPane();
+        GraphPane pane3 = new GraphPane();
+
+        MasterPane masterPane = new MasterPane();
+
+        Stopwatch swatch = new Stopwatch();
+
+        // Объявление массивов для работы с данными
+        private byte[] command = new byte[3];
+        private ushort[] _dataGraph;
+
+        // Статические массивы (для обработки принятых данных)
+        private ushort[] _dataGraph2 = new ushort[600000];
+        private ushort[] _dataGraph3 = new ushort[600000];
+        private ushort[] _dataGraph4 = new ushort[75000];
+        private ushort[] _dataGraph5 = new ushort[75000];
+        private ushort[] _dataGraph6Limit = new ushort[75000];
+        private ushort[] _dataGraph7Limit = new ushort[75000];
+        private ulong[] timePoint = new ulong[2100000];
+        private ulong[] timePoint2 = new ulong[2100000];
+        private ulong[] timePoint3 = new ulong[2100000];
+        private ulong[] timePoint4 = new ulong[200000];
+        private ulong[] timePoint5 = new ulong[200000];
+        private ulong[] timePoint6Limit = new ulong[200000];
+        private ulong[] timePoint7Limit = new ulong[200000];
+        private byte[] responce = new byte[2100000];
+        private byte[] responce_temp = new byte[15000];
+        // Объвление констант для  битовых масок
+        private const uint MaskFirstByteConst = 0x0F;
+        private const uint MaskThirdByteConst = 0x7F;
+        private const uint MaskSecondByteConst = 0x7F;
+        private const uint MaskResponceConst = 0x70;
+
+        // Размеры шрифтов
+        private const int labelsXfontSize = 25;
+        private const int labelsYfontSize = 20;
+        private const int titleXFontSize = 25;
+        private const int titleYFontSize = 20;
+        private const int legendFontSize = 15;
+        private const int mainTitleFontSize = 30;
+
+        // Поиск первого бита
+        private const uint MaskFirstByteLogicConst = 0x80;
+
+        //Объявление вспомогательных переменных
+        private int _timer_counter;
+        private int read_counter;
+        private bool _scanningstatus;
+        private bool _syncstatus;
+        private int possition_counter;
+        private int _dataGraphCounter2, _dataGraphCounter3, _dataGraphCounter4, _dataGraphCounter5, _dataGraphCounter6Limit, _dataGraphCounter7Limit;
+        ulong timebuffer;
+        private byte timer30sec = 1;
+        private int error_counter;
+        private bool _limitation = true;
+        private bool _engeneering = true;
+
+        /// <summary>
+        /// TEST
+        /// </summary>
+
+        double x1Time, x2Time, y1Time, y2Time = 0;
+        bool clickFlag = false;
+
+        #endregion
+        
+        public WorkForm()
+        {
+            InitializeComponent();
+            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "Initialization done!";
+
+            //// Включим показ всплывающих подсказок при наведении курсора на график
+            //zedGraph.IsShowPointValues = true;
+
+            // Будем обрабатывать событие PointValueEvent, чтобы изменить формат представления координат
+            zedGraph.PointValueEvent +=
+                new ZedGraphControl.PointValueHandler(zedGraph_PointValueEvent);
+        }
+
+        /// <summary>
+        /// Обработчик события PointValueEvent.
+        /// Должен вернуть строку, которая будет показана во всплывающей подсказке
+        /// </summary>
+        /// <param name="sender">Отправитель сообщения</param>
+        /// <param name="pane">Панель для рисования</param>
+        /// <param name="curve">Кривая, около которой находится курсор</param>
+        /// <param name="iPt">Номер точки в кривой</param>
+        /// <returns>Нужно вернуть отображаемую строку</returns>
+       private string zedGraph_PointValueEvent(ZedGraphControl sender,
+            GraphPane pane,
+            CurveItem curve,
+            int iPt)
+        {
+            // Получим точку, около которой находимся
+            PointPair point = curve[iPt];
+
+            // Сформируем строку
+            string result = string.Format("Y: {1}\nX: {0}", (point.X / 1000000), (point.Y));
+            // КОСТЫЛЬ!!!!!
+            System.Threading.Thread.Sleep(100);
+            return result;
+        }
+
+       ///// <summary>
+       ///// Обработчик события MouseClick.
+       ///// </summary>
+       ///// <param name="sender"></param>
+       ///// <param name="e"></param>
+       //private void zedGraph_MouseClick(object sender, MouseEventArgs e)
+       //{
+       //    // Сюда будут записаны координаты в системе координат графика
+       //    double x, y;
+
+       //    // Пересчитываем пиксели в координаты на графике
+       //    // У ZedGraph есть несколько перегруженных методов ReverseTransform.
+       //    zedGraph.GraphPane.ReverseTransform(e.Location, out x, out y);
+
+       //    // Выводим результат
+       //    string text = string.Format("X: {0};    Y: {1}", x, y);
+       //    MessageBox.Show(text);
+       //}
+
+       //private void zedGraph_MouseClick(object sender, MouseEventArgs e)
+       //{
+       //    if (cbTime.Checked == true)
+       //    {
+       //        zedGraph.GraphPane.ReverseTransform(e.Location, out x1Time, out y1Time);
+       //        // Выводим результат
+       //        string text = string.Format("X: {0};Y: {1}", x1Time, y1Time);
+       //        labCoord.Visible = true;
+       //        //labCoord.Text = text;
+       //    }           
+
+       // }
+       private void zedGraph_MouseDoubleClick(object sender, MouseEventArgs e)
+       {
+           labCoord.Visible = true;
+          // if (cbTime.Checked == true)
+           {
+
+               if (clickFlag == false)
+               {
+                   zedGraph.GraphPane.ReverseTransform(e.Location, out x1Time, out y1Time);
+                   clickFlag = true;
+                   // Выводим результат
+                   //string text = string.Format("X: {0};Y: {1}", x2Time, y2Time);
+                   //labCoord.Visible = true;
+               }
+               else 
+               {
+                   zedGraph.GraphPane.ReverseTransform(e.Location, out x2Time, out y2Time);
+                   clickFlag = false;
+               }
+
+           }
+          // else labCoord.Visible = false;
+
+           if (x1Time != 0 && x2Time != 0)
+           {
+               var xTime = (int)(x2Time - x1Time);
+
+               string text = string.Format("X: {0}", (( (double)xTime)/1000000));
+               labCoord.Text = text;
+           }
+
+       }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            combobox_prop();
+            combobox2_prop();
+            button_prop();
+            button2_prop();
+            graph_prop();
+            serialPort.DataReceived += SerialPortDataReceived;
+            serialPort.ErrorReceived += SerialPortErrorReceived;
+            serialPort2.DataReceived += serialPort2_DataReceived;
+        }
+
+        #region SerialPort
+
+        // Событие получение ошибки
+        void SerialPortErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            SerialError sr = e.EventType;
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate
+                {
+
+                    switch (sr)
+                    {
+                        case SerialError.Frame:
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a framing error";
+                            break;
+                        case SerialError.Overrun:
+
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " a character-buffer overrun has occurred. The next character is lost";
+                            break;
+                        case SerialError.RXOver:
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " an input buffer overflow has occured."
+                            + " There is either no room in the input buffer, or a character was received after the End-Of-File (EOF) character.\n";
+                            break;
+                        case SerialError.RXParity:
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a parity error.\n";
+                            break;
+                        case SerialError.TXFull:
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + "the application tried to transmit a character,"
+                                + " but the output buffer was full.";
+                            break;
+                        default:
+                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " an unknown error occurred.\n";
+                            break;
+                    }
+                });
+            }
+
+        }
+        // Событие получение данных
+        void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                if (_scanningstatus && serialPort.IsOpen)
+                {
+                    read_counter = serialPort.Read(responce, possition_counter, 1000);
+                    swatch.Stop();
+                    possition_counter += read_counter;
+                    _timer_counter += read_counter;
+                }
+                else
+                {
+                    serialPort.Read(responce_temp, 0, 2000);
+                    serialPort.DiscardInBuffer();
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+        //Настройка параметров Combobox
+        private void combobox_prop()
+        {
+            try
+            {
+                baudrate_Combobox.SelectedIndex = 6;
+                stopbits_Combobox.SelectedIndex = 0;
+                databits_Combobox.SelectedIndex = 3;
+                Array parities = Enum.GetValues(typeof(Parity));
+                foreach (Parity p in parities) parity_Combobox.Items.Add(p);
+                parity_Combobox.SelectedIndex = 2;
+                port_Combobox.Items.AddRange(SerialPort.GetPortNames());
+                if (port_Combobox.Items.Count != 0)
+                    port_Combobox.SelectedIndex = port_Combobox.SelectionStart;
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+
+        }
+        //Настройка  и подключение к COM
+        private void connect_Button_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                serialPort.PortName = port_Combobox.Text;
+                serialPort.BaudRate = int.Parse(baudrate_Combobox.Text);
+                serialPort.Parity = (Parity)Enum.Parse(typeof(Parity), parity_Combobox.Text);
+                serialPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopbits_Combobox.Text);
+                serialPort.DataBits = int.Parse(databits_Combobox.Text);
+                serialPort.ReceivedBytesThreshold = 1000;
+                //!!!!!
+                serialPort.ReadBufferSize = 300000;
+                serialPort.Open();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Connected to COM1";
+                button_prop();
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+
+        }
+        //Отключение от COM
+        private void disconnect_Button_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _scanningstatus = false;
+                dataResiveProgressBar.Visible = false;
+                Thread.Sleep(10);
+                serialPort.Close();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Disconnected from COM1";
+                button_prop();
+                if (serialPort.IsOpen)
+                {
+                    _scanningstatus = false;
+                    dataResiveProgressBar.Value = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+
+        #endregion
+
+        #region SerialPort2
+        private void connect2_button_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                serialPort2.PortName = port2_Combobox.Text;
+                serialPort2.BaudRate = int.Parse(baudrate2_Combobox.Text);
+                serialPort2.Parity = (Parity)Enum.Parse(typeof(Parity), parity2_Combobox.Text);
+                serialPort2.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopbits2_Combobox.Text);
+                serialPort2.DataBits = int.Parse(databits2_Combobox.Text);
+                serialPort2.ReceivedBytesThreshold = 1;
+                serialPort2.Open();
+                button2_prop();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Connected to COM2";
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+
+        private void disconnect2_button_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                serialPort2.Close();
+                button2_prop();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Disconnected from COM2";
+                _syncstatus = false;
+                Sync_checkBox.Text = "   Sync Off  ";
+                syncstatus_label.Text = "Sync: No";
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+
+        private void combobox2_prop()
+        {
+            try
+            {
+                baudrate2_Combobox.SelectedIndex = 6;
+                stopbits2_Combobox.SelectedIndex = 0;
+                databits2_Combobox.SelectedIndex = 3;
+                Array parities = Enum.GetValues(typeof(Parity));
+                foreach (Parity p in parities) parity2_Combobox.Items.Add(p);
+                parity2_Combobox.SelectedIndex = 2;
+                port2_Combobox.Items.AddRange(SerialPort.GetPortNames());
+                if (port2_Combobox.Items.Count != 0)
+                    port2_Combobox.SelectedIndex = port_Combobox.SelectionStart;
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+
+        }
+
+        private void button2_prop()
+        {
+            if (serialPort2.IsOpen)
+            {
+                connect2_button.Enabled = false;
+                disconnect2_button.Enabled = true;
+                port2_Combobox.Enabled = false;
+                baudrate2_Combobox.Enabled = false;
+                parity2_Combobox.Enabled = false;
+                stopbits2_Combobox.Enabled = false;
+                databits2_Combobox.Enabled = false;
+                comstatus2_label.Text = "COM2 status: Connected";
+                Sync_checkBox.Enabled = true;
+            }
+            else
+            {
+                connect2_button.Enabled = true;
+                disconnect2_button.Enabled = false;
+                port2_Combobox.Enabled = true;
+                baudrate2_Combobox.Enabled = true;
+                parity2_Combobox.Enabled = true;
+                stopbits2_Combobox.Enabled = true;
+                databits2_Combobox.Enabled = true;
+                comstatus2_label.Text = "COM2 status: Disconnected";
+                Sync_checkBox.Enabled = false;
+            }
+        }
+        // Обработчик событий
+        void serialPort2_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            if (_syncstatus && serialPort.IsOpen)
+            {
+                Invoke((MethodInvoker)delegate
+                {
+                    dataResiveProgressBar.Visible = true;
+                    derivation_button.Enabled = false;
+                    starttest_button.Enabled = false;
+                    startbvk_button.Enabled = false;
+                });
+                swatch.Start();
+                _scanningstatus = true;
+                serialPort2.DiscardInBuffer();
+            }
+        }
+
+        #endregion
+
+        #region Buttons
+
+
+        // Настройка свойств кнопок
+        private void button_prop()
+        {
+            try
+            {
+                if (serialPort.IsOpen)
+                {
+                    connect_Button.Enabled = false;
+                    disconnect_Button.Enabled = true;
+                    port_Combobox.Enabled = false;
+                    baudrate_Combobox.Enabled = false;
+                    parity_Combobox.Enabled = false;
+                    stopbits_Combobox.Enabled = false;
+                    databits_Combobox.Enabled = false;
+                    comstatus_label.Text = "COM status: Connected";
+                    startbvk_button.Enabled = true;
+                    stopbvk_button.Enabled = true;
+                    starttest_button.Enabled = true;
+                    limitation_button.Enabled = true;
+                    derivation_button.Enabled = true;
+                    normalmode_button.Enabled = true;
+                    engineeringmode_button.Enabled = true;
+                    kdo_button.Enabled = true;
+                    yac1_button.Enabled = true;
+                    yac2_button.Enabled = true;
+                }
+                else
+                {
+                    connect_Button.Enabled = true;
+                    disconnect_Button.Enabled = false;
+                    port_Combobox.Enabled = true;
+                    baudrate_Combobox.Enabled = true;
+                    parity_Combobox.Enabled = true;
+                    stopbits_Combobox.Enabled = true;
+                    databits_Combobox.Enabled = true;
+                    comstatus_label.Text = "COM status: Disconnected";
+                    startbvk_button.Enabled = false;
+                    stopbvk_button.Enabled = false;
+                    starttest_button.Enabled = false;
+                    limitation_button.Enabled = false;
+                    derivation_button.Enabled = false;
+                    normalmode_button.Enabled = false;
+                    engineeringmode_button.Enabled = false;
+                    kdo_button.Enabled = false;
+                    yac1_button.Enabled = false;
+                    yac2_button.Enabled = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+
+
+        }
+        //Запуск режима работы "Хризантема"
+        private void startbvk_button_Click(object sender, EventArgs e)
+        {
+            if (_syncstatus == false)
+            {
+                DataReset();
+                byte commandprop = 0x1A;
+                DataSend(commandprop);
+                serialPort.Write(command, 0, 3);
+                dataResiveProgressBar.Visible = true;
+                derivation_button.Enabled = false;
+                _scanningstatus = true;
+                starttest_button.Enabled = false;
+                startbvk_button.Enabled = false;
+                serialPort.DiscardInBuffer();
+            }
+            else
+            {
+                DataReset();
+                byte commandprop = 0x1A;
+                DataSend(commandprop);
+                serialPort.Write(command, 0, 3);
+                dataResiveProgressBar.Visible = true;
+                derivation_button.Enabled = false;
+                starttest_button.Enabled = false;
+                startbvk_button.Enabled = false;
+                serialPort.DiscardInBuffer();
+            }
+
+        }
+        // Формирование пакета данных
+        private void DataSend(byte commandprop)
+        {
+            try
+            {
+                command[0] = 0xAF;
+                command[1] = commandprop;
+                command[2] = Convert.ToByte(0xAF ^ commandprop);
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+        // Остановка БВК
+        private void stopbvk_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x1C;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+            dataResiveProgressBar.Visible = false;
+            derivation_button.Enabled = true;
+            starttest_button.Enabled = true;
+            startbvk_button.Enabled = true;
+            dataResiveProgressBar.Value = 1;
+            error_counter_label.Text = "Errors: 0";
+            if (_scanningstatus)
+                DataProcessing();
+            _scanningstatus = false;
+        }
+        // Отключить\Включить режим ограничения по уровню 0,5
+        private void limitation_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x17;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+            if (_limitation)
+            {
+                _limitation = false;
+            }
+            else
+            {
+                _limitation = true;
+            }
+        }
+        //Запуск режима Деривации (БКВ должен быть остановлен)
+        private void derivation_button_Click(object sender, EventArgs e)
+        {
+            if (_syncstatus == false)
+            {
+                DataReset();
+                byte commandprop = 0x1B;
+                DataSend(commandprop);
+                serialPort.Write(command, 0, 3);
+                dataResiveProgressBar.Visible = true;
+                derivation_button.Enabled = false;
+                _scanningstatus = true;
+                starttest_button.Enabled = false;
+                startbvk_button.Enabled = false;
+                serialPort.DiscardInBuffer();
+            }
+            else
+            {
+                DataReset();
+                byte commandprop = 0x1B;
+                DataSend(commandprop);
+                serialPort.Write(command, 0, 3);
+                dataResiveProgressBar.Visible = true;
+                derivation_button.Enabled = false;
+                starttest_button.Enabled = false;
+                startbvk_button.Enabled = false;
+                serialPort.DiscardInBuffer();
+            }
+
+        }
+        // Запуск тестового режима
+        private void starttest_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x14;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+        }
+        //Нормальный режим
+        private void normalmode_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x11;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+            _engeneering = false;
+        }
+        // Инженерный режим
+        private void engineeringmode_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x12;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+            _engeneering = true;
+        }
+        // Режим КДО
+        private void kdo_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x13;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+        }
+        // Выбор УАС-1
+        private void yac1_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x15;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+        }
+        // Выбор УАС-2
+        private void yac2_button_Click(object sender, EventArgs e)
+        {
+            byte commandprop = 0x16;
+            DataSend(commandprop);
+            serialPort.Write(command, 0, 3);
+        }
+        // Сохранения данных для графиков
+        private void save_button_Click(object sender, EventArgs e)
+        {
+            saveFileDialog.Filter = "Все документы (*.bin) | *.bin";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                BinaryWriter binaryWriter = new BinaryWriter(File.Open(saveFileDialog.FileName, FileMode.OpenOrCreate));
+                binaryWriter.Write(responce, 0, possition_counter);
+                binaryWriter.Close();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "File saved Data.bin";
+            }
+        }
+        // Загрузка данных для графиков
+        private void load_button_Click(object sender, EventArgs e)
+        {
+            DataReset();
+            openFileDialog.Filter = "Все документы (*.bin) | *.bin";
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                BinaryReader binaryReader = new BinaryReader(File.Open(openFileDialog.FileName, FileMode.OpenOrCreate));
+                binaryReader.Read(responce, 0, (int)binaryReader.BaseStream.Length);
+                possition_counter = (int)binaryReader.BaseStream.Length;
+                binaryReader.Close();
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "File open " + openFileDialog.SafeFileName;
+                DataProcessing();
+            }
+        }
+        // Очистка Textbox от ошибок
+        private void clean_error_linkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            error_TextBox.Clear();
+        }
+        // Запуск по сигналу с COM2
+        private void Sync_checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_syncstatus)
+                {
+                    _syncstatus = false;
+                    Sync_checkBox.Text = "   Sync Off  ";
+                    syncstatus_label.Text = "Sync: No";
+                }
+                else
+                {
+                    byte commandprop = 0x1B;
+                    DataSend(commandprop);
+                    serialPort.Write(command, 0, 3);
+                    _syncstatus = true;
+                    Sync_checkBox.Text = "   Sync On  ";
+                    syncstatus_label.Text = "Sync: Yes";
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text = "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+        }
+
+        #endregion
+
+        #region Graphs
+
+        // ! Формирование графика
+        private void GraphDraw()
+        {
+            try
+            {
+                masterPane = zedGraph.MasterPane;
+
+                // !!! Свойства IsSynchronizeXAxes и IsSynchronizeYAxes указывают, что
+                // оси на графиках должны перемещаться и масштабироваться одновременно.
+                zedGraph.IsSynchronizeXAxes = true;
+
+                // По умолчанию в MasterPane содержится один экземпляр класса GraphPane 
+                // (который можно получить из свойства zedGraph.GraphPane)
+                // Очистим этот список, так как потом мы будем создавать графики вручную
+                masterPane.PaneList.Clear();
+                // Заполнение графика данными, 
+                // поэтому вынесем заполнение точек в отдельный метод DrawSingleGraph()
+                Graph1(pane1);
+                Graph2(pane2);
+                Graph3(pane3);
+
+
+                //pane3.YAxis.Scale.Min = pane1.YAxis.Scale.Min;
+                //pane2.YAxis.Scale.Min = pane1.YAxis.Scale.Min;
+
+                // Добавим новый график в MasterPane
+                masterPane.Add(pane1);
+                masterPane.Add(pane2);
+                masterPane.Add(pane3);
+
+                // Будем размещать добавленные графики в MasterPane
+                using (Graphics g = CreateGraphics())
+                {
+                    // Графики будут размещены в один столбец друг под другом
+                    masterPane.SetLayout(g, PaneLayout.SingleColumn);
+                }
+
+                // Настройка свойств графиков
+                graph_prop_final(pane1, pane2, pane3);
+
+                // Синхронизация графиков по масштабам оси Х и Y
+                pane1.XAxis.Scale.Min = 0;
+                pane2.XAxis.Scale.Min = 0;
+                pane3.XAxis.Scale.Min = 0;
+
+                pane1.XAxis.Scale.Max = 30000000;
+                pane2.XAxis.Scale.Max = 30000000; 
+                pane3.XAxis.Scale.Max = 30000000;
+
+                pane2.YAxis.Scale.Min = -40;
+                pane3.YAxis.Scale.Min = -40;
+
+                pane2.YAxis.Scale.Max = 40;
+                pane3.YAxis.Scale.Max = 40;
+
+                // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
+                zedGraph.AxisChange();
+
+                // Обновляем график
+                zedGraph.Invalidate();
+
+            }
+            catch (Exception ex)
+            {
+                Invoke(new MethodInvoker(delegate
+                {
+                    error_TextBox.Text = "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                }
+                ));
+            }
+
+        }
+        // График 1
+        private void Graph1(GraphPane pane1)
+        {
+
+            // Создадим список точек=> График номер 1
+            PointPairList list1 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph.Length - 1; i++)
+                {
+                    list1.Add(timePoint[i], (Convert.ToDouble(_dataGraph[i])) / 10);
+                }
+            }
+            // Создадим кривые 
+            LineItem curve1 = pane1.AddCurve("Amplitude multiplied by 10! ", list1, Color.Blue, SymbolType.Circle);
+            // У кривой линия будет невидимой
+            curve1.Line.IsVisible = true;
+            // Цвет заполнения отметок (ромбиков) - голубой
+            curve1.Symbol.Fill.Color = Color.Blue;
+            // Тип заполнения - сплошная заливка
+            curve1.Symbol.Fill.Type = FillType.Solid;
+            // Размер ромбиков
+            curve1.Symbol.Size = 7;
+            // Линия невидимая
+            curve1.Line.IsVisible = true;
+            // !!!
+            // Указываем, что расположение легенды мы будет задавать 
+            // в виде координат левого верхнего угла
+            pane1.Legend.Position = LegendPos.InsideBotRight;
+
+            // Координаты будут отсчитываться в системе координат окна графика
+            pane1.Legend.Location.CoordinateFrame = CoordType.ChartFraction;
+
+            // Задаем выравнивание, относительно которого мы будем задавать координаты
+            // В данном случае мы будем располагать легенду справа внизу
+            pane1.Legend.Location.AlignH = AlignH.Right;
+            pane1.Legend.Location.AlignV = AlignV.Bottom;
+
+            // Задаем координаты легенды 
+            // Вычитаем 0.02f, чтобы был небольшой зазор между осями и легендой
+            pane1.Legend.Location.TopLeft = new PointF(1.0f - 0.02f, 1.0f - 0.02f);
+
+            pane1.Legend.FontSpec.Size = 7;
+
+        }
+        // График 2
+        private void Graph2(GraphPane pane2)
+        {
+            if (_engeneering == false)
+            {
+                _dataGraphCounter2 = 0;
+                _dataGraphCounter4 = 0;
+            }
+            // Создадим список точек=> График номер 2
+            PointPairList list2 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter2; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list2.Add(timePoint2[i], _dataGraph2[i] - 33);
+                }
+            }
+            PointPairList list4 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter4; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list4.Add(timePoint4[i], _dataGraph4[i] - 33);
+                }
+            }
+            // Лимитация по 0.5 график 1
+            // _dataGraphCounter7Limit - 1 избавляемся от некорректной точки
+            PointPairList list6 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter6Limit - 1; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list6.Add(timePoint6Limit[i], _dataGraph6Limit[i] - 33);
+                }
+            }
+
+
+            // Создадим кривые 
+            LineItem curve2 = pane2.AddCurve("", list2, Color.Green, SymbolType.Diamond);
+            LineItem curve4 = pane2.AddCurve("", list4, Color.BlueViolet, SymbolType.Diamond);
+            LineItem curve6 = pane2.AddCurve("", list6, Color.DeepPink, SymbolType.Diamond);
+            // Цвет заполнения отметок (ромбиков) - голубой
+            curve2.Symbol.Fill.Color = Color.Green;
+            curve4.Symbol.Fill.Color = Color.BlueViolet;
+            curve6.Symbol.Fill.Color = Color.DeepPink;
+            // Тип заполнения - сплошная заливка
+            curve2.Symbol.Fill.Type = FillType.Solid;
+            curve4.Symbol.Fill.Type = FillType.Solid;
+            curve6.Symbol.Fill.Type = FillType.Solid;
+            // Размер ромбиков
+            curve2.Symbol.Size = 7;
+            curve4.Symbol.Size = 7;
+            curve6.Symbol.Size = 7;
+            // Линия невидимая
+            curve2.Line.IsVisible = false;
+            curve4.Line.IsVisible = false;
+            curve6.Line.IsVisible = true;
+        }
+        //График 3
+        private void Graph3(GraphPane pane3)
+        {
+            /*
+            //Для отладки
+            /////////////////////////////
+            PointPairList list9 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter2; i++)
+                {
+                    list9.Add(timePoint2[i], _dataGraph2[i]);
+                }
+            }
+            LineItem curve222 = pane3.AddCurve("", list9, Color.Green, SymbolType.Diamond);
+            curve222.IsVisible = true;
+            PointPairList list4_2 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter4; i++)
+                {
+                    list4_2.Add(timePoint4[i], _dataGraph4[i]);
+                }
+            }
+            LineItem curve4_2 = pane3.AddCurve("", list4_2, Color.BlueViolet, SymbolType.Diamond);
+            curve4_2.IsVisible = true;
+            ////////////////////////
+            */
+            if (_engeneering == false)
+            {
+                _dataGraphCounter3 = 0;
+                _dataGraphCounter5 = 0;
+            }
+            // Создадим список точек=> График номер 3
+            PointPairList list3 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter3; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list3.Add(timePoint3[i], _dataGraph3[i] - 33);
+                }
+            }
+
+            PointPairList list5 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter5; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list5.Add(timePoint5[i], _dataGraph5[i] - 33);
+                }
+            }
+
+            // Лимитация по 0.5 график 2
+            // _dataGraphCounter7Limit - 1 избавляемся от некорректной точки
+            PointPairList list7 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter7Limit - 1; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list7.Add(timePoint7Limit[i], _dataGraph7Limit[i] - 33);
+                }
+            }
+            // Создадим кривые 
+            LineItem curve3 = pane3.AddCurve("", list3, Color.Red, SymbolType.Diamond);
+            LineItem curve5 = pane3.AddCurve("", list5, Color.Brown, SymbolType.Diamond);
+            LineItem curve7 = pane3.AddCurve("", list7, Color.DeepPink, SymbolType.Diamond);
+            // Цвет заполнения отметок (ромбиков) - голубой
+            curve3.Symbol.Fill.Color = Color.Red;
+            curve5.Symbol.Fill.Color = Color.Brown;
+            curve7.Symbol.Fill.Color = Color.DeepPink;
+            // Тип заполнения - сплошная заливка
+            curve3.Symbol.Fill.Type = FillType.Solid;
+            curve5.Symbol.Fill.Type = FillType.Solid;
+            curve7.Symbol.Fill.Type = FillType.Solid;
+            // Размер ромбиков
+            curve3.Symbol.Size = 7;
+            curve5.Symbol.Size = 7;
+            curve7.Symbol.Size = 7;
+            // Линия невидимая
+            curve3.Line.IsVisible = false;
+            curve5.Line.IsVisible = false;
+            curve7.Line.IsVisible = true;
+        }
+        // Очистка графика
+        private void cleangraph_button_Click(object sender, EventArgs e)
+        {
+            DataReset();
+        }
+        // Настройка параметров ZedGraph при инициализации
+        public void graph_prop()
+        {
+            ZedGraph.MasterPane masterPane = zedGraph.MasterPane;
+            zedGraph.IsSynchronizeXAxes = true;
+            //zedGraph.IsSynchronizeYAxes = true;
+            masterPane.PaneList.Clear();
+            GraphPane pane1 = new GraphPane();
+            GraphPane pane2 = new GraphPane();
+            GraphPane pane3 = new GraphPane();
+
+            masterPane.Add(pane1);
+            masterPane.Add(pane2);
+            masterPane.Add(pane3);
+            //pane1.Title.Text = "Амплитуда";
+            //pane2.Title.Text = "Азимут";
+            //pane3.Title.Text = "Угол";
+            pane1.Title.FontSpec.FontColor = Color.Blue;
+            pane2.Title.FontSpec.FontColor = Color.Green;
+            pane3.Title.FontSpec.FontColor = Color.Red;
+            pane1.YAxis.Title.Text = "Значение Амплитуды";
+            pane2.YAxis.Title.Text = "Значение Азимута";
+            pane3.YAxis.Title.Text = "Значение Угла";
+            //pane1.XAxis.Title.Text = "Время, мкс";
+            //pane2.XAxis.Title.Text = "Время, мкс";
+            //pane3.XAxis.Title.Text = "Время, мкс";
+            // Параметры шрифтов для графика 1
+            // Установим размеры шрифтов для меток вдоль осей
+            pane1.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane1.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane1.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane1.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane1.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane1.Title.FontSpec.Size = mainTitleFontSize;
+            pane1.Title.FontSpec.IsUnderline = true;
+            // Параметры шрифтов для графика 2
+            // Установим размеры шрифтов для меток вдоль осей
+            pane2.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane2.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane2.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane2.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane2.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane2.Title.FontSpec.Size = mainTitleFontSize;
+            pane2.Title.FontSpec.IsUnderline = true;
+            // Параметры шрифтов для графика 3
+            // Установим размеры шрифтов для меток вдоль осей
+            pane3.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane3.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane3.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane3.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane3.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane3.Title.FontSpec.Size = mainTitleFontSize;
+            pane3.Title.FontSpec.IsUnderline = true;
+
+
+            using (Graphics g = CreateGraphics())
+            {
+                masterPane.SetLayout(g, PaneLayout.SingleColumn);
+            }
+            //Настройка прогресс бара
+            dataResiveProgressBar.Minimum = 1;
+            dataResiveProgressBar.Maximum = 30;
+            dataResiveProgressBar.Step = 1;
+            labCoord.Visible = false;
+        }
+        // Настройка параметров ZedGraph после отрисовке графиков
+        private void graph_prop_final(GraphPane pane1, GraphPane pane2, GraphPane pane3)
+        {
+
+            //pane1.Title.Text = "Амплитуда";
+            //pane2.Title.Text = "Азимут";
+            //pane3.Title.Text = "Угол";
+            pane1.Title.FontSpec.FontColor = Color.Blue;
+            pane2.Title.FontSpec.FontColor = Color.Green;
+            pane3.Title.FontSpec.FontColor = Color.Red;
+            pane1.YAxis.Title.Text = "Значение Амплитуды";
+            pane2.YAxis.Title.Text = "Значение Азимута\r\n";
+            pane3.YAxis.Title.Text = "Значение Угла\r\n";
+            //pane1.XAxis.Title.Text = "Время, мкс";
+            //pane2.XAxis.Title.Text = "Время, мкс";
+            //pane3.XAxis.Title.Text = "Время, мкс";
+            // Параметры шрифтов для графика 1
+            // Установим размеры шрифтов для меток вдоль осей
+            pane1.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane1.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane1.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane1.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane1.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane1.Title.FontSpec.Size = mainTitleFontSize;
+            pane1.Title.FontSpec.IsUnderline = true;
+            // Параметры шрифтов для графика 2
+            // Установим размеры шрифтов для меток вдоль осей
+            pane2.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane2.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane2.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane2.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane2.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane2.Title.FontSpec.Size = mainTitleFontSize;
+            pane2.Title.FontSpec.IsUnderline = true;
+            // Параметры шрифтов для графика 3
+            // Установим размеры шрифтов для меток вдоль осей
+            pane3.XAxis.Scale.FontSpec.Size = labelsXfontSize;
+            pane3.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+
+            // Установим размеры шрифтов для подписей по осям
+            pane3.XAxis.Title.FontSpec.Size = titleXFontSize;
+            pane3.YAxis.Title.FontSpec.Size = titleYFontSize;
+
+            // Установим размеры шрифта для легенды
+            pane3.Legend.FontSpec.Size = legendFontSize;
+
+            // Установим размеры шрифта для общего заголовка
+            pane3.Title.FontSpec.Size = mainTitleFontSize;
+            pane3.Title.FontSpec.IsUnderline = true;
+
+
+        }
+
+        #endregion
+
+        #region Data
+
+        // Метод обработки данных
+        private void DataProcessing()
+        {
+            try
+            {
+                _scanningstatus = false;
+                dataResiveProgressBar.Visible = false;
+                TimeProcessing();
+                //+1 делается ввиду специфику округления в прграммирование для избежания выхода за пределы массива
+                _dataGraph = new ushort[possition_counter / 4 + 1];
+
+                if (possition_counter != 0)
+                {
+                    // Формирование графиков
+                    int j = 0;
+                    int n = 0;
+                    int k = 0;
+                    int z = 0;
+                    int u = 0;
+                    int c = 0;
+                    byte error_packages_counter = 0;
+                    for (int i = 0; i < possition_counter; i += 4)
+                    {
+                        //Проверка стартового бита
+                        uint startByteCheck1 = responce[i] & MaskFirstByteLogicConst;
+                        uint startByteCheck2 = responce[i + 1] & MaskFirstByteLogicConst;
+                        uint startByteCheck3 = responce[i + 2] & MaskFirstByteLogicConst;
+                        uint startByteCheck4 = responce[i + 3] & MaskFirstByteLogicConst;
+
+                        if (startByteCheck1 != 0 && startByteCheck2 == 0 && startByteCheck3 == 0 && startByteCheck4 == 0)
+                        {
+                            _dataGraph[k] =
+                                Convert.ToUInt16(((responce[i] & MaskFirstByteConst) << 7) |
+                                                 (responce[i + 2] & MaskThirdByteConst));
+                            k++;
+
+                            switch (responce[i] & MaskResponceConst)
+                            {
+                                // 0x0
+                                case 0x00:
+                                    _dataGraph2[j] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint2[j] = timePoint[z];
+                                    _dataGraphCounter2++;
+                                    j++;
+                                    break;
+                                // 0x1
+                                case 0x10:
+                                    _dataGraph3[n] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint3[n] = timePoint[z];
+                                    _dataGraphCounter3++;
+                                    n++;
+                                    break;
+                                //0x2
+                                case 0x20:
+                                    _dataGraph2[j] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint2[j] = timePoint[z];
+                                    _dataGraphCounter2++;
+                                    j++;
+                                    break;
+                                //0x3
+                                case 0x30:
+                                    _dataGraph3[n] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint3[n] = timePoint[z];
+                                    _dataGraphCounter3++;
+                                    n++;
+                                    break;
+                                // 0x4   (Служебный)
+                                case 0x40:
+                                    _dataGraph4[u] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint4[u] = timePoint[z];
+                                    _dataGraphCounter4++;
+                                    u++;
+                                    break;
+                                // 0x5 (Крен)
+                                case 0x50:
+                                    _dataGraph5[c] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    timePoint5[c] = timePoint[z];
+                                    _dataGraphCounter5++;
+                                    c++;
+                                    break;
+                            }
+                            z++;
+                        }
+                        else
+                        {
+                            error_counter_label.Text = "Errors:" + error_counter;
+                            if (error_packages_counter == 4)
+                            {
+                                _dataGraph[k] = 0;
+                                k++;
+                                error_packages_counter = 0;
+                                error_counter++;
+                            }
+                            error_packages_counter++;
+                            i -= 3;
+                        }
+                    }
+                    if (_limitation)
+                    {
+                        DataLimitation();
+                    }
+                    Thread graphThread = new Thread(GraphDraw);
+                    graphThread.Name = "Graph draw thread (open file)";
+                    graphThread.IsBackground = true;
+                    graphThread.Start();
+                    timer30sec = 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Invoke(new MethodInvoker(delegate
+                {
+                    error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message + ex.StackTrace;
+                }
+                ));
+            }
+        }
+        // Формировавание данных для лимитации
+        private void DataLimitation()
+        {
+            //Лимит по 0.5 график 1
+            ushort pointSum = 0;
+            ushort pointCounter = 0;
+            for (int i = 0; i < _dataGraphCounter2; i++)
+            {
+                //Граничное условие
+                if (_dataGraph2[i] != _dataGraph2[i + 1]
+              || _dataGraph2[i + 1] != _dataGraph2[i + 2]
+              || _dataGraph2[i + 2] != _dataGraph2[i + 3])
+                //|| _dataGraph2[i + 3] != _dataGraph2[i + 4])
+                // && _dataGraph2[i + 2] != _dataGraph2[i + 3])
+                {
+                    pointSum += _dataGraph2[i];
+                    pointCounter++;
+                }
+                else
+                {
+                    if (pointCounter != 0)
+                    {
+                        _dataGraph6Limit[_dataGraphCounter6Limit] = Convert.ToUInt16(pointSum / pointCounter);
+                        timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[i];
+                        _dataGraphCounter6Limit++;
+                        pointCounter = 0;
+                        pointSum = 0;
+                    }
+                }
+            }
+            //Лимит по 0.5 график 2
+            ushort pointSum2 = 0;
+            ushort pointCounter2 = 0;
+            for (int i = 0; i < _dataGraphCounter3; i++)
+            {
+                //if ((timePoint3[i + 1] - timePoint3[i]) <= 127)
+                //Граничное условие
+                if (_dataGraph3[i] != _dataGraph3[i + 1]
+              || _dataGraph3[i + 1] != _dataGraph3[i + 2]
+              || _dataGraph3[i + 2] != _dataGraph3[i + 3])
+                //|| ((timePoint3[i + 1] - timePoint3[i]) <= 127))
+                {
+                    pointSum2 += _dataGraph3[i];
+                    pointCounter2++;
+
+                }
+                else
+                {
+                    if (pointCounter2 != 0)
+                    {
+                        _dataGraph7Limit[_dataGraphCounter7Limit] = Convert.ToUInt16(pointSum2 / pointCounter2);
+                        timePoint7Limit[_dataGraphCounter7Limit] = timePoint3[i];
+                        _dataGraphCounter7Limit++;
+                        pointCounter2 = 0;
+                        pointSum2 = 0;
+                    }
+                }
+            }
+        }
+
+
+        // Формировавание данных для лимитации
+        //private void DataLimitation()
+        //{
+        //    int sum = 0;
+        //    for (int i = 0; i < _dataGraph.Length; i++)
+        //        sum += _dataGraph[i];
+
+        //    var average = sum / _dataGraph.Length;
+
+            ////Лимит по 0.5 график 1
+            //ushort pointSum = 0;
+            //ushort pointCounter = 0;
+            //for (int i = 0; i < _dataGraph.Length; i++)
+            //{
+            //    //Граничное условие
+            //    if (average < _dataGraph[i])
+            //    {
+            //        int j = 0;
+            //        while (timePoint[i] != timePoint2[j])
+            //        {
+            //            j++;
+            //        }
+            //        pointSum += _dataGraph2[j];
+            //        pointCounter++;
+            //    }
+            //    else
+            //    {
+            //        if (pointCounter != 0)
+            //        {
+            //            _dataGraph6Limit[_dataGraphCounter6Limit] = Convert.ToUInt16(pointSum / pointCounter);
+            //            timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[i];
+            //            _dataGraphCounter6Limit++;
+            //            pointCounter = 0;
+            //            pointSum = 0;
+            //        }
+            //    }
+            //}
+
+            ////Лимит по 0.5 график 2
+            //ushort pointSum2 = 0;
+            //ushort pointCounter2 = 0;
+            //for (int i = 0; i < _dataGraphCounter3; i++)
+            //{
+            //    //if ((timePoint3[i + 1] - timePoint3[i]) <= 127)
+            //    //Граничное условие
+            //    if (_dataGraph3[i] != _dataGraph3[i + 1]
+            //  || _dataGraph3[i + 1] != _dataGraph3[i + 2]
+            //  || _dataGraph3[i + 2] != _dataGraph3[i + 3])
+            //  //|| ((timePoint3[i + 1] - timePoint3[i]) <= 127))
+            //    {
+            //        pointSum2 += _dataGraph3[i];
+            //        pointCounter2++;
+
+            //    }
+            //    else
+            //    {
+            //        if (pointCounter2 != 0)
+            //        {
+            //            _dataGraph7Limit[_dataGraphCounter7Limit] = Convert.ToUInt16(pointSum2 / pointCounter2);
+            //            timePoint7Limit[_dataGraphCounter7Limit] = timePoint3[i];
+            //            _dataGraphCounter7Limit++;
+            //            pointCounter2 = 0;
+            //            pointSum2 = 0;
+            //        }
+            //    }
+            //}
+        //}
+        private void TimeProcessing()
+        {
+            try
+            {
+                int error = 0;
+                byte error_packages_counter = 0;
+                int j = 0;
+                if (swatch.ElapsedMilliseconds > 0)
+                {
+                    timebuffer = Convert.ToUInt64(swatch.ElapsedMilliseconds * 1000); ;
+                    swatch.Reset();
+                }
+                for (int i = 0; i < possition_counter; i += 4)
+                {
+                    uint startByteCheck1 = responce[i] & MaskFirstByteLogicConst;
+                    uint startByteCheck2 = responce[i + 1] & MaskFirstByteLogicConst;
+                    uint startByteCheck3 = responce[i + 2] & MaskFirstByteLogicConst;
+                    uint startByteCheck4 = responce[i + 3] & MaskFirstByteLogicConst;
+                    {
+                        if (startByteCheck1 != 0 && startByteCheck2 == 0 && startByteCheck3 == 0 && startByteCheck4 == 0)
+                        {
+                            timePoint[j] = timebuffer;
+                            timebuffer += Convert.ToUInt64(responce[i + 3]);
+                            j++;
+                        }
+                        else
+                        {
+                            Invoke((MethodInvoker)delegate
+                            {
+                                error_counter_label.Text = "Errors:" + error_counter;
+                                if (error_packages_counter == 4)
+                                {
+                                    error_packages_counter = 0;
+                                    error_counter++;
+                                }
+                                error_packages_counter++;
+                                i -= 3;
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+            }
+
+        }
+
+        // ! В случае исключительной ситуации, полный сброс переменных
+        private void DataReset()
+        {
+            try
+            {
+                // Очистка всех существующих массивов в случае сбоя программы
+                Array.Clear(command, 0, command.Length);
+                if (_dataGraph != null)
+                    Array.Clear(_dataGraph, 0, _dataGraph.Length);
+                Array.Clear(_dataGraph2, 0, _dataGraph2.Length);
+                Array.Clear(_dataGraph3, 0, _dataGraph3.Length);
+                Array.Clear(_dataGraph4, 0, _dataGraph4.Length);
+                Array.Clear(_dataGraph5, 0, _dataGraph5.Length);
+                Array.Clear(_dataGraph6Limit, 0, _dataGraph6Limit.Length);
+                Array.Clear(_dataGraph7Limit, 0, _dataGraph7Limit.Length);
+                Array.Clear(responce, 0, responce.Length);
+                Array.Clear(timePoint, 0, timePoint.Length);
+                Array.Clear(timePoint2, 0, timePoint2.Length);
+                Array.Clear(timePoint3, 0, timePoint3.Length);
+                Array.Clear(timePoint4, 0, timePoint4.Length);
+                Array.Clear(timePoint5, 0, timePoint5.Length);
+                Array.Clear(timePoint6Limit, 0, timePoint6Limit.Length);
+                Array.Clear(timePoint7Limit, 0, timePoint7Limit.Length);
+                // Очистка вспомогательных переменных
+                _scanningstatus = false;
+                dataResiveProgressBar.Value = 1;
+                dataResiveProgressBar.Visible = false;
+                _timer_counter = 0;
+                possition_counter = 0;
+                _dataGraphCounter2 = 0;
+                _dataGraphCounter3 = 0;
+                _dataGraphCounter4 = 0;
+                _dataGraphCounter5 = 0;
+                _dataGraphCounter6Limit = 0;
+                _dataGraphCounter7Limit = 0;
+                timebuffer = 0;
+                timer30sec = 1;
+
+                // Если есть что удалять
+                if (pane1.CurveList.Count > 0 && pane2.CurveList.Count > 0 && pane3.CurveList.Count > 0)
+                {
+                    // Удалим все кривые
+                    pane1.CurveList.Clear();
+                    pane2.CurveList.Clear();
+                    pane3.CurveList.Clear();
+                    // Обновим график
+                    zedGraph.AxisChange();
+                    zedGraph.Invalidate();
+                }
+                if (serialPort.IsOpen)
+                {
+                    serialPort.DiscardInBuffer();
+                    serialPort.DiscardOutBuffer();
+                }
+            }
+            catch (Exception ex)
+            {
+                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message + ex.StackTrace;
+            }
+        }
+        //! Таймер
+        private void timerCount_Tick(object sender, EventArgs e)
+        {
+            dataResiveCounterTest_label.Text = "Packages per sec: " + (_timer_counter).ToString();
+            packages_counter_label.Text = "Bytes resived: " + possition_counter.ToString();
+            _timer_counter = 0;
+            if (_scanningstatus)
+            {
+                dataResiveProgressBar.PerformStep();
+                timer30sec++;
+            }
+            if (timer30sec == 30)
+            {
+                swatch.Stop();
+                Thread dataThread = new Thread(DataProcessing);
+                dataThread.IsBackground = true;
+                dataThread.Start();
+                //DataProcessing();
+            }
+        }
+
+        #endregion
+
+    }
+}
