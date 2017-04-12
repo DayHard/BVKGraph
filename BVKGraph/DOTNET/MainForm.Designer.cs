@@ -69,7 +69,7 @@
             this.graph_groupBox = new System.Windows.Forms.GroupBox();
             this.btnResetGraph = new System.Windows.Forms.Button();
             this.control_groupBox = new System.Windows.Forms.GroupBox();
-            this.servicemode_button = new System.Windows.Forms.Button();
+            this.btnServiceMode = new System.Windows.Forms.Button();
             this.Sync_checkBox = new System.Windows.Forms.CheckBox();
             this.com_tabControl = new System.Windows.Forms.TabControl();
             this.com1_tabPage = new System.Windows.Forms.TabPage();
@@ -261,12 +261,13 @@
             // 
             // stopbvk_button
             // 
+            this.stopbvk_button.BackColor = System.Drawing.Color.LightCoral;
             this.stopbvk_button.Location = new System.Drawing.Point(6, 17);
             this.stopbvk_button.Name = "stopbvk_button";
             this.stopbvk_button.Size = new System.Drawing.Size(50, 52);
             this.stopbvk_button.TabIndex = 16;
             this.stopbvk_button.Text = "Стоп БВК";
-            this.stopbvk_button.UseVisualStyleBackColor = true;
+            this.stopbvk_button.UseVisualStyleBackColor = false;
             this.stopbvk_button.Click += new System.EventHandler(this.stopbvk_button_Click);
             // 
             // starttest_button
@@ -281,12 +282,13 @@
             // 
             // limitation_button
             // 
+            this.limitation_button.BackColor = System.Drawing.Color.Khaki;
             this.limitation_button.Location = new System.Drawing.Point(384, 17);
             this.limitation_button.Name = "limitation_button";
             this.limitation_button.Size = new System.Drawing.Size(75, 23);
             this.limitation_button.TabIndex = 19;
             this.limitation_button.Text = "Уров. 0,5";
-            this.limitation_button.UseVisualStyleBackColor = true;
+            this.limitation_button.UseVisualStyleBackColor = false;
             this.limitation_button.Click += new System.EventHandler(this.limitation_button_Click);
             // 
             // derivation_button
@@ -367,12 +369,13 @@
             // 
             // normalmode_button
             // 
+            this.normalmode_button.BackColor = System.Drawing.Color.YellowGreen;
             this.normalmode_button.Location = new System.Drawing.Point(62, 17);
             this.normalmode_button.Name = "normalmode_button";
             this.normalmode_button.Size = new System.Drawing.Size(75, 23);
             this.normalmode_button.TabIndex = 33;
             this.normalmode_button.Text = "Координ.";
-            this.normalmode_button.UseVisualStyleBackColor = true;
+            this.normalmode_button.UseVisualStyleBackColor = false;
             this.normalmode_button.Click += new System.EventHandler(this.normalmode_button_Click);
             // 
             // engineeringmode_button
@@ -397,12 +400,13 @@
             // 
             // yac1_button
             // 
+            this.yac1_button.BackColor = System.Drawing.Color.PaleTurquoise;
             this.yac1_button.Location = new System.Drawing.Point(304, 17);
             this.yac1_button.Name = "yac1_button";
             this.yac1_button.Size = new System.Drawing.Size(75, 23);
             this.yac1_button.TabIndex = 36;
             this.yac1_button.Text = "КОД1";
-            this.yac1_button.UseVisualStyleBackColor = true;
+            this.yac1_button.UseVisualStyleBackColor = false;
             this.yac1_button.Click += new System.EventHandler(this.yac1_button_Click);
             // 
             // yac2_button
@@ -496,7 +500,7 @@
             // 
             // control_groupBox
             // 
-            this.control_groupBox.Controls.Add(this.servicemode_button);
+            this.control_groupBox.Controls.Add(this.btnServiceMode);
             this.control_groupBox.Controls.Add(this.Sync_checkBox);
             this.control_groupBox.Controls.Add(this.stopbvk_button);
             this.control_groupBox.Controls.Add(this.startbvk_button);
@@ -515,15 +519,15 @@
             this.control_groupBox.TabStop = false;
             this.control_groupBox.Text = "Управление";
             // 
-            // servicemode_button
+            // btnServiceMode
             // 
-            this.servicemode_button.Location = new System.Drawing.Point(143, 17);
-            this.servicemode_button.Name = "servicemode_button";
-            this.servicemode_button.Size = new System.Drawing.Size(75, 23);
-            this.servicemode_button.TabIndex = 51;
-            this.servicemode_button.Text = "Служебные";
-            this.servicemode_button.UseVisualStyleBackColor = true;
-            this.servicemode_button.Click += new System.EventHandler(this.btnServiceMode_Click);
+            this.btnServiceMode.Location = new System.Drawing.Point(143, 17);
+            this.btnServiceMode.Name = "btnServiceMode";
+            this.btnServiceMode.Size = new System.Drawing.Size(75, 23);
+            this.btnServiceMode.TabIndex = 51;
+            this.btnServiceMode.Text = "Служебные";
+            this.btnServiceMode.UseVisualStyleBackColor = true;
+            this.btnServiceMode.Click += new System.EventHandler(this.btnServiceMode_Click);
             // 
             // Sync_checkBox
             // 
@@ -532,7 +536,7 @@
             this.Sync_checkBox.Name = "Sync_checkBox";
             this.Sync_checkBox.Size = new System.Drawing.Size(75, 23);
             this.Sync_checkBox.TabIndex = 50;
-            this.Sync_checkBox.Text = " Синх.  вкл. ";
+            this.Sync_checkBox.Text = "Вкл. синхр.";
             this.Sync_checkBox.UseVisualStyleBackColor = true;
             this.Sync_checkBox.CheckedChanged += new System.EventHandler(this.Sync_checkBox_CheckedChanged);
             // 
@@ -1131,7 +1135,7 @@
         private System.Windows.Forms.Label lbBVK;
         private System.Windows.Forms.Label lbInfoSync;
         private System.Windows.Forms.Button btnScale9;
-        private System.Windows.Forms.Button servicemode_button;
+        private System.Windows.Forms.Button btnServiceMode;
         private System.Windows.Forms.CheckBox cbAdmission;
     }
 }

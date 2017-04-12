@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 using ZedGraph;
 using System.IO;
+
 // ReSharper disable All
 
 ////////////////////////////
@@ -49,6 +50,11 @@ namespace DOTNET
         private ulong[] timePoint7Limit = new ulong[200000];
         private ulong[] timePoint8Correction = new ulong[75000];
         private ulong[] timePoint9Correction = new ulong[75000];
+        // Усреднение 8 кадра
+        private double[] _dataGraph10ServiceLimitation = new double[7500];
+        private ulong[] timePoint10ServiceLimitation = new ulong[210000];
+        private int _dataGraphCounter10ServiceLimitation = 0;
+
         private byte[] responce = new byte[2100000];
         private byte[] responce_temp = new byte[15000];
         // Объвление констант для  битовых масок
@@ -94,7 +100,7 @@ namespace DOTNET
         private int possition_counter;
         private int _dataGraphCounter2 = 0, _dataGraphCounter3 = 0, _dataGraphCounter4 = 0,
                     _dataGraphCounter5 = 0, _dataGraphCounter6Limit = 0, _dataGraphCounter7Limit = 0,
-                    _dataGraphCounter8Service = 0, _dataGraphCounter9Service = 0;
+                    _dataGraphCounter8Correction = 0, _dataGraphCounter9Correction = 0;
         ulong timebuffer;
         private byte timer30sec = 1;
         private int error_counter = 0;
@@ -463,8 +469,6 @@ namespace DOTNET
             {
                 error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
             }
-
-
         }
         //Запуск режима работы "Хризантема"
         private void startbvk_button_Click(object sender, EventArgs e)
@@ -529,7 +533,6 @@ namespace DOTNET
         // Отключить\Включить режим ограничения по уровню 0,5
         private void limitation_button_Click(object sender, EventArgs e)
         {
-
             if (serialPort.IsOpen)
             {
                 byte commandprop = 0x17;
@@ -537,15 +540,12 @@ namespace DOTNET
                 serialPort.Write(command, 0, 3);
             }
 
-            if (_limitation)
-            {
-                _limitation = false;
-            }
-            else
-            {
-                _limitation = true;
-            }
+            _limitation = !_limitation;
             _correction = false;
+
+            if (limitation_button.UseVisualStyleBackColor == true)
+                limitation_button.BackColor = Color.Khaki;
+            else limitation_button.UseVisualStyleBackColor = true;
         }
         //Запуск режима Деривации (БКВ должен быть остановлен)
         private void derivation_button_Click(object sender, EventArgs e)
@@ -593,8 +593,15 @@ namespace DOTNET
                 DataSend(commandprop);
                 serialPort.Write(command, 0, 3);
             }
-                _engeneering = false;
-                _service = false;
+
+            _service = false;
+            _correction = false;
+            // Нужна для перехода в режим коррекции
+            _limitation2 = true;
+
+            normalmode_button.BackColor = Color.YellowGreen;
+            btnServiceMode.UseVisualStyleBackColor = true;
+            kdo_button.UseVisualStyleBackColor = true;
         }
         // Инженерный режим
         private void engineeringmode_button_Click(object sender, EventArgs e)
@@ -605,20 +612,28 @@ namespace DOTNET
                 DataSend(commandprop);
                 serialPort.Write(command, 0, 3);
             }
-                _engeneering = true;
+                _engeneering = !_engeneering;
+
+            if (engineeringmode_button.UseVisualStyleBackColor == true)
+                engineeringmode_button.BackColor = Color.Khaki;
+            else engineeringmode_button.UseVisualStyleBackColor = true;
         }
         // Режим КДО
         private void kdo_button_Click(object sender, EventArgs e)
         {
-            _limitation2 = false;
             if (serialPort.IsOpen)
             {
                 byte commandprop = 0x13;
                 DataSend(commandprop);
                 serialPort.Write(command, 0, 3);
             }
+
+            _limitation2 = false;
             _service = false;
-            _engeneering = false;
+            _correction = true;
+            normalmode_button.UseVisualStyleBackColor = true;
+            btnServiceMode.UseVisualStyleBackColor = true;
+            kdo_button.BackColor = Color.YellowGreen;
         }
         // Выбор УАС-1
         private void yac1_button_Click(object sender, EventArgs e)
@@ -626,6 +641,9 @@ namespace DOTNET
             byte commandprop = 0x15;
             DataSend(commandprop);
             serialPort.Write(command, 0, 3);
+
+            yac1_button.BackColor = Color.PaleTurquoise;
+            yac2_button.UseVisualStyleBackColor = true;
         }
         // Выбор УАС-2
         private void yac2_button_Click(object sender, EventArgs e)
@@ -633,6 +651,9 @@ namespace DOTNET
             byte commandprop = 0x16;
             DataSend(commandprop);
             serialPort.Write(command, 0, 3);
+
+            yac1_button.UseVisualStyleBackColor = true;
+            yac2_button.BackColor = Color.PaleTurquoise;
         }
         // Сохранения данных для графиков
         private void save_button_Click(object sender, EventArgs e)
@@ -674,8 +695,9 @@ namespace DOTNET
                 if (_syncstatus)
                 {
                     _syncstatus = false;
-                    Sync_checkBox.Text = "Синх. откл. ";
+                    Sync_checkBox.Text = " Вкл. синхр. ";
                     syncstatus_label.Text = "Sync: No";
+                    Sync_checkBox.UseVisualStyleBackColor = true;
                 }
                 else
                 {
@@ -683,8 +705,9 @@ namespace DOTNET
                     DataSend(commandprop);
                     serialPort.Write(command, 0, 3);
                     _syncstatus = true;
-                    Sync_checkBox.Text = " Синх. вкл. ";
+                    Sync_checkBox.Text = "Откл.синхр.";
                     syncstatus_label.Text = "Sync: Yes";
+                    Sync_checkBox.BackColor = Color.SkyBlue;
                 }
             }
             catch (Exception ex)
@@ -806,7 +829,20 @@ namespace DOTNET
         // Режим отображения служебных данных
         private void btnServiceMode_Click(object sender, EventArgs e)
         {
-            _service = !_service;
+            _service = true;
+
+            normalmode_button.UseVisualStyleBackColor = true;
+            kdo_button.UseVisualStyleBackColor = true;
+            btnServiceMode.BackColor = Color.YellowGreen;
+
+            _limitation = false;
+
+            if (limitation_button.UseVisualStyleBackColor == true)
+                limitation_button.BackColor = Color.Khaki;
+            else limitation_button.UseVisualStyleBackColor = true;
+            //if (btnServiceMode.UseVisualStyleBackColor == true)
+            //    btnServiceMode.BackColor = Color.Khaki;
+            //else btnServiceMode.UseVisualStyleBackColor = true;
         }
 
         #endregion
@@ -946,6 +982,7 @@ namespace DOTNET
                     list2.Add(timePoint2[i], _dataGraph2[i] - 32);
                 }
             }
+            //Лимитация в режиме служебный(8 кадр)
             PointPairList list4 = new PointPairList();
             {
                 for (int i = 0; i < _dataGraphCounter4; i++)
@@ -959,7 +996,6 @@ namespace DOTNET
                 // Лимитация по 0.5 график 1
                 if (_limitation2)
                 {
-
                     for (int i = 0; i < _dataGraphCounter6Limit - 1; i += 2)
                     {
                         if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0
@@ -973,9 +1009,10 @@ namespace DOTNET
                 }
                 else
                 {
+                    // Считает 3 точки подрят
                     if (_correction)
                     {
-                        for (int i = 0; i < _dataGraphCounter8Service; i++)
+                        for (int i = 0; i < _dataGraphCounter8Correction; i++)
                         {
                                 list6.Add(timePoint8Correction[i], _dataGraph8Correction[i] - 32);
                         }
@@ -1016,7 +1053,7 @@ namespace DOTNET
                 // Линия невидимая
                 curve2.Line.IsVisible = false;
             }
-            //Служебный режим
+            //Служебный режим где виден только служебный кадр
             if (_service)
             {
                 LineItem curve4 = pane2.AddCurve("", list4, Color.BlueViolet, SymbolType.Diamond);
@@ -1033,32 +1070,26 @@ namespace DOTNET
             // Допуск
             if (cbAdmission.Checked)
             {
-                LineItem curve8 = pane2.AddCurve("", list8, Color.Black, SymbolType.Diamond);
+                LineItem curve8 = pane2.AddCurve("", list8, Color.Red, SymbolType.Diamond);
                 // Размер ромбиков
                 curve8.Symbol.Size = 1;
                 // Линия невидимая
                 curve8.Line.IsVisible = true;
             }
 
-            LineItem curve6 = pane2.AddCurve("", list6, Color.DeepPink, SymbolType.Diamond);
-            // Цвет заполнения отметок (ромбиков) - голубой
-            //curve2.Symbol.Fill.Color = Color.Green;
-            //curve4.Symbol.Fill.Color = Color.BlueViolet;
-            curve6.Symbol.Fill.Color = Color.DeepPink;
-            // Тип заполнения - сплошная заливка
-            //curve2.Symbol.Fill.Type = FillType.Solid;
-            //curve4.Symbol.Fill.Type = FillType.Solid;
-            curve6.Symbol.Fill.Type = FillType.Solid;
-            // Размер ромбиков
-            //curve2.Symbol.Size = 7;
-            //curve4.Symbol.Size = 7;
-            curve6.Symbol.Size = 7;
-            // Линия невидимая
-            //curve2.Line.IsVisible = false;
-            //curve4.Line.IsVisible = false;
-            curve6.Line.IsVisible = true;
-
-
+            // Лимитация
+            if (_limitation)
+            {
+                LineItem curve6 = pane2.AddCurve("", list6, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve6.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                curve6.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve6.Symbol.Size = 7;
+                // Линия невидимая
+                curve6.Line.IsVisible = true;
+            }
         }
         //График 3
         private void Graph3(GraphPane pane3)
@@ -1073,16 +1104,55 @@ namespace DOTNET
                     list3.Add(timePoint3[i], _dataGraph3[i] - 32);
                 }
             }
-
+            // 8 кадр список точек
             PointPairList list5 = new PointPairList();
             {
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                //for (int i = 0; i < _dataGraphCounter5; i++)
+                //{
+                //    // Отнимаем значение 33 для удобства отображения
+                //    list5.Add(timePoint5[i], _dataGraph5[i] - 32);
+                //}
+
+                double dataTemp = 0;
+                int counter = 0;
                 for (int i = 0; i < _dataGraphCounter5; i++)
                 {
-                    // Отнимаем значение 33 для удобства отображения
-                    list5.Add(timePoint5[i], _dataGraph5[i] - 32);
-                }
-            }
+                    if ((timePoint5[i + 1] - timePoint5[i]) <= 80)
+                    {
+                        dataTemp += _dataGraph5[i];
+                        counter++;
+                        //// Отнимаем значение 33 для удобства отображения
+                        //list5.Add(timePoint5[i], _dataGraph5[i] - 32);
 
+                    }
+                    else
+                    {
+                        if (counter !=0)
+                        {
+                            var temp = (dataTemp / counter);
+                            _dataGraph10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = (dataTemp / counter);
+                        }
+                        else
+                        {
+                            _dataGraph10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = 0;
+                        }
+                        timePoint10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = timePoint5[i];
+                        _dataGraphCounter10ServiceLimitation++;
+
+                        counter = 0;
+                        dataTemp = 0;
+                    }
+                }
+
+                for (int i = 0; i < _dataGraphCounter10ServiceLimitation; i++)
+                {
+                    // Отнимаем значение 33 для удобства отображения
+                    list5.Add(timePoint10ServiceLimitation[i], _dataGraph10ServiceLimitation[i] - 32);
+                }
+
+            }
             //Лист точек для допуска
             PointPairList list9 = new PointPairList();
             {
@@ -1127,7 +1197,7 @@ namespace DOTNET
             // Допуск
             if (cbAdmission.Checked)
             {
-                LineItem curve9 = pane3.AddCurve("", list9, Color.Black, SymbolType.Diamond);
+                LineItem curve9 = pane3.AddCurve("", list9, Color.Red, SymbolType.Diamond);
                 // Размер ромбиков
                 curve9.Symbol.Size = 1;
                 // Линия невидимая
@@ -1155,7 +1225,7 @@ namespace DOTNET
                 {
                     if (_correction)
                     {
-                        for (int i = 0; i < _dataGraphCounter9Service; i++)
+                        for (int i = 0; i < _dataGraphCounter9Correction; i++)
                         {
                             list7.Add(timePoint9Correction[i], _dataGraph9Correction[i] - 32);
                         }
@@ -1168,28 +1238,28 @@ namespace DOTNET
                             list7.Add(timePoint7Limit[i], _dataGraph7Limit[i] - 32);
                         }
                     }
-
                 }
             }
-
-
-            LineItem curve7 = pane3.AddCurve("", list7, Color.DeepPink, SymbolType.Diamond);
-            // Цвет заполнения отметок (ромбиков) - голубой
-            //curve3.Symbol.Fill.Color = Color.Red;
-            //curve5.Symbol.Fill.Color = Color.Brown;
-            curve7.Symbol.Fill.Color = Color.DeepPink;
-            // Тип заполнения - сплошная заливка
-            //curve3.Symbol.Fill.Type = FillType.Solid;
-            //curve5.Symbol.Fill.Type = FillType.Solid;
-            curve7.Symbol.Fill.Type = FillType.Solid;
-            // Размер ромбиков
-            //curve3.Symbol.Size = 7;
-            //curve5.Symbol.Size = 7;
-            curve7.Symbol.Size = 7;
-            // Линия невидимая
-            //curve3.Line.IsVisible = false;
-            //curve5.Line.IsVisible = false;
-            curve7.Line.IsVisible = true;
+            if (_limitation)
+            {
+                LineItem curve7 = pane3.AddCurve("", list7, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                //curve3.Symbol.Fill.Color = Color.Red;
+                //curve5.Symbol.Fill.Color = Color.Brown;
+                curve7.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                //curve3.Symbol.Fill.Type = FillType.Solid;
+                //curve5.Symbol.Fill.Type = FillType.Solid;
+                curve7.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                //curve3.Symbol.Size = 7;
+                //curve5.Symbol.Size = 7;
+                curve7.Symbol.Size = 7;
+                // Линия невидимая
+                //curve3.Line.IsVisible = false;
+                //curve5.Line.IsVisible = false;
+                curve7.Line.IsVisible = true;
+            }
         }
         // Очистка графика
         private void cleangraph_button_Click(object sender, EventArgs e)
@@ -1216,7 +1286,7 @@ namespace DOTNET
             pane2.Title.FontSpec.FontColor = Color.Green;
             pane3.Title.FontSpec.FontColor = Color.Green;
 
-            pane1.YAxis.Title.Text = " \r\n Энергия";
+            pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
             pane3.YAxis.Title.Text = "Вертикаль \r\n Крен";
             // Параметры шрифтов для графика 1
@@ -1364,7 +1434,7 @@ namespace DOTNET
             pane1.Title.FontSpec.FontColor = Color.Blue;
             pane2.Title.FontSpec.FontColor = Color.Green;
             pane3.Title.FontSpec.FontColor = Color.Green;
-            pane1.YAxis.Title.Text = " \r\n Энергия";
+            pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
             pane3.YAxis.Title.Text = "Вертикаль \r\n Крен"; ;
 
@@ -1728,26 +1798,26 @@ namespace DOTNET
                     }
                 }
 
-                //Формирование массивов для режима служебный
+                //Формирование массивов для режима поправка
                 // График 1
                 for (int i = 0; i < _dataGraphCounter2; i+=3)
                 {
                     if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
                     {
-                        _dataGraph8Correction[_dataGraphCounter8Service] = _dataGraph2[i];
-                        timePoint8Correction[_dataGraphCounter8Service] = timePoint2[i];
-                        _dataGraphCounter8Service++;
+                        _dataGraph8Correction[_dataGraphCounter8Correction] = _dataGraph2[i];
+                        timePoint8Correction[_dataGraphCounter8Correction] = timePoint2[i];
+                        _dataGraphCounter8Correction++;
                     }               
                 }
-                //Формирование массивов для режима служебный
+                //Формирование массивов для режима поправка
                 //График 2
                 for (int i = 0; i < _dataGraphCounter3; i += 3)
                 {
                     if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
                     {
-                        _dataGraph9Correction[_dataGraphCounter9Service] = _dataGraph3[i];
-                        timePoint9Correction[_dataGraphCounter9Service] = timePoint3[i];
-                        _dataGraphCounter9Service++;
+                        _dataGraph9Correction[_dataGraphCounter9Correction] = _dataGraph3[i];
+                        timePoint9Correction[_dataGraphCounter9Correction] = timePoint3[i];
+                        _dataGraphCounter9Correction++;
                     }
                 }
             }
@@ -1844,8 +1914,8 @@ namespace DOTNET
                 _dataGraphCounter5 = 0;
                 _dataGraphCounter6Limit = 0;
                 _dataGraphCounter7Limit = 0;
-                _dataGraphCounter8Service = 0;
-                _dataGraphCounter9Service = 0;
+                _dataGraphCounter8Correction = 0;
+                _dataGraphCounter9Correction = 0;
                 timebuffer = 0;
                 timer30sec = 1;
 
