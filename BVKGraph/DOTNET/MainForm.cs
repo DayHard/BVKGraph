@@ -503,6 +503,11 @@ namespace DOTNET
                 serialPort.DiscardInBuffer();
             }
 
+            // Настройки цветов кнопок
+            startbvk_button.BackColor = Color.LightCoral;
+            stopbvk_button.UseVisualStyleBackColor = true;
+            derivation_button.UseVisualStyleBackColor = true;
+            //starttest_button.UseVisualStyleBackColor = true;
         }
         // Формирование пакета данных
         private void DataSend(byte commandprop)
@@ -533,6 +538,12 @@ namespace DOTNET
             if (_scanningstatus)
                 DataProcessing();
             _scanningstatus = false;
+
+            // Настройки цветов кнопок
+            stopbvk_button.BackColor = Color.LightCoral;
+            startbvk_button.UseVisualStyleBackColor = true;
+            derivation_button.UseVisualStyleBackColor = true;
+            //starttest_button.UseVisualStyleBackColor = true;
         }
         // Отключить\Включить режим ограничения по уровню 0,5
         private void limitation_button_Click(object sender, EventArgs e)
@@ -580,6 +591,11 @@ namespace DOTNET
                 serialPort.DiscardInBuffer();
             }
 
+            // Настройки цветов кнопок
+            derivation_button.BackColor = Color.LightCoral;
+            stopbvk_button.UseVisualStyleBackColor = true;
+            startbvk_button.UseVisualStyleBackColor = true;
+            //starttest_button.UseVisualStyleBackColor = true;
         }
         // Запуск тестового режима
         private void starttest_button_Click(object sender, EventArgs e)
@@ -587,6 +603,7 @@ namespace DOTNET
             byte commandprop = 0x14;
             DataSend(commandprop);
             serialPort.Write(command, 0, 3);
+            starttest_button.BackColor = Color.Khaki;
         }
         //Нормальный режим
         private void normalmode_button_Click(object sender, EventArgs e)
@@ -606,6 +623,9 @@ namespace DOTNET
             normalmode_button.BackColor = Color.YellowGreen;
             btnServiceMode.UseVisualStyleBackColor = true;
             kdo_button.UseVisualStyleBackColor = true;
+            starttest_button.UseVisualStyleBackColor = true;
+            _limitation = true;
+            limitation_button.BackColor = Color.Khaki;
         }
         // Инженерный режим
         private void engineeringmode_button_Click(object sender, EventArgs e)
@@ -637,7 +657,10 @@ namespace DOTNET
             _correction = true;
             normalmode_button.UseVisualStyleBackColor = true;
             btnServiceMode.UseVisualStyleBackColor = true;
+            starttest_button.UseVisualStyleBackColor = true;
             kdo_button.BackColor = Color.YellowGreen;
+            _limitation = true;
+            limitation_button.BackColor = Color.Khaki;
         }
         // Выбор УАС-1
         private void yac1_button_Click(object sender, EventArgs e)
@@ -841,13 +864,6 @@ namespace DOTNET
 
             _limitation = false;
             limitation_button.UseVisualStyleBackColor = true;
-
-            //if (limitation_button.UseVisualStyleBackColor == true)
-            //    limitation_button.BackColor = Color.Khaki;
-            //else 
-            //if (btnServiceMode.UseVisualStyleBackColor == true)
-            //    btnServiceMode.BackColor = Color.Khaki;
-            //else btnServiceMode.UseVisualStyleBackColor = true;
         }
 
         #endregion
@@ -1936,6 +1952,8 @@ namespace DOTNET
                 Array.Clear(_dataGraph7Limit, 0, _dataGraph7Limit.Length);
                 Array.Clear(_dataGraph8Correction, 0, _dataGraph8Correction.Length);
                 Array.Clear(_dataGraph9Correction, 0, _dataGraph9Correction.Length);
+                Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
+                Array.Clear(_dataGraph11ServiceLimitation, 0 , _dataGraph11ServiceLimitation.Length);
                 Array.Clear(responce, 0, responce.Length);
                 Array.Clear(timePoint, 0, timePoint.Length);
                 Array.Clear(timePoint2, 0, timePoint2.Length);
@@ -1946,6 +1964,8 @@ namespace DOTNET
                 Array.Clear(timePoint7Limit, 0, timePoint7Limit.Length);
                 Array.Clear(timePoint8Correction, 0, timePoint8Correction.Length);
                 Array.Clear(timePoint9Correction, 0, timePoint9Correction.Length);
+                Array.Clear(timePoint10ServiceLimitation, 0, timePoint10ServiceLimitation.Length);
+                Array.Clear(timePoint11ServiceLimitation, 0 , timePoint11ServiceLimitation.Length);
                 // Очистка вспомогательных переменных
                 _scanningstatus = false;
                 dataResiveProgressBar.Value = 1;
@@ -1956,10 +1976,13 @@ namespace DOTNET
                 _dataGraphCounter3 = 0;
                 _dataGraphCounter4 = 0;
                 _dataGraphCounter5 = 0;
+
                 _dataGraphCounter6Limit = 0;
                 _dataGraphCounter7Limit = 0;
                 _dataGraphCounter8Correction = 0;
                 _dataGraphCounter9Correction = 0;
+                _dataGraphCounter10ServiceLimitation = 0;
+                _dataGraphCounter11ServiceLimitation = 0;
                 timebuffer = 0;
                 timer30sec = 1;
 
