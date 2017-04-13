@@ -50,10 +50,14 @@ namespace DOTNET
         private ulong[] timePoint7Limit = new ulong[200000];
         private ulong[] timePoint8Correction = new ulong[75000];
         private ulong[] timePoint9Correction = new ulong[75000];
+
         // Усреднение 8 кадра
         private double[] _dataGraph10ServiceLimitation = new double[7500];
         private ulong[] timePoint10ServiceLimitation = new ulong[210000];
         private int _dataGraphCounter10ServiceLimitation = 0;
+        private double[] _dataGraph11ServiceLimitation = new double[7500];
+        private ulong[] timePoint11ServiceLimitation = new ulong[210000];
+        private int _dataGraphCounter11ServiceLimitation = 0;
 
         private byte[] responce = new byte[2100000];
         private byte[] responce_temp = new byte[15000];
@@ -836,10 +840,11 @@ namespace DOTNET
             btnServiceMode.BackColor = Color.YellowGreen;
 
             _limitation = false;
+            limitation_button.UseVisualStyleBackColor = true;
 
-            if (limitation_button.UseVisualStyleBackColor == true)
-                limitation_button.BackColor = Color.Khaki;
-            else limitation_button.UseVisualStyleBackColor = true;
+            //if (limitation_button.UseVisualStyleBackColor == true)
+            //    limitation_button.BackColor = Color.Khaki;
+            //else 
             //if (btnServiceMode.UseVisualStyleBackColor == true)
             //    btnServiceMode.BackColor = Color.Khaki;
             //else btnServiceMode.UseVisualStyleBackColor = true;
@@ -983,12 +988,53 @@ namespace DOTNET
                 }
             }
             //Лимитация в режиме служебный(8 кадр)
+            // !!! Считает не все точки, а только точки с интервалом менее 80 мкс
             PointPairList list4 = new PointPairList();
             {
+                //// Служебный кадр
+                ////Без расчета среднего значения
+
+                //for (int i = 0; i < _dataGraphCounter4; i++)
+                //{
+                //    // Отнимаем значение 33 для удобства отображения
+                //    list4.Add(timePoint4[i], _dataGraph4[i] - 32);
+                //}
+
+                double dataTemp = 0;
+                int counter = 0;
                 for (int i = 0; i < _dataGraphCounter4; i++)
                 {
+                    if ((timePoint4[i + 1] - timePoint4[i]) <= 80)
+                    {
+                        dataTemp += _dataGraph4[i];
+                        counter++;
+                    }
+                    else
+                    {
+                        if (counter != 0)
+                        {
+                            var temp = (dataTemp / counter);
+                            _dataGraph11ServiceLimitation[_dataGraphCounter11ServiceLimitation] = (dataTemp / counter);
+                        }
+                        else
+                        {
+                            _dataGraph11ServiceLimitation[_dataGraphCounter11ServiceLimitation] = BadPointConst;
+                        }
+                        timePoint11ServiceLimitation[_dataGraphCounter11ServiceLimitation] = timePoint4[i];
+                        _dataGraphCounter11ServiceLimitation++;
+
+                        counter = 0;
+                        dataTemp = 0;
+                    }
+                }
+
+                for (int i = 0; i < _dataGraphCounter11ServiceLimitation; i++)
+                {
                     // Отнимаем значение 33 для удобства отображения
-                    list4.Add(timePoint4[i], _dataGraph4[i] - 32);
+                    if (_dataGraph11ServiceLimitation[i] != BadPointConst)
+                    {
+                        list4.Add(timePoint11ServiceLimitation[i], _dataGraph11ServiceLimitation[i] - 32);
+                    }
                 }
             }
             PointPairList list6 = new PointPairList();
@@ -1107,7 +1153,8 @@ namespace DOTNET
             // 8 кадр список точек
             PointPairList list5 = new PointPairList();
             {
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                // Служебный кадр
+                //Без расчета среднего значения
 
                 //for (int i = 0; i < _dataGraphCounter5; i++)
                 //{
@@ -1123,9 +1170,6 @@ namespace DOTNET
                     {
                         dataTemp += _dataGraph5[i];
                         counter++;
-                        //// Отнимаем значение 33 для удобства отображения
-                        //list5.Add(timePoint5[i], _dataGraph5[i] - 32);
-
                     }
                     else
                     {
@@ -1136,7 +1180,7 @@ namespace DOTNET
                         }
                         else
                         {
-                            _dataGraph10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = 0;
+                            _dataGraph10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = BadPointConst;
                         }
                         timePoint10ServiceLimitation[_dataGraphCounter10ServiceLimitation] = timePoint5[i];
                         _dataGraphCounter10ServiceLimitation++;
@@ -1147,16 +1191,17 @@ namespace DOTNET
                 }
 
                 for (int i = 0; i < _dataGraphCounter10ServiceLimitation; i++)
-                {
+                {                  
                     // Отнимаем значение 33 для удобства отображения
-                    list5.Add(timePoint10ServiceLimitation[i], _dataGraph10ServiceLimitation[i] - 32);
+                    if (_dataGraph10ServiceLimitation[i] != BadPointConst)
+                    {
+                        list5.Add(timePoint10ServiceLimitation[i], _dataGraph10ServiceLimitation[i] - 32);                        
+                    }
                 }
-
             }
             //Лист точек для допуска
             PointPairList list9 = new PointPairList();
             {
-
                 list9.Add(35_000_000, 8.15D);
                 list9.Add(2_000_000, 8.15D);
                 list9.Add(1_000_000, 4.07D);
@@ -1166,7 +1211,6 @@ namespace DOTNET
                 list9.Add(2_000_000, -8.15D);
                 list9.Add(35_000_000, -8.15D);
             }
-
             if (_engeneering == true)
             {
                 // Создадим кривые 
