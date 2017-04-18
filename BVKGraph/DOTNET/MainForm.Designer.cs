@@ -329,7 +329,6 @@
             this.zedGraph.ScrollMinY2 = 0D;
             this.zedGraph.Size = new System.Drawing.Size(830, 492);
             this.zedGraph.TabIndex = 25;
-            this.zedGraph.Load += new System.EventHandler(this.zedGraph_Load);
             this.zedGraph.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.zedGraph_MouseDoubleClick);
             // 
             // cleangraph_button

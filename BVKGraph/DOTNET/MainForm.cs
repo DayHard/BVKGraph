@@ -4,8 +4,9 @@ using System.Drawing;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows.Forms;
-using System.IO;
 using ZedGraph;
+using System.IO;
+
 // ReSharper disable All
 
 ////////////////////////////
@@ -1725,7 +1726,7 @@ namespace DOTNET
                 ushort pointCounter = 0;
                 for (int i = 0; i < _dataGraphCounter2; i++)
                 {
-                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2] && (timePoint2[i + 4] - timePoint2[i + 3])<= 5000)
+                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
                     {
                         if (Math.Abs(_dataGraph2[i + 2] - _dataGraph2[i + 3]) > 2)
                         {
@@ -1837,49 +1838,22 @@ namespace DOTNET
                         }
                     }
 
-                    // Фильтрация ошибок в вычисления
-                    //График 1
-                    for (int i = 0; i < _dataGraphCounter6Limit; i++)
-                    {
-                        if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) <= 3000)
-                        {
-                            _dataGraph6Limit[i + 1] = (ushort)BadPointConst;
-                        }
-                    }
-
-                    // Фильтрация ошибок в вычисления
-                    //График 2
-                    for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    {
-                        if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) <= 3000)
-                        {
-                            _dataGraph7Limit[i + 1] = (ushort)BadPointConst;
-                        }
-                    }
-
-
                     //Перерасчет усредненной лимитации для графика 1
                     for (int i = 0; i < _dataGraphCounter6Limit; i++)
                     {
-                        if (_dataGraph6Limit[i] != BadPointConst)
+                        if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0 
+                            && _dataGraph6Limit[i + 1] != BadPointConst && timePoint6Limit[i + 1] != 0)
                         {
-                            if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0 
-                                && _dataGraph6Limit[i + 1] != BadPointConst && timePoint6Limit[i + 1] != 0)
-                            {
-                                _dataGraph6Limit[i] = (_dataGraph6Limit[i] + _dataGraph6Limit[i + 1]) / 2;
-                            }
+                            _dataGraph6Limit[i] = (_dataGraph6Limit[i] + _dataGraph6Limit[i + 1]) / 2;
                         }
                     }
                     //Перерасчет усредненной лимитации для графика 2
                     for (int i = 0; i < _dataGraphCounter7Limit; i++)
                     {
-                        if (_dataGraph7Limit[i] != BadPointConst)
+                        if (_dataGraph7Limit[i] != BadPointConst && timePoint7Limit[i] != 0
+                            && _dataGraph7Limit[i + 1] != BadPointConst && timePoint7Limit[i + 1] != 0)
                         {
-                            if (_dataGraph7Limit[i] != BadPointConst && timePoint7Limit[i] != 0
-                                && _dataGraph7Limit[i + 1] != BadPointConst && timePoint7Limit[i + 1] != 0)
-                            {
-                                _dataGraph7Limit[i] = (_dataGraph7Limit[i] + _dataGraph7Limit[i + 1]) / 2;
-                            }
+                            _dataGraph7Limit[i] = (_dataGraph7Limit[i] + _dataGraph7Limit[i + 1]) / 2;
                         }
                     }
                 }
@@ -2042,12 +2016,6 @@ namespace DOTNET
                 error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message + ex.StackTrace;
             }
         }
-
-        private void zedGraph_Load(object sender, EventArgs e)
-        {
-
-        }
-
         //! Таймер
         private void timerCount_Tick(object sender, EventArgs e)
         {
@@ -2103,6 +2071,8 @@ namespace DOTNET
 
                 // Сюда будет сохранен номер точки кривой, ближайшей к точке клика
                 int index;
+
+                pane1 = zedGraph.GraphPane;
 
                 // Максимальное расстояние от точки клика до кривой в пикселях, 
                 // при котором еще считается, что клик попал в окрестность кривой.
@@ -2169,6 +2139,8 @@ namespace DOTNET
                 // Сюда будет сохранен номер точки кривой, ближайшей к точке клика
                 int index;
 
+                pane1 = zedGraph.GraphPane;
+
                 // Максимальное расстояние от точки клика до кривой в пикселях, 
                 // при котором еще считается, что клик попал в окрестность кривой.
                 GraphPane.Default.NearestTol = 10;
@@ -2233,6 +2205,8 @@ namespace DOTNET
 
                 // Сюда будет сохранен номер точки кривой, ближайшей к точке клика
                 int index;
+
+                pane1 = zedGraph.GraphPane;
 
                 // Максимальное расстояние от точки клика до кривой в пикселях, 
                 // при котором еще считается, что клик попал в окрестность кривой.
