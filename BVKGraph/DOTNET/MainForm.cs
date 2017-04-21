@@ -1720,273 +1720,227 @@ namespace DOTNET
         {
             try
             {
-                int minAmplPos = 0, maxAmplPos = 0;
-                bool flagMin = false, flagMax = false;
+                //Лимит по 0.5 график 1
+                ushort pointSum = 0;
+                ushort pointCounter = 0;
                 for (int i = 0; i < _dataGraphCounter2; i++)
                 {
-                    if (_dataGraph2[i] >= _dataGraph2[i + 1] && _dataGraph2[i + 1] >= _dataGraph2[i + 2] 
-                        && _dataGraph2[i + 2] >= _dataGraph2[i + 3] && _dataGraph2[i + 3] >= _dataGraph2[i + 4])
+                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2] && (timePoint2[i + 4] - timePoint2[i + 3])<= 5000)
                     {
-                        ////////
-                        minAmplPos = i;
-                        flagMin = true;
-
-                    }else if (_dataGraph2[i] <= _dataGraph2[i + 1] && _dataGraph2[i + 1] <= _dataGraph2[i + 2]
-                              && _dataGraph2[i + 2] <= _dataGraph2[i + 3] && _dataGraph2[i + 3] <= _dataGraph2[i + 4])
-                    {
-                        maxAmplPos = i;
-                        flagMax = true;
-                    }
-
-                    if (flagMax && flagMin)
-                    {
-                        flagMin = false;
-                        flagMax = false;
-                        int counter = 0;
-                        double sum = 0;
-                        int pos = 0;
-                        for (int j = 0; j < _dataGraphCounter2; j++)
+                        if (Math.Abs(_dataGraph2[i + 2] - _dataGraph2[i + 3]) > 2)
                         {
-                            while (timePoint2[j] >= timePoint2[minAmplPos] && timePoint2[j] <= timePoint2[maxAmplPos])
+                            pointCounter = 0;
+                            pointSum = 0;
+                        }
+                    }
+                    else
+                    {
+                        if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
+                            _dataGraph2[i + 3] != _dataGraph2[i + 4])
+                        {
+                            pointSum += _dataGraph2[i + 3];
+                            pointCounter++;
+
+                        }
+                        else
+                        {
+                            if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
+                                _dataGraph2[i + 3] != _dataGraph2[i + 5])
                             {
-                                sum += _dataGraph2[j];
-                                counter++;
-                                pos = j;
+                                pointSum += _dataGraph2[i + 3];
+                                pointCounter++;
+                            }
+                            else
+                            {
+                                if (pointCounter != 0)
+                                {
+                                    _dataGraph6Limit[_dataGraphCounter6Limit] = (double) pointSum/
+                                                                                (double) pointCounter;
+                                    timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[i + 3];
+                                    _dataGraphCounter6Limit++;
+                                    pointCounter = 0;
+                                    pointSum = 0;
+                                }
                             }
                         }
-                        _dataGraph6Limit[_dataGraphCounter6Limit] = sum / counter;
-                        timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[pos];
-                        _dataGraphCounter6Limit++;
+                    }
+                }
+
+                //Лимит по 0.5 график 2
+                ushort pointSum2 = 0;
+                ushort pointCounter2 = 0;
+                for (int i = 0; i < _dataGraphCounter3; i++)
+                {
+                    if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
+                    {
+                        if (Math.Abs(_dataGraph3[i + 2] - _dataGraph3[i + 3]) > 2)
+                        {
+                            pointCounter2 = 0;
+                            pointSum2 = 0;
+                        }
+                    }
+                    else
+                    {
+                        if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 && _dataGraph3[i + 3] != _dataGraph3[i + 4])
+                        {
+                            pointSum2 += _dataGraph3[i + 3];
+                            pointCounter2++;
+
+                        }
+                        else
+                        {
+                            if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 &&
+                                _dataGraph3[i + 3] != _dataGraph3[i + 5])
+                            {
+                                pointSum2 += _dataGraph3[i + 3];
+                                pointCounter2++;
+                            }
+                            else
+                            {
+                                if (pointCounter2 != 0)
+                                {
+                                    _dataGraph7Limit[_dataGraphCounter7Limit] = (double) pointSum2/
+                                                                                (double) pointCounter2;
+                                    timePoint7Limit[_dataGraphCounter7Limit] = timePoint3[i + 3];
+                                    _dataGraphCounter7Limit++;
+                                    pointCounter2 = 0;
+                                    pointSum2 = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (_limitation2)
+                {
+                    if (_sysframe)
+                    {
+                        // Проходим массив, если время между точками больше 20мкс
+                        //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
+                        for (int i = 0; i < _dataGraphCounter6Limit; i++)
+                        {
+                            if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) >= 20000)
+                            {
+                                timePoint6Limit[i] = 0;
+                                _dataGraph6Limit[i] = BadPointConst;
+                            }
+                        }
+                        // Проходим массив, если время между точками больше 20мкс
+                        //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
+                        for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                        {
+                            if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) >= 20000)
+                            {
+                                timePoint7Limit[i] = 0;
+                                _dataGraph7Limit[i] = BadPointConst;
+                            }
+                        }
+                    }
+
+                    // Фильтрация ошибок в вычисления
+                    //График 1
+                    for (int i = 0; i < _dataGraphCounter6Limit; i++)
+                    {
+                        if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) <= 3000)
+                        {
+                            _dataGraph6Limit[i + 1] = BadPointConst;
+                            timePoint6Limit[i + 1] = 0;
+                        }
+                    }
+
+                    // Фильтрация ошибок в вычисления
+                    //График 2
+                    for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    {
+                        if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) <= 3000)
+                        {
+                            _dataGraph7Limit[i + 1] = BadPointConst;
+                        }
+                    }
+
+                    //Перерасчет усредненной лимитации для графика 1
+                    for (int i = 0; i < _dataGraphCounter6Limit; i++)
+                    {
+                        if (_dataGraph6Limit[i] != BadPointConst)
+                        {
+                            if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0 
+                                && _dataGraph6Limit[i + 1] != BadPointConst && timePoint6Limit[i + 1] != 0)
+                            {
+                                _dataGraph6Limit[i] = (_dataGraph6Limit[i] + _dataGraph6Limit[i + 1]) / 2;
+                            }
+                        }
+                    }
+
+                    //Перерасчет усредненной лимитации для графика 2
+                    for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    {
+                        if (_dataGraph7Limit[i] != BadPointConst)
+                        {
+                            if (_dataGraph7Limit[i] != BadPointConst && timePoint7Limit[i] != 0
+                                && _dataGraph7Limit[i + 1] != BadPointConst && timePoint7Limit[i + 1] != 0)
+                            {
+                                _dataGraph7Limit[i] = (_dataGraph7Limit[i] + _dataGraph7Limit[i + 1]) / 2;
+                            }
+                        }
+                    }
+
+                    //double averageValue2 = 0;
+                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    //{
+                    //    if (_dataGraph7Limit[i] <= 128 && _dataGraph7Limit[i] >= 0)
+                    //    {
+                    //        averageValue2 += _dataGraph7Limit[i];
+                    //    }
+                    //}
+                    //averageValue2 = averageValue2 / _dataGraphCounter7Limit;
+                    //bool ErrorCorrection2 = true;
+                    //ulong timeBuffer2 = 0;
+                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    //{
+                    //    if (ErrorCorrection2)
+                    //    {
+                    //        if (_dataGraph7Limit[i] > (averageValue2 + 2) && _dataGraph7Limit[i] < (averageValue2 - 2))
+                    //        {
+                    //            _dataGraph7Limit[i] = (ushort)averageValue2;
+                    //            ErrorCorrection2 = false;
+                    //        }
+                    //    }
+                    //    if (timeBuffer2 > 500_000)
+                    //    {
+                    //        timeBuffer2 = 0;
+                    //        ErrorCorrection2 = true;
+                    //    }
+                    //    timeBuffer2 += timePoint7Limit[i];
+                    //}
+                }
+
+                //Формирование массивов для режима поправка
+                // График 1
+                for (int i = 0; i < _dataGraphCounter2; i+=3)
+                {
+                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
+                    {
+                        _dataGraph8Correction[_dataGraphCounter8Correction] = _dataGraph2[i];
+                        timePoint8Correction[_dataGraphCounter8Correction] = timePoint2[i];
+                        _dataGraphCounter8Correction++;
+                    }               
+                }
+                //Формирование массивов для режима поправка
+                //График 2
+                for (int i = 0; i < _dataGraphCounter3; i += 3)
+                {
+                    if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
+                    {
+                        _dataGraph9Correction[_dataGraphCounter9Correction] = _dataGraph3[i];
+                        timePoint9Correction[_dataGraphCounter9Correction] = timePoint3[i];
+                        _dataGraphCounter9Correction++;
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.StackTrace);
             }
-            //try
-            //{
-            //    //Лимит по 0.5 график 1
-            //    ushort pointSum = 0;
-            //    ushort pointCounter = 0;
-            //    for (int i = 0; i < _dataGraphCounter2; i++)
-            //    {
-            //        if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2] && (timePoint2[i + 4] - timePoint2[i + 3])<= 5000)
-            //        {
-            //            if (Math.Abs(_dataGraph2[i + 2] - _dataGraph2[i + 3]) > 2)
-            //            {
-            //                pointCounter = 0;
-            //                pointSum = 0;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
-            //                _dataGraph2[i + 3] != _dataGraph2[i + 4])
-            //            {
-            //                pointSum += _dataGraph2[i + 3];
-            //                pointCounter++;
-
-            //            }
-            //            else
-            //            {
-            //                if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
-            //                    _dataGraph2[i + 3] != _dataGraph2[i + 5])
-            //                {
-            //                    pointSum += _dataGraph2[i + 3];
-            //                    pointCounter++;
-            //                }
-            //                else
-            //                {
-            //                    if (pointCounter != 0)
-            //                    {
-            //                        _dataGraph6Limit[_dataGraphCounter6Limit] = (double) pointSum/
-            //                                                                    (double) pointCounter;
-            //                        timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[i + 3];
-            //                        _dataGraphCounter6Limit++;
-            //                        pointCounter = 0;
-            //                        pointSum = 0;
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    //Лимит по 0.5 график 2
-            //    ushort pointSum2 = 0;
-            //    ushort pointCounter2 = 0;
-            //    for (int i = 0; i < _dataGraphCounter3; i++)
-            //    {
-            //        if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
-            //        {
-            //            if (Math.Abs(_dataGraph3[i + 2] - _dataGraph3[i + 3]) > 2)
-            //            {
-            //                pointCounter2 = 0;
-            //                pointSum2 = 0;
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 && _dataGraph3[i + 3] != _dataGraph3[i + 4])
-            //            {
-            //                pointSum2 += _dataGraph3[i + 3];
-            //                pointCounter2++;
-
-            //            }
-            //            else
-            //            {
-            //                if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 &&
-            //                    _dataGraph3[i + 3] != _dataGraph3[i + 5])
-            //                {
-            //                    pointSum2 += _dataGraph3[i + 3];
-            //                    pointCounter2++;
-            //                }
-            //                else
-            //                {
-            //                    if (pointCounter2 != 0)
-            //                    {
-            //                        _dataGraph7Limit[_dataGraphCounter7Limit] = (double) pointSum2/
-            //                                                                    (double) pointCounter2;
-            //                        timePoint7Limit[_dataGraphCounter7Limit] = timePoint3[i + 3];
-            //                        _dataGraphCounter7Limit++;
-            //                        pointCounter2 = 0;
-            //                        pointSum2 = 0;
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //    if (_limitation2)
-            //    {
-            //        if (_sysframe)
-            //        {
-            //            // Проходим массив, если время между точками больше 20мкс
-            //            //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
-            //            for (int i = 0; i < _dataGraphCounter6Limit; i++)
-            //            {
-            //                if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) >= 20000)
-            //                {
-            //                    timePoint6Limit[i] = 0;
-            //                    _dataGraph6Limit[i] = BadPointConst;
-            //                }
-            //            }
-            //            // Проходим массив, если время между точками больше 20мкс
-            //            //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
-            //            for (int i = 0; i < _dataGraphCounter7Limit; i++)
-            //            {
-            //                if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) >= 20000)
-            //                {
-            //                    timePoint7Limit[i] = 0;
-            //                    _dataGraph7Limit[i] = BadPointConst;
-            //                }
-            //            }
-            //        }
-
-            //        // Фильтрация ошибок в вычисления
-            //        //График 1
-            //        for (int i = 0; i < _dataGraphCounter6Limit; i++)
-            //        {
-            //            if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) <= 3000)
-            //            {
-            //                _dataGraph6Limit[i + 1] = BadPointConst;
-            //                timePoint6Limit[i + 1] = 0;
-            //            }
-            //        }
-
-            //        // Фильтрация ошибок в вычисления
-            //        //График 2
-            //        for (int i = 0; i < _dataGraphCounter7Limit; i++)
-            //        {
-            //            if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) <= 3000)
-            //            {
-            //                _dataGraph7Limit[i + 1] = BadPointConst;
-            //            }
-            //        }
-
-            //        //Перерасчет усредненной лимитации для графика 1
-            //        for (int i = 0; i < _dataGraphCounter6Limit; i++)
-            //        {
-            //            if (_dataGraph6Limit[i] != BadPointConst)
-            //            {
-            //                if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0 
-            //                    && _dataGraph6Limit[i + 1] != BadPointConst && timePoint6Limit[i + 1] != 0)
-            //                {
-            //                    _dataGraph6Limit[i] = (_dataGraph6Limit[i] + _dataGraph6Limit[i + 1]) / 2;
-            //                }
-            //            }
-            //        }
-
-            //        //Перерасчет усредненной лимитации для графика 2
-            //        for (int i = 0; i < _dataGraphCounter7Limit; i++)
-            //        {
-            //            if (_dataGraph7Limit[i] != BadPointConst)
-            //            {
-            //                if (_dataGraph7Limit[i] != BadPointConst && timePoint7Limit[i] != 0
-            //                    && _dataGraph7Limit[i + 1] != BadPointConst && timePoint7Limit[i + 1] != 0)
-            //                {
-            //                    _dataGraph7Limit[i] = (_dataGraph7Limit[i] + _dataGraph7Limit[i + 1]) / 2;
-            //                }
-            //            }
-            //        }
-
-            //        //double averageValue2 = 0;
-            //        //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-            //        //{
-            //        //    if (_dataGraph7Limit[i] <= 128 && _dataGraph7Limit[i] >= 0)
-            //        //    {
-            //        //        averageValue2 += _dataGraph7Limit[i];
-            //        //    }
-            //        //}
-            //        //averageValue2 = averageValue2 / _dataGraphCounter7Limit;
-            //        //bool ErrorCorrection2 = true;
-            //        //ulong timeBuffer2 = 0;
-            //        //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-            //        //{
-            //        //    if (ErrorCorrection2)
-            //        //    {
-            //        //        if (_dataGraph7Limit[i] > (averageValue2 + 2) && _dataGraph7Limit[i] < (averageValue2 - 2))
-            //        //        {
-            //        //            _dataGraph7Limit[i] = (ushort)averageValue2;
-            //        //            ErrorCorrection2 = false;
-            //        //        }
-            //        //    }
-            //        //    if (timeBuffer2 > 500_000)
-            //        //    {
-            //        //        timeBuffer2 = 0;
-            //        //        ErrorCorrection2 = true;
-            //        //    }
-            //        //    timeBuffer2 += timePoint7Limit[i];
-            //        //}
-            //    }
-
-            //    //Формирование массивов для режима поправка
-            //    // График 1
-            //    for (int i = 0; i < _dataGraphCounter2; i+=3)
-            //    {
-            //        if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
-            //        {
-            //            _dataGraph8Correction[_dataGraphCounter8Correction] = _dataGraph2[i];
-            //            timePoint8Correction[_dataGraphCounter8Correction] = timePoint2[i];
-            //            _dataGraphCounter8Correction++;
-            //        }               
-            //    }
-            //    //Формирование массивов для режима поправка
-            //    //График 2
-            //    for (int i = 0; i < _dataGraphCounter3; i += 3)
-            //    {
-            //        if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
-            //        {
-            //            _dataGraph9Correction[_dataGraphCounter9Correction] = _dataGraph3[i];
-            //            timePoint9Correction[_dataGraphCounter9Correction] = timePoint3[i];
-            //            _dataGraphCounter9Correction++;
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.StackTrace);
-            //}
 
         }
         //Формирование времени
