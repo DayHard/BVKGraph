@@ -1843,7 +1843,8 @@ namespace DOTNET
                     {
                         if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) <= 3000)
                         {
-                            _dataGraph6Limit[i + 1] = (ushort)BadPointConst;
+                            _dataGraph6Limit[i + 1] = BadPointConst;
+                            timePoint6Limit[i + 1] = 0;
                         }
                     }
 
@@ -1853,10 +1854,9 @@ namespace DOTNET
                     {
                         if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) <= 3000)
                         {
-                            _dataGraph7Limit[i + 1] = (ushort)BadPointConst;
+                            _dataGraph7Limit[i + 1] = BadPointConst;
                         }
                     }
-
 
                     //Перерасчет усредненной лимитации для графика 1
                     for (int i = 0; i < _dataGraphCounter6Limit; i++)
@@ -1870,6 +1870,7 @@ namespace DOTNET
                             }
                         }
                     }
+
                     //Перерасчет усредненной лимитации для графика 2
                     for (int i = 0; i < _dataGraphCounter7Limit; i++)
                     {
@@ -1882,6 +1883,35 @@ namespace DOTNET
                             }
                         }
                     }
+
+                    //double averageValue2 = 0;
+                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    //{
+                    //    if (_dataGraph7Limit[i] <= 128 && _dataGraph7Limit[i] >= 0)
+                    //    {
+                    //        averageValue2 += _dataGraph7Limit[i];
+                    //    }
+                    //}
+                    //averageValue2 = averageValue2 / _dataGraphCounter7Limit;
+                    //bool ErrorCorrection2 = true;
+                    //ulong timeBuffer2 = 0;
+                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
+                    //{
+                    //    if (ErrorCorrection2)
+                    //    {
+                    //        if (_dataGraph7Limit[i] > (averageValue2 + 2) && _dataGraph7Limit[i] < (averageValue2 - 2))
+                    //        {
+                    //            _dataGraph7Limit[i] = (ushort)averageValue2;
+                    //            ErrorCorrection2 = false;
+                    //        }
+                    //    }
+                    //    if (timeBuffer2 > 500_000)
+                    //    {
+                    //        timeBuffer2 = 0;
+                    //        ErrorCorrection2 = true;
+                    //    }
+                    //    timeBuffer2 += timePoint7Limit[i];
+                    //}
                 }
 
                 //Формирование массивов для режима поправка
@@ -2043,11 +2073,6 @@ namespace DOTNET
             }
         }
 
-        private void zedGraph_Load(object sender, EventArgs e)
-        {
-
-        }
-
         //! Таймер
         private void timerCount_Tick(object sender, EventArgs e)
         {
@@ -2070,7 +2095,7 @@ namespace DOTNET
 
         #endregion
 
-        #region Time Counter
+        #region Measure (Time) 
         //Выделение точки для измерений
         private void zedGraph_MouseDoubleClick(object sender, MouseEventArgs e)
         {
