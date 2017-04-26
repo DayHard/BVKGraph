@@ -1717,54 +1717,6 @@ namespace DOTNET
         // Формировавание данных для лимитации
         private void DataLimitation()
         {
-            //try
-            //{
-                //    int minAmplPos = 0, maxAmplPos = 0;
-                //    bool flagMin = false, flagMax = false;
-                //    for (int i = 0; i < _dataGraphCounter2; i++)
-                //    {
-                //        if (_dataGraph2[i] >= _dataGraph2[i + 1] && _dataGraph2[i + 1] >= _dataGraph2[i + 2]
-                //            && _dataGraph2[i + 2] >= _dataGraph2[i + 3] && _dataGraph2[i + 3] >= _dataGraph2[i + 4])
-                //        {
-                //            ////////
-                //            minAmplPos = i;
-                //            flagMin = true;
-
-                //        }
-                //        else if (_dataGraph2[i] <= _dataGraph2[i + 1] && _dataGraph2[i + 1] <= _dataGraph2[i + 2]
-                //                 && _dataGraph2[i + 2] <= _dataGraph2[i + 3] && _dataGraph2[i + 3] <= _dataGraph2[i + 4])
-                //        {
-                //            maxAmplPos = i;
-                //            flagMax = true;
-                //        }
-
-                //        if (flagMax && flagMin)
-                //        {
-                //            flagMin = false;
-                //            flagMax = false;
-                //            int counter = 0;
-                //            double sum = 0;
-                //            int pos = 0;
-                //            for (int j = 0; j < _dataGraphCounter2; j++)
-                //            {
-                //                while (timePoint2[j] >= timePoint2[minAmplPos] && timePoint2[j] <= timePoint2[maxAmplPos])
-                //                {
-                //                    sum += _dataGraph2[j];
-                //                    counter++;
-                //                    pos = j;
-                //                }
-                //            }
-                //            _dataGraph6Limit[_dataGraphCounter6Limit] = sum / counter;
-                //            timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[pos];
-                //            _dataGraphCounter6Limit++;
-                //        }
-                //    }
-                //}
-                //catch (Exception ex)
-                //{
-                //    MessageBox.Show(ex.Message);
-                //}
-
                 try
                 {
                     //Лимит по 0.5 график 1
@@ -1929,39 +1881,6 @@ namespace DOTNET
                             }
                         }
                     }
-                    ///////
-                    /// 
-                    /// 
-                    /// //////
-
-                    //double averageValue2 = 0;
-                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    //{
-                    //    if (_dataGraph7Limit[i] <= 128 && _dataGraph7Limit[i] >= 0)
-                    //    {
-                    //        averageValue2 += _dataGraph7Limit[i];
-                    //    }
-                    //}
-                    //averageValue2 = averageValue2 / _dataGraphCounter7Limit;
-                    //bool ErrorCorrection2 = true;
-                    //ulong timeBuffer2 = 0;
-                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    //{
-                    //    if (ErrorCorrection2)
-                    //    {
-                    //        if (_dataGraph7Limit[i] > (averageValue2 + 2) && _dataGraph7Limit[i] < (averageValue2 - 2))
-                    //        {
-                    //            _dataGraph7Limit[i] = (ushort)averageValue2;
-                    //            ErrorCorrection2 = false;
-                    //        }
-                    //    }
-                    //    if (timeBuffer2 > 500_000)
-                    //    {
-                    //        timeBuffer2 = 0;
-                    //        ErrorCorrection2 = true;
-                    //    }
-                    //    timeBuffer2 += timePoint7Limit[i];
-                    //}
                 }
 
                     //Формирование массивов для режима поправка
