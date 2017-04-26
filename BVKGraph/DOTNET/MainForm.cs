@@ -40,8 +40,8 @@ namespace DOTNET
         //Нахождение экстремумов мощности
         private ushort[] croppedArray;
 
-        //private double[] _dataGraph6Limit = new double[75000];
-        //private double[] _dataGraph7Limit = new double[75000];
+        private double[] _dataGraph6Limit = new double[75000];
+        private double[] _dataGraph7Limit = new double[75000];
         //private double[] _dataGraph8Correction = new double[75000];
         //private double[] _dataGraph9Correction = new double[75000];
 
@@ -51,8 +51,8 @@ namespace DOTNET
         private ulong[] timePoint4 = new ulong[2100000];
         private ulong[] timePoint5 = new ulong[2100000];
 
-        //private ulong[] timePoint6Limit = new ulong[200000];
-        //private ulong[] timePoint7Limit = new ulong[200000];
+        private ulong[] timePoint6Limit = new ulong[200000];
+        private ulong[] timePoint7Limit = new ulong[200000];
         //private ulong[] timePoint8Correction = new ulong[75000];
         //private ulong[] timePoint9Correction = new ulong[75000];
 
@@ -1874,7 +1874,7 @@ namespace DOTNET
         {
             try
             {
-                // Выбираешь шапки экстремумов амплитуды
+                // Выбираем шапки экстремумов амплитуды
                 ushort amplMaxValue = ushort.MinValue;
                 croppedArray = new ushort[_dataGraph.Length];
                 for (int i = 16; i < _dataGraph.Length - 16; i++)
@@ -1915,12 +1915,15 @@ namespace DOTNET
                         amplMaxValue = ushort.MinValue;
                     }
                 }
-                // Выбираем 1 значение максимума
+
+                //Выделение диапазонов графика согласно мощности
+                ushort averageValue = 0;
                 for (int i = 0; i < croppedArray.Length; i++)
                 {
-                    if (timePoint[i] == 25_475_623)
+                    if (croppedArray[i] != 0)
                     {
-                        
+                        _dataGraph6Limit[_dataGraphCounter6Limit] = croppedArray[i] / 2;
+                        _dataGraphCounter6Limit += 10;
                     }
                 }
             }
@@ -1990,6 +1993,8 @@ namespace DOTNET
                 Array.Clear(_dataGraph3, 0, _dataGraph3.Length);
                 Array.Clear(_dataGraph4, 0, _dataGraph4.Length);
                 Array.Clear(_dataGraph5, 0, _dataGraph5.Length);
+                Array.Clear(_dataGraph6Limit, 0, _dataGraph4.Length);
+                Array.Clear(_dataGraph7Limit, 0, _dataGraph5.Length);
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0 , _dataGraph11ServiceLimitation.Length);
                 Array.Clear(responce, 0, responce.Length);
@@ -2010,7 +2015,6 @@ namespace DOTNET
                 _dataGraphCounter3 = 0;
                 _dataGraphCounter4 = 0;
                 _dataGraphCounter5 = 0;
-
                 _dataGraphCounter6Limit = 0;
                 _dataGraphCounter7Limit = 0;
                 _dataGraphCounter8Correction = 0;
