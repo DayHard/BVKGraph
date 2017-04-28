@@ -15,7 +15,7 @@ namespace DOTNET
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException; 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LogoForm());
+            //Application.Run(new LogoForm());
             Application.Run(new WorkForm());
         }
         //Глобальный обрабочик исключений

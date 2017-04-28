@@ -32,8 +32,8 @@ namespace DOTNET
         private ushort[] _dataGraph;
 
         // Статические массивы (для обработки принятых данных)
-        private ushort[] _dataGraph2 = new ushort[600000];
-        private ushort[] _dataGraph3 = new ushort[600000];
+        private ushort[] _dataGraph2;
+        private ushort[] _dataGraph3;
         private ushort[] _dataGraph4 = new ushort[600000];
         private ushort[] _dataGraph5 = new ushort[600000];
 
@@ -41,21 +41,15 @@ namespace DOTNET
         private ushort[] croppedArray;
         private ushort[] croppedArray2;
 
-        private double[] _dataGraph6Limit;// = new double[75000];
-        private double[] _dataGraph7Limit;// = new double[75000];
-        //private double[] _dataGraph8Correction = new double[75000];
-        //private double[] _dataGraph9Correction = new double[75000];
+        private double[] _dataGraph6Limit;
+        private double[] _dataGraph7Limit;
+        private double[] _dataGraph8Averaged;
+        private double[] _dataGraph9Averaged;
 
         private ulong[] timePoint = new ulong[2100000];
-        private ulong[] timePoint2 = new ulong[2100000];
-        private ulong[] timePoint3 = new ulong[2100000];
+
         private ulong[] timePoint4 = new ulong[2100000];
         private ulong[] timePoint5 = new ulong[2100000];
-
-        private ulong[] timePoint6Limit = new ulong[200000];
-        private ulong[] timePoint7Limit = new ulong[200000];
-        //private ulong[] timePoint8Correction = new ulong[75000];
-        //private ulong[] timePoint9Correction = new ulong[75000];
 
         // Усреднение 8 кадра
         private double[] _dataGraph10ServiceLimitation = new double[7500];
@@ -108,9 +102,7 @@ namespace DOTNET
         private int _timer_counter;
         private int read_counter;
         private int possition_counter;
-        private int _dataGraphCounter2 = 0, _dataGraphCounter3 = 0, _dataGraphCounter4 = 0,
-                    _dataGraphCounter5 = 0, _dataGraphCounter6Limit = 0, _dataGraphCounter7Limit = 0,
-                    _dataGraphCounter8Correction = 0, _dataGraphCounter9Correction = 0;
+        private int _dataGraphCounter4 = 0, _dataGraphCounter5 = 0;
         ulong timebuffer;
         private byte timer30sec = 1;
         private int error_counter = 0;
@@ -123,8 +115,8 @@ namespace DOTNET
         private bool _scaleXAxis16OR35 = true;
         private bool _limitation2 = true;
         private bool _sysframe= true;
-        private bool _correction = false;
         private bool _service = false;
+        private bool _correction = false;
 
         //Флаг точек
         private bool measPoint1Flag = true;
@@ -562,7 +554,6 @@ namespace DOTNET
             }
 
             _limitation = !_limitation;
-            _correction = false;
 
             if (limitation_button.UseVisualStyleBackColor == true)
                 limitation_button.BackColor = Color.Khaki;
@@ -621,8 +612,8 @@ namespace DOTNET
                 serialPort.Write(command, 0, 3);
             }
 
-            _service = false;
             _correction = false;
+            _service = false;
             // Нужна для перехода в режим коррекции
             _limitation2 = true;
 
@@ -658,9 +649,9 @@ namespace DOTNET
                 serialPort.Write(command, 0, 3);
             }
 
+            _correction = true;
             _limitation2 = false;
             _service = false;
-            _correction = true;
             normalmode_button.UseVisualStyleBackColor = true;
             btnServiceMode.UseVisualStyleBackColor = true;
             starttest_button.UseVisualStyleBackColor = true;
@@ -863,7 +854,7 @@ namespace DOTNET
         private void btnServiceMode_Click(object sender, EventArgs e)
         {
             _service = true;
-
+            _correction = false;
             normalmode_button.UseVisualStyleBackColor = true;
             kdo_button.UseVisualStyleBackColor = true;
             btnServiceMode.BackColor = Color.YellowGreen;
@@ -902,7 +893,7 @@ namespace DOTNET
                     Graph3(pane3);
 
                 }
-                catch (NullReferenceException ex)
+                catch (NullReferenceException)
                 {
                     error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "Nothing to draw.";
                     //MessageBox.Show("Nothing to draw.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1062,10 +1053,13 @@ namespace DOTNET
             // Создадим список точек=> График номер 2
             PointPairList list2 = new PointPairList();
             {
-                for (int i = 0; i < _dataGraphCounter2; i++)
+                for (int i = 0; i < _dataGraph2.Length; i++)
                 {
-                    // Отнимаем значение 33 для удобства отображения
-                    list2.Add(timePoint2[i], _dataGraph2[i] - 32);
+                    if (_dataGraph2[i] != (ushort)BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list2.Add(timePoint[i], _dataGraph2[i] - 32);
+                    }
                 }
             }
             //Лимитация в режиме служебный(8 кадр)
@@ -1131,6 +1125,19 @@ namespace DOTNET
                 list8.Add(2_000_000, -8.15D);
                 list8.Add(35_000_000, -8.15D);
             }
+            // Выделенные точки лимитации
+            PointPairList list10 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph6Limit.Length; i++)
+                {
+                    if (_dataGraph6Limit[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list10.Add(timePoint[i], _dataGraph6Limit[i] - 32);
+                    }
+                }
+            }
+
             // Создадим кривые 
             if (_engeneering == true)
             {
@@ -1143,6 +1150,16 @@ namespace DOTNET
                 curve2.Symbol.Size = 7;
                 // Линия невидимая
                 curve2.Line.IsVisible = false;
+
+                LineItem curve10 = pane2.AddCurve("", list10, Color.Red, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve10.Symbol.Fill.Color = Color.Red;
+                // Тип заполнения - сплошная заливка
+                curve10.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve10.Symbol.Size = 15;
+                // Линия невидимая
+                curve10.Line.IsVisible = false;
             }
             //Служебный режим где виден только служебный кадр
             if (_service)
@@ -1167,32 +1184,31 @@ namespace DOTNET
                 // Линия невидимая
                 curve8.Line.IsVisible = true;
             }
-
-            ///////////
-            /// ТЕСТ
-            ///////////
-             
-            // Выделенные точки лимитации
-            PointPairList list10 = new PointPairList();
+            // Лимитация
+            PointPairList list12 = new PointPairList();
             {
-                for (int i = 0; i < _dataGraph6Limit.Length; i++)
+                for (int i = 0; i < _dataGraph8Averaged.Length; i++)
                 {
-                    if (_dataGraph6Limit[i] != 0)
+                    if (_dataGraph8Averaged[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list10.Add(timePoint[i], _dataGraph6Limit[i] - 32);                      
+                        list12.Add(timePoint[i], _dataGraph8Averaged[i] - 32);
                     }
                 }
             }
-            LineItem curve10 = pane2.AddCurve("", list10, Color.Red, SymbolType.Diamond);
-            // Цвет заполнения отметок (ромбиков) - голубой
-            curve10.Symbol.Fill.Color = Color.Red;
-            // Тип заполнения - сплошная заливка
-            curve10.Symbol.Fill.Type = FillType.Solid;
-            // Размер ромбиков
-            curve10.Symbol.Size = 15;
-            // Линия невидимая
-            curve10.Line.IsVisible = false;
+
+            if (_limitation)
+            {
+                LineItem curve12 = pane2.AddCurve("", list12, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve12.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                curve12.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve12.Symbol.Size = 10;
+                // Линия невидимая
+                curve12.Line.IsVisible = true;
+            }
         }
         //График 3
         private void Graph3(GraphPane pane3)
@@ -1201,10 +1217,13 @@ namespace DOTNET
             // Создадим список точек=> График номер 3
             PointPairList list3 = new PointPairList();
             {
-                for (int i = 0; i < _dataGraphCounter3; i++)
+                for (int i = 0; i < _dataGraph3.Length; i++)
                 {
-                    // Отнимаем значение 33 для удобства отображения
-                    list3.Add(timePoint3[i], _dataGraph3[i] - 32);
+                    if (_dataGraph3[i] != (ushort) BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list3.Add(timePoint[i], _dataGraph3[i] - 32);
+                    }
                 }
             }
             // 8 кадр список точек
@@ -1268,19 +1287,6 @@ namespace DOTNET
                 list9.Add(2_000_000, -8.15D);
                 list9.Add(35_000_000, -8.15D);
             }
-            if (_engeneering == true)
-            {
-                // Создадим кривые 
-                LineItem curve3 = pane3.AddCurve("", list3, Color.Green, SymbolType.Diamond);
-                // Цвет заполнения отметок (ромбиков) - голубой
-                curve3.Symbol.Fill.Color = Color.Green;
-                // Тип заполнения - сплошная заливка
-                curve3.Symbol.Fill.Type = FillType.Solid;
-                // Размер ромбиков
-                curve3.Symbol.Size = 7;
-                // Линия невидимая
-                curve3.Line.IsVisible = false;
-            }
             //Служебный режим)
             if (_service)
             {
@@ -1303,6 +1309,67 @@ namespace DOTNET
                 curve9.Symbol.Size = 1;
                 // Линия невидимая
                 curve9.Line.IsVisible = true;
+            }
+            // Выделенные точки лимитации
+            PointPairList list11 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph7Limit.Length; i++)
+                {
+                    if (_dataGraph7Limit[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list11.Add(timePoint[i], _dataGraph7Limit[i] - 32);
+                    }
+                }
+            }
+            PointPairList list13 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph8Averaged.Length; i++)
+                {
+                    if (_dataGraph9Averaged[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list13.Add(timePoint[i], _dataGraph9Averaged[i] - 32);
+                    }
+                }
+            }
+            //Графики инженерные
+            if (_engeneering == true)
+            {
+                // Создадим кривые 
+                LineItem curve3 = pane3.AddCurve("", list3, Color.Green, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve3.Symbol.Fill.Color = Color.Green;
+                // Тип заполнения - сплошная заливка
+                curve3.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve3.Symbol.Size = 7;
+                // Линия невидимая
+                curve3.Line.IsVisible = false;
+
+                LineItem curve11 = pane3.AddCurve("", list11, Color.Red, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve11.Symbol.Fill.Color = Color.Red;
+                // Тип заполнения - сплошная заливка
+                curve11.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve11.Symbol.Size = 15;
+                // Линия невидимая
+                curve11.Line.IsVisible = false;
+                // Лимитация
+            }
+            //График лимитации
+            if (_limitation)
+            {
+                LineItem curve13 = pane3.AddCurve("", list13, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve13.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                curve13.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve13.Symbol.Size = 10;
+                // Линия невидимая
+                curve13.Line.IsVisible = true;
             }
         }
         // Очистка графика
@@ -1593,12 +1660,22 @@ namespace DOTNET
                 TimeProcessing();
                 //+1 делается ввиду специфику округления в прграммирование для избежания выхода за пределы массива
                 _dataGraph = new ushort[possition_counter / 4 + 1];
+                _dataGraph2 = new ushort[_dataGraph.Length];
+                // Заполнения массива 2 значениями BadPointConst
+                for (int i = 0; i < _dataGraph2.Length; i++)
+                {
+                    _dataGraph2[i] = (ushort)BadPointConst;
+                }
+                // Заполнения массива 3 значениями BadPointConst
+                _dataGraph3 = new ushort[_dataGraph.Length];
+                for (int i = 0; i < _dataGraph3.Length; i++)
+                {
+                    _dataGraph3[i] = (ushort)BadPointConst;
+                }
 
                 if (possition_counter != 0)
                 {
                     // Формирование графиков
-                    int j = 0;
-                    int n = 0;
                     int k = 0;
                     int z = 0;
                     int u = 0;
@@ -1623,31 +1700,19 @@ namespace DOTNET
                             {
                                 // 0x0
                                 case 0x00:
-                                    _dataGraph2[j] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint2[j] = timePoint[z];
-                                    _dataGraphCounter2++;
-                                    j++;
+                                    _dataGraph2[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 // 0x1
                                 case 0x10:
-                                    _dataGraph3[n] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint3[n] = timePoint[z];
-                                    _dataGraphCounter3++;
-                                    n++;
+                                    _dataGraph3[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 //0x2
                                 case 0x20:
-                                    _dataGraph2[j] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint2[j] = timePoint[z];
-                                    _dataGraphCounter2++;
-                                    j++;
+                                    _dataGraph2[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 //0x3
                                 case 0x30:
-                                    _dataGraph3[n] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint3[n] = timePoint[z];
-                                    _dataGraphCounter3++;
-                                    n++;
+                                    _dataGraph3[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 // 0x4   (Служебный)
                                 case 0x40:
@@ -1700,231 +1765,6 @@ namespace DOTNET
                 ));
             }
         }
-        /*
-         *try
-            {
-                //Лимит по 0.5 график 1
-                ushort pointSum = 0;
-                ushort pointCounter = 0;
-                for (int i = 0; i < _dataGraphCounter2; i++)
-                {
-                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2] && (timePoint2[i + 4] - timePoint2[i + 3])<= 5000)
-                    {
-                        if (Math.Abs(_dataGraph2[i + 2] - _dataGraph2[i + 3]) > 2)
-                        {
-                            pointCounter = 0;
-                            pointSum = 0;
-                        }
-                    }
-                    else
-                    {
-                        if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
-                            _dataGraph2[i + 3] != _dataGraph2[i + 4])
-                        {
-                            pointSum += _dataGraph2[i + 3];
-                            pointCounter++;
-
-                        }
-                        else
-                        {
-                            if ((timePoint2[i + 4] - timePoint2[i + 3]) <= 80 &&
-                                _dataGraph2[i + 3] != _dataGraph2[i + 5])
-                            {
-                                pointSum += _dataGraph2[i + 3];
-                                pointCounter++;
-                            }
-                            else
-                            {
-                                if (pointCounter != 0)
-                                {
-                                    _dataGraph6Limit[_dataGraphCounter6Limit] = (double) pointSum/
-                                                                                (double) pointCounter;
-                                    timePoint6Limit[_dataGraphCounter6Limit] = timePoint2[i + 3];
-                                    _dataGraphCounter6Limit++;
-                                    pointCounter = 0;
-                                    pointSum = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Лимит по 0.5 график 2
-                ushort pointSum2 = 0;
-                ushort pointCounter2 = 0;
-                for (int i = 0; i < _dataGraphCounter3; i++)
-                {
-                    if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
-                    {
-                        if (Math.Abs(_dataGraph3[i + 2] - _dataGraph3[i + 3]) > 2)
-                        {
-                            pointCounter2 = 0;
-                            pointSum2 = 0;
-                        }
-                    }
-                    else
-                    {
-                        if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 && _dataGraph3[i + 3] != _dataGraph3[i + 4])
-                        {
-                            pointSum2 += _dataGraph3[i + 3];
-                            pointCounter2++;
-
-                        }
-                        else
-                        {
-                            if ((timePoint3[i + 4] - timePoint3[i + 3]) <= 80 &&
-                                _dataGraph3[i + 3] != _dataGraph3[i + 5])
-                            {
-                                pointSum2 += _dataGraph3[i + 3];
-                                pointCounter2++;
-                            }
-                            else
-                            {
-                                if (pointCounter2 != 0)
-                                {
-                                    _dataGraph7Limit[_dataGraphCounter7Limit] = (double) pointSum2/
-                                                                                (double) pointCounter2;
-                                    timePoint7Limit[_dataGraphCounter7Limit] = timePoint3[i + 3];
-                                    _dataGraphCounter7Limit++;
-                                    pointCounter2 = 0;
-                                    pointSum2 = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (_limitation2)
-                {
-                    if (_sysframe)
-                    {
-                        // Проходим массив, если время между точками больше 20мкс
-                        //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
-                        for (int i = 0; i < _dataGraphCounter6Limit; i++)
-                        {
-                            if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) >= 20000)
-                            {
-                                timePoint6Limit[i] = 0;
-                                _dataGraph6Limit[i] = BadPointConst;
-                            }
-                        }
-                        // Проходим массив, если время между точками больше 20мкс
-                        //зануляем время, аплитуде присваиваем значение 0xBB8(3000)
-                        for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                        {
-                            if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) >= 20000)
-                            {
-                                timePoint7Limit[i] = 0;
-                                _dataGraph7Limit[i] = BadPointConst;
-                            }
-                        }
-                    }
-
-                    // Фильтрация ошибок в вычисления
-                    //График 1
-                    for (int i = 0; i < _dataGraphCounter6Limit; i++)
-                    {
-                        if ((timePoint6Limit[i + 1] - timePoint6Limit[i]) <= 3000)
-                        {
-                            _dataGraph6Limit[i + 1] = BadPointConst;
-                            timePoint6Limit[i + 1] = 0;
-                        }
-                    }
-
-                    // Фильтрация ошибок в вычисления
-                    //График 2
-                    for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    {
-                        if ((timePoint7Limit[i + 1] - timePoint7Limit[i]) <= 3000)
-                        {
-                            _dataGraph7Limit[i + 1] = BadPointConst;
-                        }
-                    }
-
-                    //Перерасчет усредненной лимитации для графика 1
-                    for (int i = 0; i < _dataGraphCounter6Limit; i++)
-                    {
-                        if (_dataGraph6Limit[i] != BadPointConst)
-                        {
-                            if (_dataGraph6Limit[i] != BadPointConst && timePoint6Limit[i] != 0 
-                                && _dataGraph6Limit[i + 1] != BadPointConst && timePoint6Limit[i + 1] != 0)
-                            {
-                                _dataGraph6Limit[i] = (_dataGraph6Limit[i] + _dataGraph6Limit[i + 1]) / 2;
-                            }
-                        }
-                    }
-
-                    //Перерасчет усредненной лимитации для графика 2
-                    for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    {
-                        if (_dataGraph7Limit[i] != BadPointConst)
-                        {
-                            if (_dataGraph7Limit[i] != BadPointConst && timePoint7Limit[i] != 0
-                                && _dataGraph7Limit[i + 1] != BadPointConst && timePoint7Limit[i + 1] != 0)
-                            {
-                                _dataGraph7Limit[i] = (_dataGraph7Limit[i] + _dataGraph7Limit[i + 1]) / 2;
-                            }
-                        }
-                    }
-
-                    //double averageValue2 = 0;
-                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    //{
-                    //    if (_dataGraph7Limit[i] <= 128 && _dataGraph7Limit[i] >= 0)
-                    //    {
-                    //        averageValue2 += _dataGraph7Limit[i];
-                    //    }
-                    //}
-                    //averageValue2 = averageValue2 / _dataGraphCounter7Limit;
-                    //bool ErrorCorrection2 = true;
-                    //ulong timeBuffer2 = 0;
-                    //for (int i = 0; i < _dataGraphCounter7Limit; i++)
-                    //{
-                    //    if (ErrorCorrection2)
-                    //    {
-                    //        if (_dataGraph7Limit[i] > (averageValue2 + 2) && _dataGraph7Limit[i] < (averageValue2 - 2))
-                    //        {
-                    //            _dataGraph7Limit[i] = (ushort)averageValue2;
-                    //            ErrorCorrection2 = false;
-                    //        }
-                    //    }
-                    //    if (timeBuffer2 > 500_000)
-                    //    {
-                    //        timeBuffer2 = 0;
-                    //        ErrorCorrection2 = true;
-                    //    }
-                    //    timeBuffer2 += timePoint7Limit[i];
-                    //}
-                }
-
-                //Формирование массивов для режима поправка
-                // График 1
-                for (int i = 0; i < _dataGraphCounter2; i+=3)
-                {
-                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
-                    {
-                        _dataGraph8Correction[_dataGraphCounter8Correction] = _dataGraph2[i];
-                        timePoint8Correction[_dataGraphCounter8Correction] = timePoint2[i];
-                        _dataGraphCounter8Correction++;
-                    }               
-                }
-                //Формирование массивов для режима поправка
-                //График 2
-                for (int i = 0; i < _dataGraphCounter3; i += 3)
-                {
-                    if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
-                    {
-                        _dataGraph9Correction[_dataGraphCounter9Correction] = _dataGraph3[i];
-                        timePoint9Correction[_dataGraphCounter9Correction] = timePoint3[i];
-                        _dataGraphCounter9Correction++;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.StackTrace);
-            }
-         */
         // Формировавание данных для лимитации
         private void DataLimitation()
         {
@@ -1978,7 +1818,7 @@ namespace DOTNET
                 {
                     if (croppedArray[i] != 0)
                     {
-                        for (int j = i + 1; j < i + 30; j++)
+                        for (int j = i; j < i + 30; j++)
                         {
                             if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2))
                             {
@@ -1996,22 +1836,86 @@ namespace DOTNET
                 }
 
                 _dataGraph6Limit = new double[_dataGraph.Length];
+                //Заполняем массив лимитации 1 BadPointConst
+                for (int i = 0; i < _dataGraph6Limit.Length; i++)
+                {
+                    _dataGraph6Limit[i] = (ushort) BadPointConst;
+                }
+
                 _dataGraph7Limit = new double[_dataGraph.Length];
-                int currentPos = 0;
-                //Выделение точек на графике 2 и 3
+                //Заполняем массив лимитации 2 BadPointConst
+                for (int i = 0; i < _dataGraph7Limit.Length; i++)
+                {
+                    _dataGraph7Limit[i] = (ushort) BadPointConst;
+                }
+                //Формирование выборки точек лимитации на графиках 2 и 3
                 for (int i = 0; i < croppedArray2.Length; i++)
                 {
                     if (croppedArray2[i] != 0)
                     {
-                        for (int j = currentPos; j < _dataGraph2.Length; j++)
+                        if (_dataGraph2[i] != 0)
                         {
-                            if (timePoint[i] == timePoint2[j])
-                            {
-                                _dataGraph6Limit[i] = _dataGraph2[j];
-                                currentPos = j;
-                                break;
-                            }
-                        }   
+                            _dataGraph6Limit[i] = _dataGraph2[i];
+                        }
+
+                        if (_dataGraph3[i] != 0)
+                        {
+                            _dataGraph7Limit[i] = _dataGraph3[i];
+                        }
+                    }
+                }
+                //Заполнения массива усредненной лимитации графика 1
+                _dataGraph8Averaged = new double[_dataGraph6Limit.Length];
+                for (int i = 0; i < _dataGraph8Averaged.Length; i++)
+                {
+                    _dataGraph8Averaged[i] = BadPointConst;
+                }
+                //Заполнения массива усредненной лимитации графика 2
+                _dataGraph9Averaged = new double[_dataGraph7Limit.Length];
+
+                for (int i = 0; i < _dataGraph9Averaged.Length; i++)
+                {
+                    _dataGraph9Averaged[i] = BadPointConst;
+                }
+
+                //Усреднение лимитации 1
+                double dataSumAver1 = 0;
+                int dataSumAver1Counter = 0;
+                for (int i = 0; i < _dataGraph6Limit.Length; i++)
+                {
+                    if (_dataGraph6Limit[i] != BadPointConst)
+                    {
+                        dataSumAver1 += _dataGraph6Limit[i];
+                        dataSumAver1Counter++;
+                    }
+                    else
+                    {
+                        if (dataSumAver1Counter != 0)
+                        {
+                            _dataGraph8Averaged[i] = dataSumAver1 / dataSumAver1Counter;
+                            dataSumAver1 = 0;
+                            dataSumAver1Counter = 0;
+                        }
+                    }
+                }
+                //Усреднение лимитации 2
+                double dataSumAver2 = 0;
+                int dataSumAver2Counter = 0;
+                for (int i = 0; i < _dataGraph7Limit.Length; i++)
+                {
+                    if (_dataGraph7Limit[i] != BadPointConst)
+                    {
+                        dataSumAver2 += _dataGraph7Limit[i];
+                        dataSumAver2Counter++;
+                    }
+                    else
+                    {
+                        if (dataSumAver2Counter != 0)
+                        {
+                            _dataGraph9Averaged[i] = dataSumAver2 / dataSumAver2Counter;
+                            dataSumAver2 = 0;
+                            dataSumAver2Counter = 0;
+                        }
                     }
                 }
             }
@@ -2076,29 +1980,39 @@ namespace DOTNET
             {
                 // Очистка всех существующих массивов в случае сбоя программы
                 Array.Clear(command, 0, command.Length);
+
                 if (_dataGraph != null)
                     Array.Clear(_dataGraph, 0, _dataGraph.Length);
-                Array.Clear(_dataGraph2, 0, _dataGraph2.Length);
-                Array.Clear(_dataGraph3, 0, _dataGraph3.Length);
+                if (_dataGraph2 != null)
+                    Array.Clear(_dataGraph2, 0, _dataGraph2.Length);
+                if (_dataGraph3 != null)
+                    Array.Clear(_dataGraph3, 0, _dataGraph3.Length);
+
                 Array.Clear(_dataGraph4, 0, _dataGraph4.Length);
                 Array.Clear(_dataGraph5, 0, _dataGraph5.Length);
+
                 if (_dataGraph6Limit != null)
                    Array.Clear(_dataGraph6Limit, 0, _dataGraph6Limit.Length);
                 if (_dataGraph7Limit != null )
                      Array.Clear(_dataGraph7Limit, 0, _dataGraph7Limit.Length);
+                if (_dataGraph8Averaged != null)
+                    Array.Clear(_dataGraph8Averaged, 0 , _dataGraph8Averaged.Length);
+                if (_dataGraph9Averaged != null)
+                    Array.Clear(_dataGraph8Averaged, 0, _dataGraph9Averaged.Length);
+
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0 , _dataGraph11ServiceLimitation.Length);
                 Array.Clear(responce, 0, responce.Length);
                 Array.Clear(timePoint, 0, timePoint.Length);
-                Array.Clear(timePoint2, 0, timePoint2.Length);
-                Array.Clear(timePoint3, 0, timePoint3.Length);
                 Array.Clear(timePoint4, 0, timePoint4.Length);
                 Array.Clear(timePoint5, 0, timePoint5.Length);
                 Array.Clear(timePoint10ServiceLimitation, 0, timePoint10ServiceLimitation.Length);
                 Array.Clear(timePoint11ServiceLimitation, 0 , timePoint11ServiceLimitation.Length);
                 if (croppedArray != null)
-                {
                     Array.Clear(croppedArray, 0, croppedArray.Length);
+                if (croppedArray2 != null)
+                {
+                    Array.Clear(croppedArray2, 0, croppedArray2.Length);
                 }
                 // Очистка вспомогательных переменных
                 _scanningstatus = false;
@@ -2106,14 +2020,8 @@ namespace DOTNET
                 dataResiveProgressBar.Visible = false;
                 _timer_counter = 0;
                 possition_counter = 0;
-                _dataGraphCounter2 = 0;
-                _dataGraphCounter3 = 0;
                 _dataGraphCounter4 = 0;
                 _dataGraphCounter5 = 0;
-                _dataGraphCounter6Limit = 0;
-                _dataGraphCounter7Limit = 0;
-                _dataGraphCounter8Correction = 0;
-                _dataGraphCounter9Correction = 0;
                 _dataGraphCounter10ServiceLimitation = 0;
                 _dataGraphCounter11ServiceLimitation = 0;
                 timebuffer = 0;
