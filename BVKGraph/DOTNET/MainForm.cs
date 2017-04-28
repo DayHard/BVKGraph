@@ -1189,12 +1189,23 @@ namespace DOTNET
             // Лимитация
             PointPairList list12 = new PointPairList();
             {
+                double sum = 0;
+                bool average = false;
                 for (int i = 0; i < _dataGraph8Averaged.Length; i++)
                 {
                     if (_dataGraph8Averaged[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
-                        list12.Add(timePoint[i], _dataGraph8Averaged[i] - 32);
+                        if (average)
+                        {
+                            // Отнимаем значение 33 для удобства отображения
+                            list12.Add(timePoint[i], ((_dataGraph8Averaged[i] - 32) + sum) / 2);
+                            average = !average;
+                        }
+                        else
+                        {
+                            sum = _dataGraph8Averaged[i] - 32;
+                            average = !average;
+                        }
                     }
                 }
             }
@@ -1348,12 +1359,23 @@ namespace DOTNET
             }
             PointPairList list13 = new PointPairList();
             {
-                for (int i = 0; i < _dataGraph8Averaged.Length; i++)
+                double sum = 0;
+                bool average = false;
+                for (int i = 0; i < _dataGraph9Averaged.Length; i++)
                 {
                     if (_dataGraph9Averaged[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
-                        list13.Add(timePoint[i], _dataGraph9Averaged[i] - 32);
+                        if (average)
+                        {
+                            // Отнимаем значение 33 для удобства отображения
+                            list13.Add(timePoint[i], ((_dataGraph9Averaged[i] - 32) + sum) / 2);
+                            average = !average;
+                        }
+                        else
+                        {
+                            sum = _dataGraph9Averaged[i] - 32;
+                            average = !average;
+                        }
                     }
                 }
             }
