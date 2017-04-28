@@ -41,8 +41,8 @@ namespace DOTNET
         private ushort[] croppedArray;
         private ushort[] croppedArray2;
 
-        private double[] _dataGraph6Limit = new double[75000];
-        private double[] _dataGraph7Limit = new double[75000];
+        private double[] _dataGraph6Limit;// = new double[75000];
+        private double[] _dataGraph7Limit;// = new double[75000];
         //private double[] _dataGraph8Correction = new double[75000];
         //private double[] _dataGraph9Correction = new double[75000];
 
@@ -1167,6 +1167,32 @@ namespace DOTNET
                 // Линия невидимая
                 curve8.Line.IsVisible = true;
             }
+
+            ///////////
+            /// ТЕСТ
+            ///////////
+             
+            // Выделенные точки лимитации
+            PointPairList list10 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph6Limit.Length; i++)
+                {
+                    if (_dataGraph6Limit[i] != 0)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list10.Add(timePoint[i], _dataGraph6Limit[i] - 32);                      
+                    }
+                }
+            }
+            LineItem curve10 = pane2.AddCurve("", list10, Color.Red, SymbolType.Diamond);
+            // Цвет заполнения отметок (ромбиков) - голубой
+            curve10.Symbol.Fill.Color = Color.Red;
+            // Тип заполнения - сплошная заливка
+            curve10.Symbol.Fill.Type = FillType.Solid;
+            // Размер ромбиков
+            curve10.Symbol.Size = 15;
+            // Линия невидимая
+            curve10.Line.IsVisible = false;
         }
         //График 3
         private void Graph3(GraphPane pane3)
@@ -1948,12 +1974,11 @@ namespace DOTNET
                 //Выделение памяти под массив лимитации
                 croppedArray2 = new ushort[croppedArray.Length];
                 //Выделение диапазонов графика согласно мощности
-                for (int i = 0; i < croppedArray.Length; i++)
+                for (int i = 0; i < croppedArray.Length - 30; i++)
                 {
-
                     if (croppedArray[i] != 0)
                     {
-                        for (int j = i + 1; j < i + 31; j++)
+                        for (int j = i + 1; j < i + 30; j++)
                         {
                             if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2))
                             {
@@ -1970,18 +1995,29 @@ namespace DOTNET
                     }
                 }
 
+                _dataGraph6Limit = new double[_dataGraph.Length];
+                _dataGraph7Limit = new double[_dataGraph.Length];
+                int currentPos = 0;
                 //Выделение точек на графике 2 и 3
-                for (int i = 0; i < _dataGraph.Length; i++)
+                for (int i = 0; i < croppedArray2.Length; i++)
                 {
-                    if (croppedArray[i] != 0)
+                    if (croppedArray2[i] != 0)
                     {
-                        
-
+                        for (int j = currentPos; j < _dataGraph2.Length; j++)
+                        {
+                            if (timePoint[i] == timePoint2[j])
+                            {
+                                _dataGraph6Limit[i] = _dataGraph2[j];
+                                currentPos = j;
+                                break;
+                            }
+                        }   
                     }
                 }
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.Message + ex.StackTrace);
                 error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
             }
         }
@@ -2046,8 +2082,10 @@ namespace DOTNET
                 Array.Clear(_dataGraph3, 0, _dataGraph3.Length);
                 Array.Clear(_dataGraph4, 0, _dataGraph4.Length);
                 Array.Clear(_dataGraph5, 0, _dataGraph5.Length);
-                Array.Clear(_dataGraph6Limit, 0, _dataGraph6Limit.Length);
-                Array.Clear(_dataGraph7Limit, 0, _dataGraph7Limit.Length);
+                if (_dataGraph6Limit != null)
+                   Array.Clear(_dataGraph6Limit, 0, _dataGraph6Limit.Length);
+                if (_dataGraph7Limit != null )
+                     Array.Clear(_dataGraph7Limit, 0, _dataGraph7Limit.Length);
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0 , _dataGraph11ServiceLimitation.Length);
                 Array.Clear(responce, 0, responce.Length);
