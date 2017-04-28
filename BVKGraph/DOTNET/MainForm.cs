@@ -45,6 +45,8 @@ namespace DOTNET
         private double[] _dataGraph7Limit;
         private double[] _dataGraph8Averaged;
         private double[] _dataGraph9Averaged;
+        private double[] _dataGraph10Correction;
+        private double[] _dataGraph11Correction;
 
         private ulong[] timePoint = new ulong[2100000];
 
@@ -1196,7 +1198,6 @@ namespace DOTNET
                     }
                 }
             }
-
             if (_limitation)
             {
                 LineItem curve12 = pane2.AddCurve("", list12, Color.DeepPink, SymbolType.Diamond);
@@ -1208,6 +1209,29 @@ namespace DOTNET
                 curve12.Symbol.Size = 10;
                 // Линия невидимая
                 curve12.Line.IsVisible = true;
+            }
+            PointPairList list14 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph10Correction.Length; i+=3)
+                {
+                    if (_dataGraph10Correction[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list14.Add(timePoint[i], _dataGraph10Correction[i] - 32);
+                    }
+                }
+            }
+            if (_correction)
+            {
+                LineItem curve14 = pane2.AddCurve("", list14, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve14.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                curve14.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve14.Symbol.Size = 10;
+                // Линия невидимая
+                curve14.Line.IsVisible = true;
             }
         }
         //График 3
@@ -1371,6 +1395,30 @@ namespace DOTNET
                 // Линия невидимая
                 curve13.Line.IsVisible = true;
             }
+            PointPairList list15 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraph11Correction.Length; i+=3)
+                {
+                    if (_dataGraph11Correction[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list15.Add(timePoint[i], _dataGraph11Correction[i] - 32);
+                    }
+                }
+            }
+            if (_correction)
+            {
+                LineItem curve15 = pane3.AddCurve("", list15, Color.DeepPink, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve15.Symbol.Fill.Color = Color.DeepPink;
+                // Тип заполнения - сплошная заливка
+                curve15.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve15.Symbol.Size = 10;
+                // Линия невидимая
+                curve15.Line.IsVisible = true;
+            }
+
         }
         // Очистка графика
         private void cleangraph_button_Click(object sender, EventArgs e)
@@ -1916,6 +1964,39 @@ namespace DOTNET
                             dataSumAver2 = 0;
                             dataSumAver2Counter = 0;
                         }
+                    }
+                }
+
+                //Формирование графиков коррекции график 1
+                _dataGraph10Correction = new double[_dataGraph2.Length];
+                for (int i = 0; i < _dataGraph10Correction.Length; i++)
+                {
+                    _dataGraph10Correction[i] = BadPointConst;
+                }
+                //Формирование графиков коррекции график 2
+                _dataGraph11Correction = new double[_dataGraph3.Length];
+                for (int i = 0; i < _dataGraph11Correction.Length; i++)
+                {
+                    _dataGraph11Correction[i] = BadPointConst;
+                }
+
+                // Устреднение коррекции график 1
+                //Формирование массивов для режима поправка
+                // График 1
+                for (int i = 0; i < _dataGraph2.Length - 3; i += 3)
+                {
+                    if (_dataGraph2[i] == _dataGraph2[i + 1] && _dataGraph2[i] == _dataGraph2[i + 2])
+                    {
+                        _dataGraph10Correction[i] = _dataGraph2[i];
+                    }
+                }
+
+                // Устреднение коррекции график 2
+                for (int i = 0; i < _dataGraph3.Length - 3; i += 3)
+                {
+                    if (_dataGraph3[i] == _dataGraph3[i + 1] && _dataGraph3[i] == _dataGraph3[i + 2])
+                    {
+                        _dataGraph11Correction[i] = _dataGraph3[i];
                     }
                 }
             }
