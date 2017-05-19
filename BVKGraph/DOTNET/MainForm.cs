@@ -949,14 +949,25 @@ namespace DOTNET
         // График 1
         private void Graph1(GraphPane pane1)
         {
-
             // Создадим список точек=> График номер 1
             PointPairList list1 = new PointPairList();
             {
                 for (int i = 0; i < _dataGraph.Length - 1; i++)
                 {
-                    if (_dataGraph[i] > 1000)
-                        list1.Add(timePoint[i], (Convert.ToDouble(_dataGraph[i])) - 1100);
+                    if (_dataGraph[i] > 1000 || _dataGraph[i] == 0)
+                    {
+                        //// Исправление недостатка АЦП из-за которого 
+                        //// при зашкале амплитуды взамен 2047 шлется 0
+                        //if (_dataGraph[i] == 0 && i != 0)
+                        //{
+                        //    _dataGraph[i] = _dataGraph[i - 1];
+                        //}
+                        if (_dataGraph[i] != BadPointConst)
+                        {
+                            list1.Add(timePoint[i], (Convert.ToDouble(_dataGraph[i])) - 1100);
+                        }
+                    }
+
                 }
             }
 
@@ -1683,6 +1694,13 @@ namespace DOTNET
                 TimeProcessing();
                 //+1 делается ввиду специфику округления в прграммирование для избежания выхода за пределы массива
                 _dataGraph = new ushort[possition_counter / 4 + 1];
+                // Инициализация массива значением BadPointConst
+                // (для исправление недостатка АЦП из-за которого 
+                // при зашкале амплитуды взамен 2047 шлется 0)
+                for (int i = 0; i < _dataGraph.Length; i++)
+                {
+                    _dataGraph[i] = (ushort)BadPointConst;
+                }
                 _dataGraph2 = new ushort[_dataGraph.Length];
                 // Заполнения массива 2 значениями BadPointConst
                 for (int i = 0; i < _dataGraph2.Length; i++)
@@ -1770,6 +1788,16 @@ namespace DOTNET
                             error_packages_counter++;
                             i -= 3;
                             error_counter_label.Text = "Errors:" + error_counter;
+                        }
+                    }
+
+                    // Исправление недостатка АЦП из-за которого 
+                    // при зашкале амплитуды взамен 2047 шлется 0
+                    for (int i = 0; i < _dataGraph.Length; i++)
+                    {
+                        if (_dataGraph[i] == 0 && i != 0)
+                        {
+                            _dataGraph[i] = _dataGraph[i - 1];
                         }
                     }
 
@@ -2040,6 +2068,12 @@ namespace DOTNET
                         _dataGraph4[i + 1] = (ushort)BadPointConst;
                         _dataGraph4[i + 2] = (ushort)BadPointConst;
                     }
+                    else
+                    {
+                        _dataGraph4[i] = (ushort)BadPointConst;
+                        _dataGraph4[i + 1] = (ushort)BadPointConst;
+                        _dataGraph4[i + 2] = (ushort)BadPointConst;
+                    }
                 }
                 // Усреднение Служебного график 2
                 for (int i = 0; i < _dataGraphCounter5 - 3; i += 3)
@@ -2049,7 +2083,55 @@ namespace DOTNET
                         _dataGraph5[i + 1] = (ushort)BadPointConst;
                         _dataGraph5[i + 2] = (ushort)BadPointConst;
                     }
+                    else
+                    {
+                        _dataGraph5[i] = (ushort)BadPointConst;
+                        _dataGraph5[i + 1] = (ushort)BadPointConst;
+                        _dataGraph5[i + 2] = (ushort)BadPointConst;
+                    }
                 }
+
+                ////Служебный
+                ////График 1
+                //double sum = 0;
+                //int counter = 0;
+                //for (int i = 0; i < _dataGraphCounter4; i++)
+                //{
+                //    while ((timePoint4[i + 1] - timePoint4[i]) < 5000)
+                //    {
+                //        sum += _dataGraph4[i];
+                //        counter++;
+                //        i++;
+                //    }
+                //    sum /= counter;
+                //    for (int j = i - counter; j < i; j++)
+                //    {
+                //        _dataGraph4[j] = (ushort)sum;
+                //    }
+                //}
+                ////Служебный
+                ////График 2
+                //double sum5 = 0;
+                //int counter5 = 0;
+                //for (int i = 0; i < _dataGraphCounter5; i++)
+                //{
+                //    while ((timePoint5[i + 1] - timePoint5[i]) < 5000)
+                //    {
+                //        if (_dataGraph5[i] != BadPointConst)
+                //        {
+                //            sum5 += _dataGraph5[i];
+                //            counter5++;
+                //        }
+                //        i++;
+                //    }
+                //    sum5 /= counter5;
+                //    for (int j = i - counter5; j < i; j++)
+                //    {
+                //        _dataGraph5[j] = (ushort)sum5;
+                //    }
+                //    sum5 = 0;
+                //    counter5 = 0;
+                //}
             }
             catch (Exception ex)
             {
@@ -2133,7 +2215,11 @@ namespace DOTNET
                 if (_dataGraph8Averaged != null)
                     Array.Clear(_dataGraph8Averaged, 0 , _dataGraph8Averaged.Length);
                 if (_dataGraph9Averaged != null)
-                    Array.Clear(_dataGraph8Averaged, 0, _dataGraph9Averaged.Length);
+                    Array.Clear(_dataGraph9Averaged, 0, _dataGraph9Averaged.Length);
+                if (_dataGraph10Correction != null)
+                    Array.Clear(_dataGraph10Correction, 0 , _dataGraph10Correction.Length);
+                if (_dataGraph11Correction != null)
+                    Array.Clear(_dataGraph11Correction, 0, _dataGraph11Correction.Length);
 
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0 , _dataGraph11ServiceLimitation.Length);
