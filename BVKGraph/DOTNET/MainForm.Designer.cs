@@ -90,14 +90,16 @@
             this.label5 = new System.Windows.Forms.Label();
             this.control_tabPage = new System.Windows.Forms.TabPage();
             this.measure_tabPage = new System.Windows.Forms.TabPage();
+            this.labLimitationLevel = new System.Windows.Forms.Label();
+            this.cbLimitationLevel = new System.Windows.Forms.ComboBox();
             this.cbAdmission = new System.Windows.Forms.CheckBox();
             this.gbScale = new System.Windows.Forms.GroupBox();
             this.btnScale9 = new System.Windows.Forms.Button();
             this.btnScale17 = new System.Windows.Forms.Button();
             this.btnScale35 = new System.Windows.Forms.Button();
             this.gbLimitation2 = new System.Windows.Forms.GroupBox();
-            this.btnChangeFrame = new System.Windows.Forms.Button();
-            this.btnLimitation2 = new System.Windows.Forms.Button();
+            this.btnFilter = new System.Windows.Forms.Button();
+            this.btnLimitAverage = new System.Windows.Forms.Button();
             this.gbAmplitude = new System.Windows.Forms.GroupBox();
             this.btnShowAmpl = new System.Windows.Forms.Button();
             this.labXInfo = new System.Windows.Forms.Label();
@@ -753,6 +755,8 @@
             // 
             // measure_tabPage
             // 
+            this.measure_tabPage.Controls.Add(this.labLimitationLevel);
+            this.measure_tabPage.Controls.Add(this.cbLimitationLevel);
             this.measure_tabPage.Controls.Add(this.cbAdmission);
             this.measure_tabPage.Controls.Add(this.gbScale);
             this.measure_tabPage.Controls.Add(this.gbLimitation2);
@@ -772,6 +776,29 @@
             this.measure_tabPage.TabIndex = 3;
             this.measure_tabPage.Text = "Измерения";
             this.measure_tabPage.UseVisualStyleBackColor = true;
+            // 
+            // labLimitationLevel
+            // 
+            this.labLimitationLevel.AutoSize = true;
+            this.labLimitationLevel.Location = new System.Drawing.Point(302, 43);
+            this.labLimitationLevel.Name = "labLimitationLevel";
+            this.labLimitationLevel.Size = new System.Drawing.Size(125, 13);
+            this.labLimitationLevel.TabIndex = 54;
+            this.labLimitationLevel.Text = "Лимитация по уровню: ";
+            // 
+            // cbLimitationLevel
+            // 
+            this.cbLimitationLevel.DisplayMember = "3";
+            this.cbLimitationLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLimitationLevel.FormattingEnabled = true;
+            this.cbLimitationLevel.Items.AddRange(new object[] {
+            "1,1",
+            "1,2",
+            "2"});
+            this.cbLimitationLevel.Location = new System.Drawing.Point(366, 58);
+            this.cbLimitationLevel.Name = "cbLimitationLevel";
+            this.cbLimitationLevel.Size = new System.Drawing.Size(52, 21);
+            this.cbLimitationLevel.TabIndex = 53;
             // 
             // cbAdmission
             // 
@@ -827,8 +854,8 @@
             // 
             // gbLimitation2
             // 
-            this.gbLimitation2.Controls.Add(this.btnChangeFrame);
-            this.gbLimitation2.Controls.Add(this.btnLimitation2);
+            this.gbLimitation2.Controls.Add(this.btnFilter);
+            this.gbLimitation2.Controls.Add(this.btnLimitAverage);
             this.gbLimitation2.Location = new System.Drawing.Point(418, 7);
             this.gbLimitation2.Name = "gbLimitation2";
             this.gbLimitation2.Size = new System.Drawing.Size(87, 78);
@@ -837,25 +864,25 @@
             this.gbLimitation2.Text = "Limitation 2";
             this.gbLimitation2.Visible = false;
             // 
-            // btnChangeFrame
+            // btnFilter
             // 
-            this.btnChangeFrame.Location = new System.Drawing.Point(6, 46);
-            this.btnChangeFrame.Name = "btnChangeFrame";
-            this.btnChangeFrame.Size = new System.Drawing.Size(75, 23);
-            this.btnChangeFrame.TabIndex = 13;
-            this.btnChangeFrame.Text = "Disable";
-            this.btnChangeFrame.UseVisualStyleBackColor = true;
-            this.btnChangeFrame.Click += new System.EventHandler(this.btnChangeFrame_Click);
+            this.btnFilter.Location = new System.Drawing.Point(6, 46);
+            this.btnFilter.Name = "btnFilter";
+            this.btnFilter.Size = new System.Drawing.Size(75, 23);
+            this.btnFilter.TabIndex = 1;
+            this.btnFilter.Text = "Filter Off";
+            this.btnFilter.UseVisualStyleBackColor = true;
+            this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
             // 
-            // btnLimitation2
+            // btnLimitAverage
             // 
-            this.btnLimitation2.Location = new System.Drawing.Point(6, 19);
-            this.btnLimitation2.Name = "btnLimitation2";
-            this.btnLimitation2.Size = new System.Drawing.Size(75, 23);
-            this.btnLimitation2.TabIndex = 12;
-            this.btnLimitation2.Text = "Disable";
-            this.btnLimitation2.UseVisualStyleBackColor = true;
-            this.btnLimitation2.Click += new System.EventHandler(this.btnLimitation2_Click);
+            this.btnLimitAverage.Location = new System.Drawing.Point(6, 19);
+            this.btnLimitAverage.Name = "btnLimitAverage";
+            this.btnLimitAverage.Size = new System.Drawing.Size(75, 23);
+            this.btnLimitAverage.TabIndex = 0;
+            this.btnLimitAverage.Text = "Disable";
+            this.btnLimitAverage.UseVisualStyleBackColor = true;
+            this.btnLimitAverage.Click += new System.EventHandler(this.btnLimitAverage_Click);
             // 
             // gbAmplitude
             // 
@@ -1128,15 +1155,17 @@
         private System.Windows.Forms.Button btnResetGraph;
         private System.Windows.Forms.Button btnScale35;
         private System.Windows.Forms.Button btnScale17;
-        private System.Windows.Forms.Button btnLimitation2;
         private System.Windows.Forms.GroupBox gbScale;
         private System.Windows.Forms.GroupBox gbLimitation2;
-        private System.Windows.Forms.Button btnChangeFrame;
         private System.Windows.Forms.Label lbBVK;
         private System.Windows.Forms.Label lbInfoSync;
         private System.Windows.Forms.Button btnScale9;
         private System.Windows.Forms.Button btnServiceMode;
         private System.Windows.Forms.CheckBox cbAdmission;
+        private System.Windows.Forms.Button btnLimitAverage;
+        private System.Windows.Forms.Button btnFilter;
+        private System.Windows.Forms.ComboBox cbLimitationLevel;
+        private System.Windows.Forms.Label labLimitationLevel;
     }
 }
 
