@@ -90,6 +90,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.control_tabPage = new System.Windows.Forms.TabPage();
             this.measure_tabPage = new System.Windows.Forms.TabPage();
+            this.labLimitationLevel = new System.Windows.Forms.Label();
             this.cbLimitationLevel = new System.Windows.Forms.ComboBox();
             this.cbAdmission = new System.Windows.Forms.CheckBox();
             this.gbScale = new System.Windows.Forms.GroupBox();
@@ -115,7 +116,6 @@
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.syncstatus_label = new System.Windows.Forms.Label();
             this.timeGraphName_label = new System.Windows.Forms.Label();
-            this.labLimitationLevel = new System.Windows.Forms.Label();
             this.graph_groupBox.SuspendLayout();
             this.control_groupBox.SuspendLayout();
             this.com_tabControl.SuspendLayout();
@@ -777,6 +777,15 @@
             this.measure_tabPage.Text = "Измерения";
             this.measure_tabPage.UseVisualStyleBackColor = true;
             // 
+            // labLimitationLevel
+            // 
+            this.labLimitationLevel.AutoSize = true;
+            this.labLimitationLevel.Location = new System.Drawing.Point(302, 43);
+            this.labLimitationLevel.Name = "labLimitationLevel";
+            this.labLimitationLevel.Size = new System.Drawing.Size(125, 13);
+            this.labLimitationLevel.TabIndex = 54;
+            this.labLimitationLevel.Text = "Лимитация по уровню: ";
+            // 
             // cbLimitationLevel
             // 
             this.cbLimitationLevel.DisplayMember = "3";
@@ -1025,15 +1034,6 @@
             this.timeGraphName_label.Size = new System.Drawing.Size(60, 13);
             this.timeGraphName_label.TabIndex = 50;
             this.timeGraphName_label.Text = "Время, с";
-            // 
-            // labLimitationLevel
-            // 
-            this.labLimitationLevel.AutoSize = true;
-            this.labLimitationLevel.Location = new System.Drawing.Point(302, 43);
-            this.labLimitationLevel.Name = "labLimitationLevel";
-            this.labLimitationLevel.Size = new System.Drawing.Size(125, 13);
-            this.labLimitationLevel.TabIndex = 54;
-            this.labLimitationLevel.Text = "Лимитация по уровню: ";
             // 
             // WorkForm
             // 
