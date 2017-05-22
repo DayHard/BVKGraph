@@ -10,7 +10,7 @@ using ZedGraph;
 
 ////////////////////////////
 // Автор: Ланденок Владимир
-// Редакция от 11.04.2017
+// Редакция от 22.05.2017
 ///////////////////////////
 
 namespace DOTNET
@@ -614,12 +614,11 @@ namespace DOTNET
 
             _correction = false;
             _service = false;
-
+            _limitation = true;
             normalmode_button.BackColor = Color.YellowGreen;
             btnServiceMode.UseVisualStyleBackColor = true;
             kdo_button.UseVisualStyleBackColor = true;
             starttest_button.UseVisualStyleBackColor = true;
-            _limitation = true;
             limitation_button.BackColor = Color.Khaki;
         }
         // Инженерный режим
@@ -649,11 +648,11 @@ namespace DOTNET
 
             _correction = true;
             _service = false;
+            _limitation = false;
             normalmode_button.UseVisualStyleBackColor = true;
             btnServiceMode.UseVisualStyleBackColor = true;
             starttest_button.UseVisualStyleBackColor = true;
             kdo_button.BackColor = Color.YellowGreen;
-            _limitation = true;
             limitation_button.BackColor = Color.Khaki;
         }
         // Выбор УАС-1
@@ -954,7 +953,6 @@ namespace DOTNET
             {
                 for (int i = 0; i < _dataGraph.Length - 1; i++)
                 {
-                    //if (_dataGraph[i] > 1000)
                     if (_dataGraph[i] != BadPointConst)
                         list1.Add(timePoint[i], (Convert.ToDouble(_dataGraph[i])) - 1100);
                 }
