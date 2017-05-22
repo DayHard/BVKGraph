@@ -649,11 +649,11 @@ namespace DOTNET
 
             _correction = true;
             _service = false;
+            _limitation = false;
             normalmode_button.UseVisualStyleBackColor = true;
             btnServiceMode.UseVisualStyleBackColor = true;
             starttest_button.UseVisualStyleBackColor = true;
             kdo_button.BackColor = Color.YellowGreen;
-            _limitation = true;
             limitation_button.BackColor = Color.Khaki;
         }
         // Выбор УАС-1
