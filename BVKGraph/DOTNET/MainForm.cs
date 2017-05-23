@@ -114,8 +114,12 @@ namespace DOTNET
         private bool _scaleXAxis16OR35 = true;
         private bool _service = false;
         private bool _correction = false;
-        private bool _limitAverage = true;
-        private bool _filter = true;
+
+        //ТЕСТ
+        // ФИЛЬТРЫ
+        // ДОЛЖНЫ БЫТЬ TRUE
+        private bool _limitAverage = false;
+        private bool _filter = false;
 
         //Флаг точек
         private bool measPoint1Flag = true;
@@ -1180,7 +1184,7 @@ namespace DOTNET
                         }
                         else
                         {             
-                                list12.Add(timePoint[i], (_dataGraph8Averaged[i]));
+                                list12.Add(timePoint[i], (_dataGraph8Averaged[i] - 32));
                         }
                     }
                 }
@@ -1772,15 +1776,15 @@ namespace DOTNET
                             error_counter_label.Text = "Errors:" + error_counter;
                         }
                     }
-                    // Исправление ошибок графика амплитуда
-                    // диапазон коррекции 0 to 1030
-                    for (int i = 1; i < _dataGraph.Length; i++)
-                    {
-                        if (_dataGraph[i] >= 0 && _dataGraph[i] <= 1030)
-                        {
-                            _dataGraph[i] = _dataGraph[i - 1];
-                        }
-                    }
+                    //// Исправление ошибок графика амплитуда
+                    //// диапазон коррекции 0 to 1030
+                    //for (int i = 1; i < _dataGraph.Length; i++)
+                    //{
+                    //    if (_dataGraph[i] >= 0 && _dataGraph[i] <= 1030)
+                    //    {
+                    //        _dataGraph[i] = _dataGraph[i - 1];
+                    //    }
+                    //}
 
                     // Обработка данных
                     // Для режимов
@@ -1865,7 +1869,7 @@ namespace DOTNET
                         && _dataGraph[i - 24] <= _dataGraph[i]
                         && _dataGraph[i - 25] <= _dataGraph[i])
                     {
-                        //if (_dataGraph[i] > 1105)
+                        if (_dataGraph[i] > 1105)
                         {
                             croppedArray[i] = _dataGraph[i];
                             amplMaxValue = ushort.MinValue;
@@ -1977,38 +1981,38 @@ namespace DOTNET
                         }
                     }
                 }
-                // Возможность отключения Фильтра
-                // Значение времени 10_000
-                if (_filter)
-                {
-                    //Фильтрация ошибочных точек График 1
-                    int counter1 = 0;
-                    for (int i = 0; i < _dataGraph8Averaged.Length; i++)
-                    {
-                        if (_dataGraph8Averaged[i] != BadPointConst)
-                        {
-                            if ((timePoint[i] - timePoint[counter1]) <= 10_000)
-                            {
-                                _dataGraph8Averaged[counter1] = BadPointConst;
-                            }
-                            counter1 = i;
-                        }
-                    }
+                //// Возможность отключения Фильтра
+                //// Значение времени 10_000
+                //if (_filter)
+                //{
+                //    //Фильтрация ошибочных точек График 1
+                //    int counter1 = 0;
+                //    for (int i = 0; i < _dataGraph8Averaged.Length; i++)
+                //    {
+                //        if (_dataGraph8Averaged[i] != BadPointConst)
+                //        {
+                //            if ((timePoint[i] - timePoint[counter1]) <= 10_000)
+                //            {
+                //                _dataGraph8Averaged[counter1] = BadPointConst;
+                //            }
+                //            counter1 = i;
+                //        }
+                //    }
 
-                    //Фильтрация ошибочных точек График 2
-                    int counter2 = 0;
-                    for (int i = 0; i < _dataGraph9Averaged.Length; i++)
-                    {
-                        if (_dataGraph9Averaged[i] != BadPointConst)
-                        {
-                            if ((timePoint[i] - timePoint[counter2]) <= 10_000)
-                            {
-                                _dataGraph9Averaged[counter2] = BadPointConst;
-                            }
-                            counter2 = i;
-                        }
-                    }
-                }
+                //    //Фильтрация ошибочных точек График 2
+                //    int counter2 = 0;
+                //    for (int i = 0; i < _dataGraph9Averaged.Length; i++)
+                //    {
+                //        if (_dataGraph9Averaged[i] != BadPointConst)
+                //        {
+                //            if ((timePoint[i] - timePoint[counter2]) <= 10_000)
+                //            {
+                //                _dataGraph9Averaged[counter2] = BadPointConst;
+                //            }
+                //            counter2 = i;
+                //        }
+                //    }
+                //}
                 //Формирование графиков коррекции график 1
                 _dataGraph10Correction = new double[_dataGraph2.Length];
                 for (int i = 0; i < _dataGraph10Correction.Length; i++)
@@ -2039,127 +2043,128 @@ namespace DOTNET
                         _dataGraph11Correction[i] = _dataGraph3[i];
                     }
                 }
-                // Служебный
-                // Отсечение шумов Служебного графика 1
-                for (int i = 0; i < _dataGraphCounter4; i += 3)
-                {
-                    if (_dataGraph4[i] == _dataGraph4[i + 1] && _dataGraph4[i] == _dataGraph4[i + 2])
-                    {
-                        _dataGraph4[i + 1] = (ushort)BadPointConst;
-                        _dataGraph4[i + 2] = (ushort)BadPointConst;
-                    }
-                    else
-                    {
-                        _dataGraph4[i] = (ushort)BadPointConst;
-                        _dataGraph4[i + 1] = (ushort)BadPointConst;
-                        _dataGraph4[i + 2] = (ushort)BadPointConst;
-                    }
-                }
-                // Отсечение шумов Служебного графика 2
-                for (int i = 0; i < _dataGraphCounter5; i += 3)
-                {
-                    if (_dataGraph5[i] == _dataGraph5[i + 1] && _dataGraph5[i] == _dataGraph5[i + 2])
-                    {
-                        _dataGraph5[i + 1] = (ushort)BadPointConst;
-                        _dataGraph5[i + 2] = (ushort)BadPointConst;
-                    }
-                    else
-                    {
-                        _dataGraph5[i] = (ushort)BadPointConst;
-                        _dataGraph5[i + 1] = (ushort)BadPointConst;
-                        _dataGraph5[i + 2] = (ushort)BadPointConst;
-                    }
-                }
-                //Служебный
-                // Усреднение график 1
-                int sumService = 0;
-                int sumCounter = 0;
-                for (int i = 0; i < _dataGraphCounter4; i++)
-                {
-                    if (_dataGraph4[i] != _dataGraph4[i + 1] ||
-                        _dataGraph4[i] != _dataGraph4[i + 2] ||
-                        _dataGraph4[i] != _dataGraph4[i + 3] ||
-                        _dataGraph4[i] != _dataGraph4[i + 4] ||
-                        _dataGraph4[i] != _dataGraph4[i + 5] ||
-                        _dataGraph4[i] != _dataGraph4[i + 6] ||
-                        _dataGraph4[i] != _dataGraph4[i + 7] ||
-                        _dataGraph4[i] != _dataGraph4[i + 8] ||
-                        _dataGraph4[i] != _dataGraph4[i + 9] ||
-                        _dataGraph4[i] != _dataGraph4[i + 10])
-                    {
 
-                        if (sumCounter < 10)
-                        {
-                            if (_dataGraph4[i] != BadPointConst)
-                            {
-                                sumService += _dataGraph4[i];
-                                sumCounter++;
-                            }
-                        }
-                        else
-                        {
-                            sumService /= sumCounter;
+                //// Служебный
+                //// Отсечение шумов Служебного графика 1
+                //for (int i = 0; i < _dataGraphCounter4; i += 3)
+                //{
+                //    if (_dataGraph4[i] == _dataGraph4[i + 1] && _dataGraph4[i] == _dataGraph4[i + 2])
+                //    {
+                //        _dataGraph4[i + 1] = (ushort)BadPointConst;
+                //        _dataGraph4[i + 2] = (ushort)BadPointConst;
+                //    }
+                //    else
+                //    {
+                //        _dataGraph4[i] = (ushort)BadPointConst;
+                //        _dataGraph4[i + 1] = (ushort)BadPointConst;
+                //        _dataGraph4[i + 2] = (ushort)BadPointConst;
+                //    }
+                //}
+                //// Отсечение шумов Служебного графика 2
+                //for (int i = 0; i < _dataGraphCounter5; i += 3)
+                //{
+                //    if (_dataGraph5[i] == _dataGraph5[i + 1] && _dataGraph5[i] == _dataGraph5[i + 2])
+                //    {
+                //        _dataGraph5[i + 1] = (ushort)BadPointConst;
+                //        _dataGraph5[i + 2] = (ushort)BadPointConst;
+                //    }
+                //    else
+                //    {
+                //        _dataGraph5[i] = (ushort)BadPointConst;
+                //        _dataGraph5[i + 1] = (ushort)BadPointConst;
+                //        _dataGraph5[i + 2] = (ushort)BadPointConst;
+                //    }
+                //}
+                ////Служебный
+                //// Усреднение график 1
+                //int sumService = 0;
+                //int sumCounter = 0;
+                //for (int i = 0; i < _dataGraphCounter4; i++)
+                //{
+                //    if (_dataGraph4[i] != _dataGraph4[i + 1] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 2] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 3] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 4] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 5] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 6] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 7] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 8] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 9] ||
+                //        _dataGraph4[i] != _dataGraph4[i + 10])
+                //    {
 
-                            int counter = 0;
-                            int j = i;
-                            while (counter < 10)
-                            {
-                                if (_dataGraph4[j] != BadPointConst)
-                                {
-                                    _dataGraph4[j] = (ushort)sumService;
-                                    counter++;
-                                }
-                                j--;
-                            }
-                            sumService = 0;
-                            sumCounter = 0;
-                        }
-                    }
-                }
-                // Усреднение график 2
-                int sumService2 = 0;
-                int sumCounter2 = 0;
-                for (int i = 0; i < _dataGraphCounter5; i++)
-                {
-                    if (_dataGraph5[i] != _dataGraph5[i + 1] ||
-                        _dataGraph5[i] != _dataGraph5[i + 2] ||
-                        _dataGraph5[i] != _dataGraph5[i + 3] ||
-                        _dataGraph5[i] != _dataGraph5[i + 4] ||
-                        _dataGraph5[i] != _dataGraph5[i + 5] ||
-                        _dataGraph5[i] != _dataGraph5[i + 6] ||
-                        _dataGraph5[i] != _dataGraph5[i + 7] ||
-                        _dataGraph5[i] != _dataGraph5[i + 8] ||
-                        _dataGraph5[i] != _dataGraph5[i + 9] ||
-                        _dataGraph5[i] != _dataGraph5[i + 10])
-                    {
-                        if (sumCounter2 < 10)
-                        {
-                            if (_dataGraph5[i] != BadPointConst)
-                            {
-                                sumService2 += _dataGraph5[i];
-                                sumCounter2++;
-                            }
-                        }
-                        else
-                        {
-                            sumService2 /= sumCounter2;
+                //        if (sumCounter < 10)
+                //        {
+                //            if (_dataGraph4[i] != BadPointConst)
+                //            {
+                //                sumService += _dataGraph4[i];
+                //                sumCounter++;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            sumService /= sumCounter;
 
-                            int counter2 = 0;
-                            int k = i;
-                            while (counter2 < 10)
-                            {
-                                if (_dataGraph5[k] != BadPointConst)
-                                {
-                                    _dataGraph5[k] = (ushort)sumService2;
-                                    counter2++;
-                                }
-                                k--;
-                            }
-                            sumService2 = 0;
-                            sumCounter2 = 0;
-                        }
-                    }
-                }
+                //            int counter = 0;
+                //            int j = i;
+                //            while (counter < 10)
+                //            {
+                //                if (_dataGraph4[j] != BadPointConst)
+                //                {
+                //                    _dataGraph4[j] = (ushort)sumService;
+                //                    counter++;
+                //                }
+                //                j--;
+                //            }
+                //            sumService = 0;
+                //            sumCounter = 0;
+                //        }
+                //    }
+                //}
+                //// Усреднение график 2
+                //int sumService2 = 0;
+                //int sumCounter2 = 0;
+                //for (int i = 0; i < _dataGraphCounter5; i++)
+                //{
+                //    if (_dataGraph5[i] != _dataGraph5[i + 1] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 2] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 3] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 4] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 5] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 6] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 7] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 8] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 9] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 10])
+                //    {
+                //        if (sumCounter2 < 10)
+                //        {
+                //            if (_dataGraph5[i] != BadPointConst)
+                //            {
+                //                sumService2 += _dataGraph5[i];
+                //                sumCounter2++;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            sumService2 /= sumCounter2;
+
+                //            int counter2 = 0;
+                //            int k = i;
+                //            while (counter2 < 10)
+                //            {
+                //                if (_dataGraph5[k] != BadPointConst)
+                //                {
+                //                    _dataGraph5[k] = (ushort)sumService2;
+                //                    counter2++;
+                //                }
+                //                k--;
+                //            }
+                //            sumService2 = 0;
+                //            sumCounter2 = 0;
+                //        }
+                //    }
+                //}
             }
             catch (Exception ex)
             {
