@@ -142,6 +142,7 @@ namespace DOTNET
         public WorkForm()
         {
             InitializeComponent();
+
             error_TextBox.Text = " [" + System.DateTime.Now + "] " + "Initialization done!";
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -240,7 +241,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
         //Настройка параметров Combobox
@@ -261,7 +266,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
 
         }
@@ -284,7 +293,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
 
         }
@@ -307,7 +320,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
 
@@ -330,7 +347,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
 
@@ -347,7 +368,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
 
@@ -367,7 +392,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
 
         }
@@ -473,7 +502,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
         //Запуск режима работы "Хризантема"
@@ -522,7 +555,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
         // Остановка БВК
@@ -736,7 +773,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text = "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
         //Кнопка показать\отключить  график амплитуда
@@ -902,7 +943,11 @@ namespace DOTNET
                 }
                 catch (NullReferenceException)
                 {
-                    error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "Nothing to draw.";
+                    Invoke(new MethodInvoker(delegate
+                    {
+                           error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "Nothing to draw.";
+                    }));
+
                     //MessageBox.Show("Nothing to draw.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
@@ -942,7 +987,6 @@ namespace DOTNET
                 Invoke(new MethodInvoker(delegate
                 {
                         error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
-
                 }
                 ));
             }
@@ -1679,7 +1723,13 @@ namespace DOTNET
             try
             {
                 _scanningstatus = false;
-                dataResiveProgressBar.Visible = false;
+
+                Invoke(new MethodInvoker(delegate
+                    {
+                         dataResiveProgressBar.Visible = false;
+                    }
+                ));
+
                 TimeProcessing();
                 //+1 делается ввиду специфику округления в прграммирование для избежания выхода за пределы массива
                 _dataGraph = new ushort[possition_counter / 4 + 1];
@@ -1878,6 +1928,14 @@ namespace DOTNET
                 }
                 //Выделение памяти под массив лимитации
                 croppedArray2 = new ushort[croppedArray.Length];
+                // Снятия текущего значений cbLimitationLevel
+                double limitationLevel = 0;
+                Invoke(new MethodInvoker(delegate
+                    {
+                      limitationLevel = Double.Parse(cbLimitationLevel.Text);                  
+                    }
+                ));
+
                 //Выделение диапазонов графика согласно мощности
                 //УРОВЕНЬ Лимитации задается здесь
                 // 1.2 = 80%, 2 = 50%
@@ -1887,14 +1945,14 @@ namespace DOTNET
                     {
                         for (int j = i; j < i + 30; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / limitationLevel))
                             {
                                 croppedArray2[j] = _dataGraph[j];
                             }
                         }
                         for (int j = i - 30; j < i; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / limitationLevel))
                             {
                                 croppedArray2[j] = _dataGraph[j];
                             }
@@ -2219,7 +2277,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
 
         }
@@ -2309,7 +2371,11 @@ namespace DOTNET
             }
             catch (Exception ex)
             {
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message + ex.StackTrace;
+                Invoke(new MethodInvoker(delegate
+                    {
+                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                    }
+                ));
             }
         }
 
