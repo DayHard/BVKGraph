@@ -785,6 +785,7 @@
             this.labLimitationLevel.Size = new System.Drawing.Size(125, 13);
             this.labLimitationLevel.TabIndex = 54;
             this.labLimitationLevel.Text = "Лимитация по уровню: ";
+            this.labLimitationLevel.Visible = false;
             // 
             // cbLimitationLevel
             // 
@@ -799,6 +800,7 @@
             this.cbLimitationLevel.Name = "cbLimitationLevel";
             this.cbLimitationLevel.Size = new System.Drawing.Size(52, 21);
             this.cbLimitationLevel.TabIndex = 53;
+            this.cbLimitationLevel.Visible = false;
             // 
             // cbAdmission
             // 
