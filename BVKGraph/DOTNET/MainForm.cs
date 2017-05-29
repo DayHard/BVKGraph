@@ -1931,14 +1931,14 @@ namespace DOTNET
                     {
                         for (int j = i; j < i + 30; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2)); //Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
                             {
                                 croppedArray2[j] = _dataGraph[j];
                             }
                         }
                         for (int j = i - 30; j < i; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2)); //Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
                             {
                                 croppedArray2[j] = _dataGraph[j];
                             }
