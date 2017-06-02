@@ -920,9 +920,9 @@
             this.labYInfo.AutoSize = true;
             this.labYInfo.Location = new System.Drawing.Point(11, 40);
             this.labYInfo.Name = "labYInfo";
-            this.labYInfo.Size = new System.Drawing.Size(33, 13);
+            this.labYInfo.Size = new System.Drawing.Size(29, 13);
             this.labYInfo.TabIndex = 7;
-            this.labYInfo.Text = "ΔТ, с";
+            this.labYInfo.Text = "Δt, с";
             // 
             // tbYCounted
             // 

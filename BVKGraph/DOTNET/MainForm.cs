@@ -162,7 +162,7 @@ namespace DOTNET
             PointPair point = curve[iPt];
 
             // Сформируем строку F1 было
-            string result = string.Format("X: {1}\nY: {0:F2}", point.Y, ((double)point.X) / 1000000);
+            string result = string.Format("K: {0:F2}\nt: {1}", point.Y, ((double)point.X) / 1000000);
 
             System.Threading.Thread.Sleep(100);
             return result;
@@ -2027,6 +2027,7 @@ namespace DOTNET
                 }
                 // Возможность отключения Фильтра
                 // Значение времени 10_000
+
                 if (_filter)
                 {
                     //Фильтрация ошибочных точек График 1
@@ -2035,7 +2036,7 @@ namespace DOTNET
                     {
                         if (_dataGraph8Averaged[i] != BadPointConst)
                         {
-                            if ((timePoint[i] - timePoint[counter1]) <= 10_000)
+                            if ((timePoint[i] - timePoint[counter1]) >= 15_000 || (timePoint[i] - timePoint[counter1]) <= 5_000)
                             {
                                 _dataGraph8Averaged[counter1] = BadPointConst;
                             }
@@ -2049,7 +2050,7 @@ namespace DOTNET
                     {
                         if (_dataGraph9Averaged[i] != BadPointConst)
                         {
-                            if ((timePoint[i] - timePoint[counter2]) <= 10_000)
+                            if ((timePoint[i] - timePoint[counter2]) >= 15_000 || (timePoint[i] - timePoint[counter1]) <= 5_000)
                             {
                                 _dataGraph9Averaged[counter2] = BadPointConst;
                             }
