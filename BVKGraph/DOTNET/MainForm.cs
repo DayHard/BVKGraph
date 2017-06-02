@@ -10,7 +10,7 @@ using ZedGraph;
 
 ////////////////////////////
 // Автор: Ланденок Владимир
-// Редакция от 22.05.2017
+// Редакция от 02.06.2017
 ///////////////////////////
 
 namespace DOTNET
@@ -138,7 +138,8 @@ namespace DOTNET
         public WorkForm()
         {
             InitializeComponent();
-            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "Initialization done!";
+            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "Инициализация завершена. Текущая версия программы: " +
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -152,27 +153,69 @@ namespace DOTNET
             serialPort2.DataReceived += serialPort2_DataReceived;
             // Будем обрабатывать событие PointValueEvent, чтобы изменить формат представления координат
             zedGraph.PointValueEvent += new ZedGraphControl.PointValueHandler(zedGraph_PointValueEvent);
+            // !!! Подпишемся на событие, которое будет возникать перед тем, 
+            // как будет показано контекстное меню.
+            zedGraph.ContextMenuBuilder +=
+                new ZedGraphControl.ContextMenuBuilderEventHandler(zedGraph_ContextMenuBuilder);
         }
 
         #region Events
+
+        /// <summary>
+        /// Обработчик события, который вызывается, перед показом контекстного меню
+        /// </summary>
+        /// <param name="sender">Компонент ZedGraph</param>
+        /// <param name="menuStrip">Контекстное меню, которое будет показано</param>
+        /// <param name="mousePt">Координаты курсора мыши</param>
+        /// <param name="objState">Состояние контекстного меню. Описывает объект, на который кликнули.</param>
+        public void zedGraph_ContextMenuBuilder(ZedGraphControl sender, ContextMenuStrip menuStrip, Point mousePt, ZedGraphControl.ContextMenuObjectState objState)
+        {
+            // Переименуем (переведем на русский язык) некоторые пункты контекстного меню
+            menuStrip.Items[0].Text = "Копировать графики";
+            menuStrip.Items[1].Text = "Сохранить как картинку…";
+            menuStrip.Items[2].Text = "Параметры печати…";
+            menuStrip.Items[3].Text = "Печать…";
+            //menuStrip.Items[4].Text = "Показывать значения в точках…";
+            menuStrip.Items[5].Text = "Уменьшить (Ctrl + Z)";
+            menuStrip.Items[6].Text = "Отменить все увеличение";
+            menuStrip.Items[7].Text = "Установить масштаб по умолчанию…";
+
+            // Некоторые пункты удалим
+            //Удаляем пункт меню параметры страницы
+            //menuStrip.Items.RemoveAt(2);
+            //Удалаяем пункт меню показать значения в точках
+            menuStrip.Items.RemoveAt(4);
+        }
         //Событие всплывающей подсказки
-        string zedGraph_PointValueEvent(ZedGraphControl sender,GraphPane pane,CurveItem curve,int iPt)
+        private string zedGraph_PointValueEvent(ZedGraphControl sender,GraphPane pane,CurveItem curve,int iPt)
         {
             // Получим точку, около которой находимся
             PointPair point = curve[iPt];
-
             // Сформируем строку F1 было
             string result = string.Format("K: {0:F2}\nt: {1}", point.Y, ((double)point.X) / 1000000);
-
-            System.Threading.Thread.Sleep(100);
+            Thread.Sleep(100);
             return result;
         }
-        // Ctrl + Shift + F12 Показать кнопку лимитация 2, по дефолту включена
+        // Ctrl + F12 Показать кнопку лимитация 2, по дефолту включена
+        // Ctrl + Z Un-Zoom hot key
         private void WorkForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Control && e.KeyCode == Keys.F12)
+            switch  (e.KeyCode)
             {
-                gbLimitation2.Visible = !gbLimitation2.Visible;
+                //Отображение скрытого меню отладки
+                case Keys.F12:
+                    if (e.Control && e.KeyCode == Keys.F12)
+                    {
+                        gbLimitation2.Visible = !gbLimitation2.Visible;
+                    }     
+                    break;
+                //Горячие клавиши, отменить увеличение на шаг
+                case Keys.Z:
+                    if (e.Control && e.KeyCode == Keys.Z)
+                    {
+                        zedGraph.ZoomOut(zedGraph.GraphPane);
+                    }
+                    break;
             }
         }
         #endregion
@@ -2363,7 +2406,6 @@ namespace DOTNET
                 ));
             }
         }
-
         //! Таймер
         private void timerCount_Tick(object sender, EventArgs e)
         {
@@ -2383,7 +2425,6 @@ namespace DOTNET
                 dataThread.Start();
             }
         }
-
         #endregion
 
         #region Measure (Time) 

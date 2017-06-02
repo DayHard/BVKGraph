@@ -469,12 +469,12 @@
             // 
             this.clean_error_linkLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.clean_error_linkLabel.AutoSize = true;
-            this.clean_error_linkLabel.Location = new System.Drawing.Point(788, 693);
+            this.clean_error_linkLabel.Location = new System.Drawing.Point(783, 693);
             this.clean_error_linkLabel.Name = "clean_error_linkLabel";
-            this.clean_error_linkLabel.Size = new System.Drawing.Size(49, 13);
+            this.clean_error_linkLabel.Size = new System.Drawing.Size(54, 13);
             this.clean_error_linkLabel.TabIndex = 42;
             this.clean_error_linkLabel.TabStop = true;
-            this.clean_error_linkLabel.Text = "Clean list";
+            this.clean_error_linkLabel.Text = "Очистить";
             this.clean_error_linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.clean_error_linkLabel_LinkClicked);
             // 
             // graph_groupBox
