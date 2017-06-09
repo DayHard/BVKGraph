@@ -1,34 +1,39 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using ZedGraph;
-// ReSharper disable All
+// !!!!ReSharper disable All
 
 ////////////////////////////
 // Автор: Ланденок Владимир
 // Редакция от 02.06.2017
 ///////////////////////////
 
-namespace DOTNET
+namespace BVKGraph
 {
+    [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
+    [SuppressMessage("ReSharper", "CoVariantArrayConversion")]
+    [SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
+    [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public partial class WorkForm : Form
     {
         #region Variables
 
-        GraphPane pane1 = new GraphPane();
-        GraphPane pane2 = new GraphPane();
-        GraphPane pane3 = new GraphPane();
+        private GraphPane _pane1 = new GraphPane();
+        private GraphPane _pane2 = new GraphPane();
+        private GraphPane _pane3 = new GraphPane();
 
-        MasterPane masterPane = new MasterPane();
+        MasterPane _masterPane = new MasterPane();
 
-        Stopwatch swatch = new Stopwatch();
+        private Stopwatch _swatch = new Stopwatch();
 
         // Объявление массивов для работы с данными
-        private byte[] command = new byte[3];
+        private byte[] _command = new byte[3];
         private ushort[] _dataGraph;
 
         // Статические массивы (для обработки принятых данных)
@@ -38,8 +43,8 @@ namespace DOTNET
         private ushort[] _dataGraph5 = new ushort[600000];
 
         //Нахождение экстремумов мощности
-        private ushort[] croppedArray;
-        private ushort[] croppedArray2;
+        private ushort[] _croppedArray;
+        private ushort[] _croppedArray2;
 
         private double[] _dataGraph6Limit;
         private double[] _dataGraph7Limit;
@@ -48,18 +53,18 @@ namespace DOTNET
         private double[] _dataGraph10Correction;
         private double[] _dataGraph11Correction;
 
-        private ulong[] timePoint = new ulong[2100000];
-        private ulong[] timePoint4 = new ulong[2100000];
-        private ulong[] timePoint5 = new ulong[2100000];
+        private ulong[] _timePoint = new ulong[2100000];
+        private ulong[] _timePoint4 = new ulong[2100000];
+        private ulong[] _timePoint5 = new ulong[2100000];
 
         // Усреднение 8 кадра
         private double[] _dataGraph10ServiceLimitation = new double[7500];
-        private ulong[] timePoint10ServiceLimitation = new ulong[210000];
+        private ulong[] _timePoint10ServiceLimitation = new ulong[210000];
         private double[] _dataGraph11ServiceLimitation = new double[7500];
-        private ulong[] timePoint11ServiceLimitation = new ulong[210000];
+        private ulong[] _timePoint11ServiceLimitation = new ulong[210000];
 
-        private byte[] responce = new byte[2100000];
-        private byte[] responce_temp = new byte[15000];
+        private byte[] _responce = new byte[2100000];
+        private byte[] _responceTemp = new byte[15000];
         // Объвление констант для  битовых масок
         private const uint MaskFirstByteConst = 0x0F;
         private const uint MaskThirdByteConst = 0x7F;
@@ -67,12 +72,12 @@ namespace DOTNET
         private const uint MaskResponceConst = 0x70;
 
         // Размеры шрифтов
-        private const int labelsXfontSize = 25;
-        private const int labelsYfontSize = 20;
-        private const int titleXFontSize = 25;
-        private const int titleYFontSize = 20;
-        private const int legendFontSize = 15;
-        private const int mainTitleFontSize = 30;
+        private const int LabelsXfontSize = 25;
+        private const int LabelsYfontSize = 20;
+        private const int TitleXFontSize = 25;
+        private const int TitleYFontSize = 20;
+        private const int LegendFontSize = 15;
+        private const int MainTitleFontSize = 30;
 
         //Диапазоны осей
         private const double XScaleMin = 0;
@@ -84,62 +89,51 @@ namespace DOTNET
         private const double YScaleMin35 = -35;
         private const double YScaleMax35 = 35;
 
-        //Допуск графиков
-        private const double admission1 = 4.07D;
-        private const double admission2 = 8.15D;
-        private const double timeAdmission1 = 0;
-        private const double timeAdmission2 = 1;
-        private const double timeAdmission3 = 2;
-        private const double timeAdmission4 = 35_000_000;
-
         // Поиск первого бита
         private const uint MaskFirstByteLogicConst = 0x80;
         //Значение угол\азимут
         private const short BadPointConst = 0x7FFF;
 
         //Объявление вспомогательных переменных
-        private int _timer_counter;
-        private int read_counter;
-        private int possition_counter;
-        private int _dataGraphCounter4 = 0, _dataGraphCounter5 = 0;
-        ulong timebuffer;
-        private byte timer30sec = 1;
-        private int error_counter = 0;
+        private int _timerCounter;
+        private int _readCounter;
+        private int _possitionCounter;
+        private int _dataGraphCounter4, _dataGraphCounter5 ;
+        ulong _timebuffer;
+        private byte _timer30Sec = 1;
+        private int _errorCounter;
 
         //Флаги
         private bool _scanningstatus;
         private bool _syncstatus;
         private bool _limitation = true;
-        private bool _engeneering = false;
-        private bool _scaleXAxis16OR35 = true;
-        private bool _service = false;
-        private bool _correction = false;
+        private bool _engeneering;
+        private bool _scaleXAxis16Or35 = true;
+        private bool _service;
+        private bool _correction;
         private bool _limitAverage = true;
         private bool _filter = true;
 
         //Флаг точек
-        private bool measPoint1Flag = true;
-        private bool measPoint2Flag = true;
-        private double measPointX1 = 0;
-        private double measPointX2 = 0;
-        private double measPointY1 = 0;
-        private double measPointY2 = 0;
-        CurveItem curveToDelete1;
-        CurveItem curveToDelete2;
+        private bool _measPoint1Flag = true;
+        private bool _measPoint2Flag = true;
+        private double _measPointX1;
+        private double _measPointX2;
+        private double _measPointY1;
+        private double _measPointY2;
+        CurveItem _curveToDelete1;
+        CurveItem _curveToDelete2;
 
         //Отображение амплитуды
-        private bool _amplShow = false;
-
-        //Таймаут потока
-        private const int ThreadTimeOut = 3000;
+        private bool _amplShow;
 
         #endregion
 
         public WorkForm()
         {
             InitializeComponent();
-            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "Инициализация завершена. Текущая версия программы: " +
-                System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            error_TextBox.Text = " [" + DateTime.Now + "] " + "Инициализация завершена. Текущая версия программы: " +
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -152,11 +146,10 @@ namespace DOTNET
             serialPort.ErrorReceived += SerialPortErrorReceived;
             serialPort2.DataReceived += serialPort2_DataReceived;
             // Будем обрабатывать событие PointValueEvent, чтобы изменить формат представления координат
-            zedGraph.PointValueEvent += new ZedGraphControl.PointValueHandler(zedGraph_PointValueEvent);
+            zedGraph.PointValueEvent += zedGraph_PointValueEvent;
             // !!! Подпишемся на событие, которое будет возникать перед тем, 
             // как будет показано контекстное меню.
-            zedGraph.ContextMenuBuilder +=
-                new ZedGraphControl.ContextMenuBuilderEventHandler(zedGraph_ContextMenuBuilder);
+            zedGraph.ContextMenuBuilder += zedGraph_ContextMenuBuilder;
         }
 
         #region Events
@@ -192,7 +185,7 @@ namespace DOTNET
             // Получим точку, около которой находимся
             PointPair point = curve[iPt];
             // Сформируем строку F1 было
-            string result = string.Format("K: {0:F2}\nt: {1}", point.Y, ((double)point.X) / 1000000);
+            string result = $"K: {point.Y:F2}\nt: {point.X / 1000000}";
             Thread.Sleep(100);
             return result;
         }
@@ -234,25 +227,25 @@ namespace DOTNET
                     switch (sr)
                     {
                         case SerialError.Frame:
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a framing error";
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a framing error";
                             break;
                         case SerialError.Overrun:
 
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " a character-buffer overrun has occurred. The next character is lost";
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " a character-buffer overrun has occurred. The next character is lost";
                             break;
                         case SerialError.RXOver:
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " an input buffer overflow has occured."
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " an input buffer overflow has occured."
                             + " There is either no room in the input buffer, or a character was received after the End-Of-File (EOF) character.\n";
                             break;
                         case SerialError.RXParity:
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a parity error.\n";
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a parity error.\n";
                             break;
                         case SerialError.TXFull:
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + "the application tried to transmit a character,"
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + "the application tried to transmit a character,"
                                 + " but the output buffer was full.";
                             break;
                         default:
-                            error_TextBox.Text = " [" + System.DateTime.Now + "] " + "On port " + serialPort.PortName + " an unknown error occurred.\n";
+                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " an unknown error occurred.\n";
                             break;
                     }
                 });
@@ -266,14 +259,14 @@ namespace DOTNET
             {
                 if (_scanningstatus && serialPort.IsOpen)
                 {
-                    read_counter = serialPort.Read(responce, possition_counter, 1000);
-                    swatch.Stop();
-                    possition_counter += read_counter;
-                    _timer_counter += read_counter;
+                    _readCounter = serialPort.Read(_responce, _possitionCounter, 1000);
+                    _swatch.Stop();
+                    _possitionCounter += _readCounter;
+                    _timerCounter += _readCounter;
                 }
                 else
                 {
-                    serialPort.Read(responce_temp, 0, 2000);
+                    serialPort.Read(_responceTemp, 0, 2000);
                     serialPort.DiscardInBuffer();
                 }
             }
@@ -281,7 +274,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -306,7 +299,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -323,17 +316,16 @@ namespace DOTNET
                 serialPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopbits_Combobox.Text);
                 serialPort.DataBits = int.Parse(databits_Combobox.Text);
                 serialPort.ReceivedBytesThreshold = 1000;
-                //!!!!!
                 serialPort.ReadBufferSize = 300000;
                 serialPort.Open();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Connected to COM1";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Connected to COM1";
                 button_prop();
             }
             catch (Exception ex)
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -348,7 +340,7 @@ namespace DOTNET
                 dataResiveProgressBar.Visible = false;
                 Thread.Sleep(10);
                 serialPort.Close();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Disconnected from COM1";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Disconnected from COM1";
                 button_prop();
                 if (serialPort.IsOpen)
                 {
@@ -360,7 +352,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -381,13 +373,13 @@ namespace DOTNET
                 serialPort2.ReceivedBytesThreshold = 1;
                 serialPort2.Open();
                 button2_prop();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Connected to COM2";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Connected to COM2";
             }
             catch (Exception ex)
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -399,7 +391,7 @@ namespace DOTNET
             {
                 serialPort2.Close();
                 button2_prop();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + " Disconnected from COM2";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Disconnected from COM2";
                 _syncstatus = false;
                 Sync_checkBox.Text = "   Sync Off  ";
                 syncstatus_label.Text = "Sync: No";
@@ -408,7 +400,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -432,7 +424,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -478,7 +470,7 @@ namespace DOTNET
                     starttest_button.Enabled = false;
                     startbvk_button.Enabled = false;
                 });
-                swatch.Start();
+                _swatch.Start();
                 _scanningstatus = true;
                 serialPort2.DiscardInBuffer();
             }
@@ -542,7 +534,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -556,7 +548,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x1A;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
                 dataResiveProgressBar.Visible = true;
                 derivation_button.Enabled = false;
                 _scanningstatus = true;
@@ -568,7 +560,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x1A;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
                 dataResiveProgressBar.Visible = true;
                 derivation_button.Enabled = false;
                 starttest_button.Enabled = false;
@@ -587,15 +579,15 @@ namespace DOTNET
         {
             try
             {
-                command[0] = 0xAF;
-                command[1] = commandprop;
-                command[2] = Convert.ToByte(0xAF ^ commandprop);
+                _command[0] = 0xAF;
+                _command[1] = commandprop;
+                _command[2] = Convert.ToByte(0xAF ^ commandprop);
             }
             catch (Exception ex)
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -605,7 +597,7 @@ namespace DOTNET
         {
             byte commandprop = 0x1C;
             DataSend(commandprop);
-            serialPort.Write(command, 0, 3);
+            serialPort.Write(_command, 0, 3);
             dataResiveProgressBar.Visible = false;
             derivation_button.Enabled = true;
             starttest_button.Enabled = true;
@@ -629,12 +621,12 @@ namespace DOTNET
             {
                 byte commandprop = 0x17;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
             }
 
             _limitation = !_limitation;
 
-            if (limitation_button.UseVisualStyleBackColor == true)
+            if (limitation_button.UseVisualStyleBackColor)
                 limitation_button.BackColor = Color.Khaki;
             else limitation_button.UseVisualStyleBackColor = true;
         }
@@ -647,7 +639,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x1B;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
                 dataResiveProgressBar.Visible = true;
                 derivation_button.Enabled = false;
                 _scanningstatus = true;
@@ -659,7 +651,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x1B;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
                 dataResiveProgressBar.Visible = true;
                 derivation_button.Enabled = false;
                 starttest_button.Enabled = false;
@@ -678,7 +670,7 @@ namespace DOTNET
         {
             byte commandprop = 0x14;
             DataSend(commandprop);
-            serialPort.Write(command, 0, 3);
+            serialPort.Write(_command, 0, 3);
             starttest_button.BackColor = Color.Khaki;
         }
         //Нормальный режим
@@ -688,7 +680,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x11;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
             }
 
             _correction = false;
@@ -707,11 +699,11 @@ namespace DOTNET
             {
                 byte commandprop = 0x12;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
             }
                 _engeneering = !_engeneering;
 
-            if (engineeringmode_button.UseVisualStyleBackColor == true)
+            if (engineeringmode_button.UseVisualStyleBackColor)
                 engineeringmode_button.BackColor = Color.Khaki;
             else engineeringmode_button.UseVisualStyleBackColor = true;
         }
@@ -722,7 +714,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x13;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
             }
 
             _correction = true;
@@ -739,7 +731,7 @@ namespace DOTNET
         {
             byte commandprop = 0x15;
             DataSend(commandprop);
-            serialPort.Write(command, 0, 3);
+            serialPort.Write(_command, 0, 3);
 
             yac1_button.BackColor = Color.PaleTurquoise;
             yac2_button.UseVisualStyleBackColor = true;
@@ -749,7 +741,7 @@ namespace DOTNET
         {
             byte commandprop = 0x16;
             DataSend(commandprop);
-            serialPort.Write(command, 0, 3);
+            serialPort.Write(_command, 0, 3);
 
             yac1_button.UseVisualStyleBackColor = true;
             yac2_button.BackColor = Color.PaleTurquoise;
@@ -761,9 +753,9 @@ namespace DOTNET
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 BinaryWriter binaryWriter = new BinaryWriter(File.Open(saveFileDialog.FileName, FileMode.OpenOrCreate));
-                binaryWriter.Write(responce, 0, possition_counter);
+                binaryWriter.Write(_responce, 0, _possitionCounter);
                 binaryWriter.Close();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "File saved Data.bin";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + "File saved Data.bin";
             }
         }
         // Загрузка данных для графиков
@@ -774,10 +766,10 @@ namespace DOTNET
             {
                 DataReset();
                 BinaryReader binaryReader = new BinaryReader(File.Open(openFileDialog.FileName, FileMode.OpenOrCreate));
-                binaryReader.Read(responce, 0, (int)binaryReader.BaseStream.Length);
-                possition_counter = (int)binaryReader.BaseStream.Length;
+                binaryReader.Read(_responce, 0, (int)binaryReader.BaseStream.Length);
+                _possitionCounter = (int)binaryReader.BaseStream.Length;
                 binaryReader.Close();
-                error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + "File open " + openFileDialog.SafeFileName;
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + "File open " + openFileDialog.SafeFileName;
                 DataProcessing();
             }
         }
@@ -802,7 +794,7 @@ namespace DOTNET
                 {
                     byte commandprop = 0x1B;
                     DataSend(commandprop);
-                    serialPort.Write(command, 0, 3);
+                    serialPort.Write(_command, 0, 3);
                     _syncstatus = true;
                     Sync_checkBox.Text = "Откл.синхр.";
                     syncstatus_label.Text = "Sync: Yes";
@@ -813,7 +805,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -825,10 +817,6 @@ namespace DOTNET
             {
                 btnShowAmpl.Text = "Показать";
                 _amplShow = false;
-                masterPane.PaneList.Clear();
-                Thread thrd1 = new Thread(GraphDraw);
-                thrd1.Start();
-                thrd1.Join(ThreadTimeOut);
                 rbtnMeasureGraph1.Enabled = false;
                 rbtnMeasureGraph2.Select();
             }
@@ -836,40 +824,38 @@ namespace DOTNET
             {
                 btnShowAmpl.Text = "Скрыть";
                 _amplShow = true;
-                masterPane.PaneList.Clear();
-                Thread thrd2 = new Thread(GraphDraw);
-                thrd2.Start();
-                thrd2.Join(ThreadTimeOut);
                 rbtnMeasureGraph1.Enabled = true;
             }
+            _masterPane.PaneList.Clear();
+            Thread thrd1 = new Thread(GraphDraw);
+            thrd1.IsBackground = true;
+            thrd1.Start();
         }
         //Кнопка перезагрузки графиков
         private void btnResetGraph_Click(object sender, EventArgs e)
         {
             // Если есть что удалять
-            if (pane1.CurveList.Count > 0 && pane2.CurveList.Count > 0 && pane3.CurveList.Count > 0)
+            if (_pane1.CurveList.Count > 0 && _pane2.CurveList.Count > 0 && _pane3.CurveList.Count > 0)
             {
                 // Удалим все кривые
-                pane1.CurveList.Clear();
-                pane2.CurveList.Clear();
-                pane3.CurveList.Clear();
+                _pane1.CurveList.Clear();
+                _pane2.CurveList.Clear();
+                _pane3.CurveList.Clear();
                 // Обновим график
-                zedGraph.AxisChange();
                 zedGraph.Invalidate();
             }
 
             Thread thrd = new Thread(GraphDraw);
             thrd.Start();
-            thrd.Join(ThreadTimeOut);
         }
         //Масштаб графика +-9
         private void btnScale9_Click(object sender, EventArgs e)
         {
-            pane2.YAxis.Scale.Min = YScaleMin9;
-            pane3.YAxis.Scale.Min = YScaleMin9;
+            _pane2.YAxis.Scale.Min = YScaleMin9;
+            _pane3.YAxis.Scale.Min = YScaleMin9;
 
-            pane2.YAxis.Scale.Max = YScaleMax9;
-            pane3.YAxis.Scale.Max = YScaleMax9;
+            _pane2.YAxis.Scale.Max = YScaleMax9;
+            _pane3.YAxis.Scale.Max = YScaleMax9;
 
             zedGraph.Invalidate();
             zedGraph.AxisChange();
@@ -877,12 +863,12 @@ namespace DOTNET
         //Изменение масштаба YAxis -35 + 35
         private void btnScale35_Click(object sender, EventArgs e)
         {
-            _scaleXAxis16OR35 = false;
-            pane2.YAxis.Scale.Min = YScaleMin35;
-            pane3.YAxis.Scale.Min = YScaleMin35;
+            _scaleXAxis16Or35 = false;
+            _pane2.YAxis.Scale.Min = YScaleMin35;
+            _pane3.YAxis.Scale.Min = YScaleMin35;
 
-            pane2.YAxis.Scale.Max = YScaleMax35;
-            pane3.YAxis.Scale.Max = YScaleMax35;
+            _pane2.YAxis.Scale.Max = YScaleMax35;
+            _pane3.YAxis.Scale.Max = YScaleMax35;
 
             zedGraph.Invalidate();
             zedGraph.AxisChange();
@@ -890,12 +876,12 @@ namespace DOTNET
         //Изменение масштаба YAxis -17 + 17
         private void btnScale17_Click(object sender, EventArgs e)
         {
-            _scaleXAxis16OR35 = true;
-            pane2.YAxis.Scale.Min = YScaleMin17;
-            pane3.YAxis.Scale.Min = YScaleMin17;
+            _scaleXAxis16Or35 = true;
+            _pane2.YAxis.Scale.Min = YScaleMin17;
+            _pane3.YAxis.Scale.Min = YScaleMin17;
 
-            pane2.YAxis.Scale.Max = YScaleMax17;
-            pane3.YAxis.Scale.Max = YScaleMax17;
+            _pane2.YAxis.Scale.Max = YScaleMax17;
+            _pane3.YAxis.Scale.Max = YScaleMax17;
 
             zedGraph.Invalidate();
             zedGraph.AxisChange();
@@ -907,7 +893,7 @@ namespace DOTNET
             {
                 byte commandprop = 0x13;
                 DataSend(commandprop);
-                serialPort.Write(command, 0, 3);
+                serialPort.Write(_command, 0, 3);
             }
 
             _service = true;
@@ -958,7 +944,7 @@ namespace DOTNET
         {
             try
             {
-                masterPane = zedGraph.MasterPane;
+                _masterPane = zedGraph.MasterPane;
 
                 // !!! Свойства IsSynchronizeXAxes и IsSynchronizeYAxes указывают, что
                 // оси на графиках должны перемещаться и масштабироваться одновременно.
@@ -969,14 +955,14 @@ namespace DOTNET
                 // По умолчанию в MasterPane содержится один экземпляр класса GraphPane 
                 // (который можно получить из свойства zedGraph.GraphPane)
                 // Очистим этот список, так как потом мы будем создавать графики вручную
-                masterPane.PaneList.Clear();
+                _masterPane.PaneList.Clear();
                 try
                 {
                     // Заполнение графика данными, 
                     // поэтому вынесем заполнение точек в отдельный метод DrawSingleGraph()
-                    Graph1(pane1);
-                    Graph2(pane2);
-                    Graph3(pane3);
+                    Graph1(_pane1);
+                    Graph2(_pane2);
+                    Graph3(_pane3);
 
                 }
                 catch (NullReferenceException)
@@ -991,29 +977,29 @@ namespace DOTNET
 
                 // Добавим новый график в MasterPane
                 if (_amplShow)
-                masterPane.Add(pane1);
-                masterPane.Add(pane2);
-                masterPane.Add(pane3);
+                _masterPane.Add(_pane1);
+                _masterPane.Add(_pane2);
+                _masterPane.Add(_pane3);
                 
 
                 // Будем размещать добавленные графики в MasterPane
                 using (Graphics g = CreateGraphics())
                 {
                     // Графики будут размещены в один столбец друг под другом
-                    masterPane.SetLayout(g, PaneLayout.SingleColumn);
+                    _masterPane.SetLayout(g, PaneLayout.SingleColumn);
                 }
 
                 // Настройка свойств графиков
-                graph_prop_final(pane1, pane2, pane3);
+                graph_prop_final(_pane1, _pane2, _pane3);
 
-                if (_scaleXAxis16OR35)
+                if (_scaleXAxis16Or35)
                     btnScale17_Click(null, null);
                 else
                     btnScale35_Click(null ,null);
                 
 
                 // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
-                zedGraph.AxisChange();
+                //zedGraph.AxisChange();
 
                 // Обновляем график
                 zedGraph.Invalidate();
@@ -1023,7 +1009,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                 {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                 }
                 ));
             }
@@ -1039,7 +1025,7 @@ namespace DOTNET
                 for (int i = 0; i < _dataGraph.Length - 1; i++)
                 {
                     if (_dataGraph[i] != BadPointConst)
-                        list1.Add(timePoint[i], (Convert.ToDouble(_dataGraph[i])) - 1100);
+                        list1.Add(_timePoint[i], (Convert.ToDouble(_dataGraph[i])) - 1100);
                 }
             }
 
@@ -1075,19 +1061,14 @@ namespace DOTNET
 
             pane1.Legend.FontSpec.Size = 7;
 
-
-            //////////////////////////////////////
-            /// ТЕСТ ЭКСТРЕМОМОВ
-            /////////////////////////////////////
-
             // Создадим список точек=> График номер 1
             PointPairList list2 = new PointPairList();
             {
-                for (int i = 0; i < croppedArray.Length; i++)
+                for (int i = 0; i < _croppedArray.Length; i++)
                 {
-                    if (croppedArray[i] != 0)
+                    if (_croppedArray[i] != 0)
                     {
-                        list2.Add(timePoint[i], (Convert.ToDouble(croppedArray[i])) - 1100); // / 10);
+                        list2.Add(_timePoint[i], (Convert.ToDouble(_croppedArray[i])) - 1100); // / 10);
                     }
                 }
             }
@@ -1111,11 +1092,11 @@ namespace DOTNET
             // Точки лимитации
             PointPairList list3 = new PointPairList();
             {
-                for (int i = 0; i < croppedArray2.Length; i++)
+                for (int i = 0; i < _croppedArray2.Length; i++)
                 {
-                    if (croppedArray2[i] != 0)
+                    if (_croppedArray2[i] != 0)
                     {
-                        list3.Add(timePoint[i], (Convert.ToDouble(croppedArray2[i])) - 1100); // / 10);
+                        list3.Add(_timePoint[i], (Convert.ToDouble(_croppedArray2[i])) - 1100); // / 10);
                     }
                 }
             }
@@ -1148,7 +1129,7 @@ namespace DOTNET
                     if (_dataGraph2[i] != (ushort)BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list2.Add(timePoint[i], _dataGraph2[i] - 32);
+                        list2.Add(_timePoint[i], _dataGraph2[i] - 32);
                     }
                 }
             }
@@ -1164,7 +1145,7 @@ namespace DOTNET
                     if (_dataGraph4[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list4.Add(timePoint4[i], _dataGraph4[i] - 32);
+                        list4.Add(_timePoint4[i], _dataGraph4[i] - 32);
                     }
                 }
 
@@ -1187,15 +1168,15 @@ namespace DOTNET
             {
                 for (int i = 0; i < _dataGraph6Limit.Length; i++)
                 {
-                    if (_dataGraph6Limit[i] != BadPointConst)
+                    if ((ushort)_dataGraph6Limit[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list10.Add(timePoint[i], _dataGraph6Limit[i] - 32);
+                        list10.Add(_timePoint[i], _dataGraph6Limit[i] - 32);
                     }
                 }
             }
             // Создадим кривые 
-            if (_engeneering == true)
+            if (_engeneering)
             {
                 LineItem curve2 = pane2.AddCurve("", list2, Color.Green, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
@@ -1247,14 +1228,14 @@ namespace DOTNET
                 bool average = false;
                 for (int i = 0; i < _dataGraph8Averaged.Length; i++)
                 {
-                    if (_dataGraph8Averaged[i] != BadPointConst)
+                    if ((ushort)_dataGraph8Averaged[i] != BadPointConst)
                     {
                         if (_limitAverage)
                         {
                             if (average)
                             {
                                 // Отнимаем значение 33 для удобства отображения
-                                list12.Add(timePoint[i], ((_dataGraph8Averaged[i] - 32) + sum) / 2);
+                                list12.Add(_timePoint[i], ((_dataGraph8Averaged[i] - 32) + sum) / 2);
                                 average = !average;
                             }
                             else
@@ -1265,7 +1246,7 @@ namespace DOTNET
                         }
                         else
                         {             
-                                list12.Add(timePoint[i], (_dataGraph8Averaged[i] - 32));
+                                list12.Add(_timePoint[i], (_dataGraph8Averaged[i] - 32));
                         }
                     }
                 }
@@ -1286,10 +1267,10 @@ namespace DOTNET
             {
                 for (int i = 0; i < _dataGraph10Correction.Length; i+=3)
                 {
-                    if (_dataGraph10Correction[i] != BadPointConst)
+                    if ((ushort)_dataGraph10Correction[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list14.Add(timePoint[i], _dataGraph10Correction[i] - 32);
+                        list14.Add(_timePoint[i], _dataGraph10Correction[i] - 32);
                     }
                 }
             }
@@ -1318,7 +1299,7 @@ namespace DOTNET
                     if (_dataGraph3[i] != (ushort) BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list3.Add(timePoint[i], _dataGraph3[i] - 32);
+                        list3.Add(_timePoint[i], _dataGraph3[i] - 32);
                     }
                 }
             }
@@ -1333,7 +1314,7 @@ namespace DOTNET
                     if (_dataGraph5[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list5.Add(timePoint5[i], _dataGraph5[i] - 32);
+                        list5.Add(_timePoint5[i], _dataGraph5[i] - 32);
                     }
                 }
             }
@@ -1377,10 +1358,10 @@ namespace DOTNET
             {
                 for (int i = 0; i < _dataGraph7Limit.Length; i++)
                 {
-                    if (_dataGraph7Limit[i] != BadPointConst)
+                    if ((ushort)_dataGraph7Limit[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list11.Add(timePoint[i], _dataGraph7Limit[i] - 32);
+                        list11.Add(_timePoint[i], _dataGraph7Limit[i] - 32);
                     }
                 }
             }
@@ -1390,14 +1371,14 @@ namespace DOTNET
                 bool average = false;
                 for (int i = 0; i < _dataGraph9Averaged.Length; i++)
                 {
-                    if (_dataGraph9Averaged[i] != BadPointConst)
+                    if ((ushort)_dataGraph9Averaged[i] != BadPointConst)
                     {
                         if (_limitAverage)
                         {
                             if (average)
                             {
                                 // Отнимаем значение 33 для удобства отображения
-                                list13.Add(timePoint[i], ((_dataGraph9Averaged[i] - 32) + sum) / 2);
+                                list13.Add(_timePoint[i], ((_dataGraph9Averaged[i] - 32) + sum) / 2);
                                 average = !average;
                             }
                             else
@@ -1408,13 +1389,13 @@ namespace DOTNET
                         }
                         else
                         {
-                                list13.Add(timePoint[i], (_dataGraph9Averaged[i] - 32));
+                                list13.Add(_timePoint[i], (_dataGraph9Averaged[i] - 32));
                         }
                     }
                 }
             }
             //Графики инженерные
-            if (_engeneering == true)
+            if (_engeneering)
             {
                 // Создадим кривые 
                 LineItem curve3 = pane3.AddCurve("", list3, Color.Green, SymbolType.Diamond);
@@ -1455,10 +1436,10 @@ namespace DOTNET
             {
                 for (int i = 0; i < _dataGraph11Correction.Length; i+=3)
                 {
-                    if (_dataGraph11Correction[i] != BadPointConst)
+                    if ((ushort)_dataGraph11Correction[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list15.Add(timePoint[i], _dataGraph11Correction[i] - 32);
+                        list15.Add(_timePoint[i], _dataGraph11Correction[i] - 32);
                     }
                 }
             }
@@ -1484,7 +1465,7 @@ namespace DOTNET
         // Настройка параметров ZedGraph при инициализации
         public void graph_prop()
         {
-            ZedGraph.MasterPane masterPane = zedGraph.MasterPane;
+            MasterPane masterPane = zedGraph.MasterPane;
             zedGraph.IsSynchronizeXAxes = true;
             //zedGraph.IsSynchronizeYAxes = true;
             masterPane.PaneList.Clear();
@@ -1506,48 +1487,48 @@ namespace DOTNET
             pane3.YAxis.Title.Text = "Вертикаль \r\n Крен";
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
-            pane1.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane1.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane1.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane1.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane1.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane1.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane1.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane1.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane1.Legend.FontSpec.Size = legendFontSize;
+            pane1.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane1.Title.FontSpec.Size = mainTitleFontSize;
+            pane1.Title.FontSpec.Size = MainTitleFontSize;
             pane1.Title.FontSpec.IsUnderline = true;
             // Параметры шрифтов для графика 2
             // Установим размеры шрифтов для меток вдоль осей
-            pane2.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane2.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane2.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane2.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane2.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane2.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane2.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane2.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane2.Legend.FontSpec.Size = legendFontSize;
+            pane2.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane2.Title.FontSpec.Size = mainTitleFontSize;
+            pane2.Title.FontSpec.Size = MainTitleFontSize;
             pane2.Title.FontSpec.IsUnderline = true;
             // Параметры шрифтов для графика 3
             // Установим размеры шрифтов для меток вдоль осей
-            pane3.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane3.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane3.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane3.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane3.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane3.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane3.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane3.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane3.Legend.FontSpec.Size = legendFontSize;
+            pane3.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane3.Title.FontSpec.Size = mainTitleFontSize;
+            pane3.Title.FontSpec.Size = MainTitleFontSize;
             pane3.Title.FontSpec.IsUnderline = true;
 
 
@@ -1651,7 +1632,7 @@ namespace DOTNET
             pane3.Title.FontSpec.FontColor = Color.Green;
             pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
-            pane3.YAxis.Title.Text = "Вертикаль \r\n Крен"; ;
+            pane3.YAxis.Title.Text = "Вертикаль \r\n Крен";
 
             //pane1.YAxis.Title.Text = "Значение Амплитуды";
             //pane2.YAxis.Title.Text = "Значение Азимута\r\n";
@@ -1659,48 +1640,48 @@ namespace DOTNET
 
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
-            pane1.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane1.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane1.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane1.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane1.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane1.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane1.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane1.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane1.Legend.FontSpec.Size = legendFontSize;
+            pane1.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane1.Title.FontSpec.Size = mainTitleFontSize;
+            pane1.Title.FontSpec.Size = MainTitleFontSize;
             pane1.Title.FontSpec.IsUnderline = true;
             // Параметры шрифтов для графика 2
             // Установим размеры шрифтов для меток вдоль осей
-            pane2.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane2.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane2.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane2.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane2.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane2.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane2.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane2.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane2.Legend.FontSpec.Size = legendFontSize;
+            pane2.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane2.Title.FontSpec.Size = mainTitleFontSize;
+            pane2.Title.FontSpec.Size = MainTitleFontSize;
             pane2.Title.FontSpec.IsUnderline = true;
             // Параметры шрифтов для графика 3
             // Установим размеры шрифтов для меток вдоль осей
-            pane3.XAxis.Scale.FontSpec.Size = labelsXfontSize;
-            pane3.YAxis.Scale.FontSpec.Size = labelsYfontSize;
+            pane3.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
+            pane3.YAxis.Scale.FontSpec.Size = LabelsYfontSize;
 
             // Установим размеры шрифтов для подписей по осям
-            pane3.XAxis.Title.FontSpec.Size = titleXFontSize;
-            pane3.YAxis.Title.FontSpec.Size = titleYFontSize;
+            pane3.XAxis.Title.FontSpec.Size = TitleXFontSize;
+            pane3.YAxis.Title.FontSpec.Size = TitleYFontSize;
 
             // Установим размеры шрифта для легенды
-            pane3.Legend.FontSpec.Size = legendFontSize;
+            pane3.Legend.FontSpec.Size = LegendFontSize;
 
             // Установим размеры шрифта для общего заголовка
-            pane3.Title.FontSpec.Size = mainTitleFontSize;
+            pane3.Title.FontSpec.Size = MainTitleFontSize;
             pane3.Title.FontSpec.IsUnderline = true;
 
             ////
@@ -1769,7 +1750,7 @@ namespace DOTNET
 
                 TimeProcessing();
                 //+1 делается ввиду специфику округления в прграммирование для избежания выхода за пределы массива
-                _dataGraph = new ushort[possition_counter / 4 + 1];
+                _dataGraph = new ushort[_possitionCounter / 4 + 1];
                 for (int i = 0; i < _dataGraph.Length; i++)
                 {
                     _dataGraph[i] = (ushort) BadPointConst;
@@ -1787,62 +1768,62 @@ namespace DOTNET
                     _dataGraph3[i] = (ushort)BadPointConst;
                 }
 
-                if (possition_counter != 0)
+                if (_possitionCounter != 0)
                 {
                     // Формирование графиков
                     int k = 0;
                     int z = 0;
                     int u = 0;
                     int c = 0;
-                    byte error_packages_counter = 0;
-                    for (int i = 0; i < possition_counter; i += 4)
+                    byte errorPackagesCounter = 0;
+                    for (int i = 0; i < _possitionCounter; i += 4)
                     {
                         //Проверка стартового бита
-                        uint startByteCheck1 = responce[i] & MaskFirstByteLogicConst;
-                        uint startByteCheck2 = responce[i + 1] & MaskFirstByteLogicConst;
-                        uint startByteCheck3 = responce[i + 2] & MaskFirstByteLogicConst;
-                        uint startByteCheck4 = responce[i + 3] & MaskFirstByteLogicConst;
+                        uint startByteCheck1 = _responce[i] & MaskFirstByteLogicConst;
+                        uint startByteCheck2 = _responce[i + 1] & MaskFirstByteLogicConst;
+                        uint startByteCheck3 = _responce[i + 2] & MaskFirstByteLogicConst;
+                        uint startByteCheck4 = _responce[i + 3] & MaskFirstByteLogicConst;
 
                         if (startByteCheck1 != 0 && startByteCheck2 == 0 && startByteCheck3 == 0 && startByteCheck4 == 0)
                         {
                             _dataGraph[k] =
-                                Convert.ToUInt16(((responce[i] & MaskFirstByteConst) << 7) |
-                                                 (responce[i + 2] & MaskThirdByteConst));
+                                Convert.ToUInt16(((_responce[i] & MaskFirstByteConst) << 7) |
+                                                 (_responce[i + 2] & MaskThirdByteConst));
                             k++;
 
-                            switch (responce[i] & MaskResponceConst)
+                            switch (_responce[i] & MaskResponceConst)
                             {
                                 // 0x0
                                 case 0x00:
-                                    if (Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst) < 65)
-                                        _dataGraph2[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) < 65)
+                                        _dataGraph2[k] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 // 0x1
                                 case 0x10:
-                                    if (Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst) < 65)
-                                        _dataGraph3[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) < 65)
+                                        _dataGraph3[k] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 //0x2
                                 case 0x20:
-                                    if (Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst) < 65)
-                                        _dataGraph2[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) < 65)
+                                        _dataGraph2[k] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 //0x3
                                 case 0x30:
-                                    if (Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst) < 65)
-                                        _dataGraph3[k] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) < 65)
+                                        _dataGraph3[k] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
                                     break;
                                 // 0x4   (Служебный)
                                 case 0x40:
-                                    _dataGraph4[u] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint4[u] = timePoint[z];
+                                    _dataGraph4[u] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                    _timePoint4[u] = _timePoint[z];
                                     _dataGraphCounter4++;
                                     u++;
                                     break;
                                 // 0x5 (Крен)
                                 case 0x50:
-                                    _dataGraph5[c] = Convert.ToUInt16(responce[i + 1] & MaskSecondByteConst);
-                                    timePoint5[c] = timePoint[z];
+                                    _dataGraph5[c] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                    _timePoint5[c] = _timePoint[z];
                                     _dataGraphCounter5++;
                                     c++;
                                     break;
@@ -1851,23 +1832,23 @@ namespace DOTNET
                         }
                         else
                         {
-                            if (error_packages_counter == 4)
+                            if (errorPackagesCounter == 4)
                             {
                                 _dataGraph[k] = 0;
                                 k++;
-                                error_packages_counter = 0;
-                                error_counter++;
+                                errorPackagesCounter = 0;
+                                _errorCounter++;
                             }
-                            error_packages_counter++;
+                            errorPackagesCounter++;
                             i -= 3;
-                            error_counter_label.Text = "Errors:" + error_counter;
+                            error_counter_label.Text = "Errors:" + _errorCounter;
                         }
                     }
                     // Исправление ошибок графика амплитуда
                     // диапазон коррекции 0 to 1030
                     for (int i = 1; i < _dataGraph.Length; i++)
                     {
-                        if (_dataGraph[i] >= 0 && _dataGraph[i] <= 1030)
+                        if (_dataGraph[i] <= 1030)
                         {
                             _dataGraph[i] = _dataGraph[i - 1];
                         }
@@ -1881,14 +1862,14 @@ namespace DOTNET
                     graphThread.Name = "Graph draw thread (open file)";
                     graphThread.IsBackground = true;
                     graphThread.Start();
-                    timer30sec = 1;
+                    _timer30Sec = 1;
                 }
             }
             catch (Exception ex)
             {
                 Invoke(new MethodInvoker(delegate
                 {
-                    error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message + ex.StackTrace;
+                    error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message + ex.StackTrace;
                 }
                 ));
             }
@@ -1901,7 +1882,7 @@ namespace DOTNET
                 // Выбираем шапки экстремумов амплитуды
                 //Отсечка маленьких экстремумов с амплитудой меньше 1105
                 ushort amplMaxValue = ushort.MinValue;
-                croppedArray = new ushort[_dataGraph.Length];
+                _croppedArray = new ushort[_dataGraph.Length];
                 for (int i = 26; i < _dataGraph.Length - 26; i++)
                 {
                     if (_dataGraph[i] > amplMaxValue
@@ -1958,32 +1939,32 @@ namespace DOTNET
                     {
                         if (_dataGraph[i] > 1105)
                         {
-                            croppedArray[i] = _dataGraph[i];
+                            _croppedArray[i] = _dataGraph[i];
                             amplMaxValue = ushort.MinValue;
                         }
                     }
                 }
                 //Выделение памяти под массив лимитации
-                croppedArray2 = new ushort[croppedArray.Length];
+                _croppedArray2 = new ushort[_croppedArray.Length];
                 //Выделение диапазонов графика согласно мощности
                 //УРОВЕНЬ Лимитации задается здесь
                 // 1.2 = 80%, 2 = 50%
-                for (int i = 0; i < croppedArray.Length - 30; i++)
+                for (int i = 0; i < _croppedArray.Length - 30; i++)
                 {
-                    if (croppedArray[i] != 0)
+                    if (_croppedArray[i] != 0)
                     {
                         for (int j = i; j < i + 30; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((_croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
                             {
-                                croppedArray2[j] = _dataGraph[j];
+                                _croppedArray2[j] = _dataGraph[j];
                             }
                         }
                         for (int j = i - 30; j < i; j++)
                         {
-                            if ((_dataGraph[j] - 1100) >= ((croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
+                            if ((_dataGraph[j] - 1100) >= ((_croppedArray[i] - 1100) / 2.0)) //Double.Parse(cbLimitationLevel.Text)))
                             {
-                                croppedArray2[j] = _dataGraph[j];
+                                _croppedArray2[j] = _dataGraph[j];
                             }
                         }
                     }
@@ -2001,9 +1982,9 @@ namespace DOTNET
                     _dataGraph7Limit[i] = (ushort) BadPointConst;
                 }
                 //Формирование выборки точек лимитации на графиках 2 и 3
-                for (int i = 0; i < croppedArray2.Length; i++)
+                for (int i = 0; i < _croppedArray2.Length; i++)
                 {
-                    if (croppedArray2[i] != 0)
+                    if (_croppedArray2[i] != 0)
                     {
                         if (_dataGraph2[i] != 0)
                         {
@@ -2033,7 +2014,7 @@ namespace DOTNET
                 int dataSumAver1Counter = 0;
                 for (int i = 0; i < _dataGraph6Limit.Length; i++)
                 {
-                    if (_dataGraph6Limit[i] != BadPointConst)
+                    if ((ushort)_dataGraph6Limit[i] != BadPointConst)
                     {
                         dataSumAver1 += _dataGraph6Limit[i];
                         dataSumAver1Counter++;
@@ -2053,7 +2034,7 @@ namespace DOTNET
                 int dataSumAver2Counter = 0;
                 for (int i = 0; i < _dataGraph7Limit.Length; i++)
                 {
-                    if (_dataGraph7Limit[i] != BadPointConst)
+                    if ((ushort)_dataGraph7Limit[i] != BadPointConst)
                     {
                         dataSumAver2 += _dataGraph7Limit[i];
                         dataSumAver2Counter++;
@@ -2077,9 +2058,9 @@ namespace DOTNET
                     int counter1 = 0;
                     for (int i = 0; i < _dataGraph8Averaged.Length; i++)
                     {
-                        if (_dataGraph8Averaged[i] != BadPointConst)
+                        if ((ushort)_dataGraph8Averaged[i] != BadPointConst)
                         {
-                            if ((timePoint[i] - timePoint[counter1]) >= 15_000 || (timePoint[i] - timePoint[counter1]) <= 5_000)
+                            if ((_timePoint[i] - _timePoint[counter1]) >= 15_000 || (_timePoint[i] - _timePoint[counter1]) <= 5_000)
                             {
                                 _dataGraph8Averaged[counter1] = BadPointConst;
                             }
@@ -2091,9 +2072,9 @@ namespace DOTNET
                     int counter2 = 0;
                     for (int i = 0; i < _dataGraph9Averaged.Length; i++)
                     {
-                        if (_dataGraph9Averaged[i] != BadPointConst)
+                        if ((ushort)_dataGraph9Averaged[i] != BadPointConst)
                         {
-                            if ((timePoint[i] - timePoint[counter2]) >= 15_000 || (timePoint[i] - timePoint[counter1]) <= 5_000)
+                            if ((_timePoint[i] - _timePoint[counter2]) >= 15_000 || (_timePoint[i] - _timePoint[counter1]) <= 5_000)
                             {
                                 _dataGraph9Averaged[counter2] = BadPointConst;
                             }
@@ -2257,7 +2238,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -2267,37 +2248,38 @@ namespace DOTNET
         {
             try
             {
-                byte error_packages_counter = 0;
+                byte errorPackagesCounter = 0;
                 int j = 0;
-                if (swatch.ElapsedMilliseconds > 0)
+                if (_swatch.ElapsedMilliseconds > 0)
                 {
-                    timebuffer = Convert.ToUInt64(swatch.ElapsedMilliseconds * 1000); ;
-                    swatch.Reset();
+                    _timebuffer = Convert.ToUInt64(_swatch.ElapsedMilliseconds * 1000);
+                    _swatch.Reset();
                 }
-                for (int i = 0; i < possition_counter; i += 4)
+                for (int i = 0; i < _possitionCounter; i += 4)
                 {
-                    uint startByteCheck1 = responce[i] & MaskFirstByteLogicConst;
-                    uint startByteCheck2 = responce[i + 1] & MaskFirstByteLogicConst;
-                    uint startByteCheck3 = responce[i + 2] & MaskFirstByteLogicConst;
-                    uint startByteCheck4 = responce[i + 3] & MaskFirstByteLogicConst;
+                    uint startByteCheck1 = _responce[i] & MaskFirstByteLogicConst;
+                    uint startByteCheck2 = _responce[i + 1] & MaskFirstByteLogicConst;
+                    uint startByteCheck3 = _responce[i + 2] & MaskFirstByteLogicConst;
+                    uint startByteCheck4 = _responce[i + 3] & MaskFirstByteLogicConst;
                     {
                         if (startByteCheck1 != 0 && startByteCheck2 == 0 && startByteCheck3 == 0 && startByteCheck4 == 0)
                         {
-                            timePoint[j] = timebuffer;
-                            timebuffer += Convert.ToUInt64(responce[i + 3]);
+                            _timePoint[j] = _timebuffer;
+                            _timebuffer += Convert.ToUInt64(_responce[i + 3]);
                             j++;
                         }
                         else
                         {
                             Invoke((MethodInvoker)delegate
                             {
-                                error_counter_label.Text = "Errors:" + error_counter;
-                                if (error_packages_counter == 4)
+                                error_counter_label.Text = "Errors:" + _errorCounter;
+                                if (errorPackagesCounter == 4)
                                 {
-                                    error_packages_counter = 0;
-                                    error_counter++;
+                                    errorPackagesCounter = 0;
+                                    _errorCounter++;
                                 }
-                                error_packages_counter++;
+                                errorPackagesCounter++;
+                                // ReSharper disable once AccessToModifiedClosure
                                 i -= 3;
                             });
                         }
@@ -2308,7 +2290,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -2319,7 +2301,7 @@ namespace DOTNET
             try
             {
                 // Очистка всех существующих массивов в случае сбоя программы
-                Array.Clear(command, 0, command.Length);
+                Array.Clear(_command, 0, _command.Length);
 
                 if (_dataGraph != null)
                     Array.Clear(_dataGraph, 0, _dataGraph.Length);
@@ -2343,48 +2325,48 @@ namespace DOTNET
                     Array.Clear(_dataGraph10Correction, 0, _dataGraph10Correction.Length);
                 if (_dataGraph11Correction != null)
                     Array.Clear(_dataGraph11Correction, 0, _dataGraph11Correction.Length);
-                if (croppedArray != null)
-                    Array.Clear(croppedArray, 0, croppedArray.Length);
-                if (croppedArray2 != null)
-                    Array.Clear(croppedArray2, 0, croppedArray2.Length);
+                if (_croppedArray != null)
+                    Array.Clear(_croppedArray, 0, _croppedArray.Length);
+                if (_croppedArray2 != null)
+                    Array.Clear(_croppedArray2, 0, _croppedArray2.Length);
 
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0, _dataGraph11ServiceLimitation.Length);
-                Array.Clear(responce, 0, responce.Length);
-                Array.Clear(timePoint, 0, timePoint.Length);
-                Array.Clear(timePoint4, 0, timePoint4.Length);
-                Array.Clear(timePoint5, 0, timePoint5.Length);
-                Array.Clear(timePoint10ServiceLimitation, 0, timePoint10ServiceLimitation.Length);
-                Array.Clear(timePoint11ServiceLimitation, 0, timePoint11ServiceLimitation.Length);
+                Array.Clear(_responce, 0, _responce.Length);
+                Array.Clear(_timePoint, 0, _timePoint.Length);
+                Array.Clear(_timePoint4, 0, _timePoint4.Length);
+                Array.Clear(_timePoint5, 0, _timePoint5.Length);
+                Array.Clear(_timePoint10ServiceLimitation, 0, _timePoint10ServiceLimitation.Length);
+                Array.Clear(_timePoint11ServiceLimitation, 0, _timePoint11ServiceLimitation.Length);
 
                 // Очистка вспомогательных переменных
                 _scanningstatus = false;
                 dataResiveProgressBar.Value = 1;
                 dataResiveProgressBar.Visible = false;
-                _timer_counter = 0;
-                possition_counter = 0;
+                _timerCounter = 0;
+                _possitionCounter = 0;
                 _dataGraphCounter4 = 0;
                 _dataGraphCounter5 = 0;
-                timebuffer = 0;
-                timer30sec = 1;
+                _timebuffer = 0;
+                _timer30Sec = 1;
 
                 // Если есть что удалять
-                if (pane1.CurveList.Count > 0)
+                if (_pane1.CurveList.Count > 0)
                 {
                     // Удалим все кривые
-                    pane1.CurveList.Clear();
+                    _pane1.CurveList.Clear();
                     // Синхронизация графиков по масштабам оси Х и Y
-                    pane1.XAxis.Scale.Min = XScaleMin;
-                    pane1.XAxis.Scale.Max = XScaleMax;
+                    _pane1.XAxis.Scale.Min = XScaleMin;
+                    _pane1.XAxis.Scale.Max = XScaleMax;
                 }
-                if (pane2.CurveList.Count > 0 && pane3.CurveList.Count > 0)
+                if (_pane2.CurveList.Count > 0 && _pane3.CurveList.Count > 0)
                 {
-                    pane2.CurveList.Clear();
-                    pane3.CurveList.Clear();
-                    pane2.XAxis.Scale.Min = XScaleMin;
-                    pane3.XAxis.Scale.Min = XScaleMin;
-                    pane2.XAxis.Scale.Max = XScaleMax;
-                    pane3.XAxis.Scale.Max = XScaleMax;
+                    _pane2.CurveList.Clear();
+                    _pane3.CurveList.Clear();
+                    _pane2.XAxis.Scale.Min = XScaleMin;
+                    _pane3.XAxis.Scale.Min = XScaleMin;
+                    _pane2.XAxis.Scale.Max = XScaleMax;
+                    _pane3.XAxis.Scale.Max = XScaleMax;
                 }
 
                 // Обновим график
@@ -2401,7 +2383,7 @@ namespace DOTNET
             {
                 Invoke(new MethodInvoker(delegate
                     {
-                        error_TextBox.Text += "\r\n [" + System.DateTime.Now + "]" + ex.Message;
+                        error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + ex.Message;
                     }
                 ));
             }
@@ -2409,19 +2391,18 @@ namespace DOTNET
         //! Таймер
         private void timerCount_Tick(object sender, EventArgs e)
         {
-            dataResiveCounterTest_label.Text = "Packages per sec: " + (_timer_counter).ToString();
-            packages_counter_label.Text = "Bytes resived: " + possition_counter.ToString();
-            _timer_counter = 0;
+            dataResiveCounterTest_label.Text = "Packages per sec: " + (_timerCounter);
+            packages_counter_label.Text = "Bytes resived: " + _possitionCounter;
+            _timerCounter = 0;
             if (_scanningstatus)
             {
                 dataResiveProgressBar.PerformStep();
-                timer30sec++;
+                _timer30Sec++;
             }
-            if (timer30sec == 30)
+            if (_timer30Sec == 30)
             {
-                swatch.Stop();
-                Thread dataThread = new Thread(DataProcessing);
-                dataThread.IsBackground = true;
+                _swatch.Stop();
+                Thread dataThread = new Thread(DataProcessing) {IsBackground = true};
                 dataThread.Start();
             }
         }
@@ -2431,19 +2412,19 @@ namespace DOTNET
         //Выделение точки для измерений
         private void zedGraph_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (checkBoxMeasuring.Checked == true)
+            if (checkBoxMeasuring.Checked)
             {
-                if (rbtnMeasureGraph1.Checked == true)
+                if (rbtnMeasureGraph1.Checked)
                 {
                     DistinguishPointGraph1(e);
                 }
                 else
-                    if (rbtnMeasureGraph2.Checked == true)
+                    if (rbtnMeasureGraph2.Checked)
                     {
                         DistinguishPointGraph2(e);
                     }
                     else
-                        if (rbtnMeasureGraph3.Checked == true)
+                        if (rbtnMeasureGraph3.Checked)
                         {
                             DistinguishPointGraph3(e);
                         }
@@ -2453,7 +2434,7 @@ namespace DOTNET
         //Отрисовка выделенной точки на графике 1 для измерений
         private void DistinguishPointGraph1(MouseEventArgs e)
         {
-            if (measPoint1Flag || measPoint2Flag)
+            if (_measPoint1Flag || _measPoint2Flag)
             {
                 // Сюда будет сохранена кривая, рядом с которой был произведен клик
                 CurveItem curve;
@@ -2465,21 +2446,21 @@ namespace DOTNET
                 // при котором еще считается, что клик попал в окрестность кривой.
                 GraphPane.Default.NearestTol = 10;
 
-                bool result = pane1.FindNearestPoint(e.Location, out curve, out index);
+                bool result = _pane1.FindNearestPoint(e.Location, out curve, out index);
 
                 if (result)
                 {
                     // Максимально расстояние от точки клика до кривой не превысило NearestTol
 
                     // Добавим точку на график, вблизи которой произошел клик
-                    PointPairList point = new PointPairList();
+                    // ReSharper disable once ObjectCreationAsStatement
+                    new PointPairList {curve[index]};
 
-                    point.Add(curve[index]);
 
                     // Кривая, состоящая из одной точки. Точка будет отмечена синим кругом
-                    LineItem curvePount = pane1.AddCurve("",
-                        new double[] { curve[index].X },
-                        new double[] { curve[index].Y },
+                    LineItem curvePount = _pane1.AddCurve("",
+                        new [] { curve[index].X },
+                        new [] { curve[index].Y },
                         Color.Blue,
                         SymbolType.Circle);
 
@@ -2495,21 +2476,21 @@ namespace DOTNET
                     // Размер круга
                     curvePount.Symbol.Size = 20;
 
-                    if (measPoint1Flag)
+                    if (_measPoint1Flag)
                     {
-                        curveToDelete1 = curvePount;
-                        measPointX1 = curve[index].X;
-                        measPointY1 = curve[index].Y;
-                        measPoint1Flag = false;
+                        _curveToDelete1 = curvePount;
+                        _measPointX1 = curve[index].X;
+                        _measPointY1 = curve[index].Y;
+                        _measPoint1Flag = false;
                     }
                     else
                     {
-                        curveToDelete2 = curvePount;
-                        measPointX2 = curve[index].X;
-                        measPointY2 = curve[index].Y;
-                        measPoint2Flag = false;
-                        tbTimeCounted.Text = Math.Abs((measPointX2 - measPointX1) / 1000000).ToString("F6");
-                        tbYCounted.Text = Math.Abs((measPointY2 - measPointY1)).ToString("F2");
+                        _curveToDelete2 = curvePount;
+                        _measPointX2 = curve[index].X;
+                        _measPointY2 = curve[index].Y;
+                        _measPoint2Flag = false;
+                        tbTimeCounted.Text = Math.Abs((_measPointX2 - _measPointX1) / 1000000).ToString("F6");
+                        tbYCounted.Text = Math.Abs((_measPointY2 - _measPointY1)).ToString("F2");
                     }
 
                 }
@@ -2518,7 +2499,7 @@ namespace DOTNET
         //Отрисовка выделенной точки на графике 2 для измерений
         private void DistinguishPointGraph2(MouseEventArgs e)
         {
-            if (measPoint1Flag || measPoint2Flag)
+            if (_measPoint1Flag || _measPoint2Flag)
             {
                 // Сюда будет сохранена кривая, рядом с которой был произведен клик
                 CurveItem curve;
@@ -2530,7 +2511,7 @@ namespace DOTNET
                 // при котором еще считается, что клик попал в окрестность кривой.
                 GraphPane.Default.NearestTol = 10;
 
-                bool result = pane2.FindNearestPoint(e.Location, out curve, out index);
+                bool result = _pane2.FindNearestPoint(e.Location, out curve, out index);
 
                 if (result)
                 {
@@ -2542,9 +2523,9 @@ namespace DOTNET
                     point.Add(curve[index]);
 
                     // Кривая, состоящая из одной точки. Точка будет отмечена синим кругом
-                    LineItem curvePount = pane2.AddCurve("",
-                        new double[] { curve[index].X },
-                        new double[] { curve[index].Y },
+                    LineItem curvePount = _pane2.AddCurve("",
+                        new [] { curve[index].X },
+                        new [] { curve[index].Y },
                         Color.Blue,
                         SymbolType.Circle);
 
@@ -2560,21 +2541,21 @@ namespace DOTNET
                     // Размер круга
                     curvePount.Symbol.Size = 20;
 
-                    if (measPoint1Flag)
+                    if (_measPoint1Flag)
                     {
-                        curveToDelete1 = curvePount;
-                        measPointX1 = curve[index].X;
-                        measPointY1 = curve[index].Y;
-                        measPoint1Flag = false;
+                        _curveToDelete1 = curvePount;
+                        _measPointX1 = curve[index].X;
+                        _measPointY1 = curve[index].Y;
+                        _measPoint1Flag = false;
                     }
                     else
                     {
-                        curveToDelete2 = curvePount;
-                        measPointX2 = curve[index].X;
-                        measPointY2 = curve[index].Y;
-                        measPoint2Flag = false;
-                        tbTimeCounted.Text = Math.Abs((measPointX2 - measPointX1) / 1000000).ToString("F6");
-                        tbYCounted.Text = Math.Abs((measPointY2 - measPointY1)).ToString("F2");
+                        _curveToDelete2 = curvePount;
+                        _measPointX2 = curve[index].X;
+                        _measPointY2 = curve[index].Y;
+                        _measPoint2Flag = false;
+                        tbTimeCounted.Text = Math.Abs((_measPointX2 - _measPointX1) / 1000000).ToString("F6");
+                        tbYCounted.Text = Math.Abs((_measPointY2 - _measPointY1)).ToString("F2");
                     }
 
                 }
@@ -2583,7 +2564,7 @@ namespace DOTNET
         //Отрисовка выделенной точки на графике 3 для измерений
         private void DistinguishPointGraph3(MouseEventArgs e)
         {
-            if (measPoint1Flag || measPoint2Flag)
+            if (_measPoint1Flag || _measPoint2Flag)
             {
                 // Сюда будет сохранена кривая, рядом с которой был произведен клик
                 CurveItem curve;
@@ -2595,7 +2576,7 @@ namespace DOTNET
                 // при котором еще считается, что клик попал в окрестность кривой.
                 GraphPane.Default.NearestTol = 10;
 
-                bool result = pane3.FindNearestPoint(e.Location, out curve, out index);
+                bool result = _pane3.FindNearestPoint(e.Location, out curve, out index);
 
                 if (result)
                 {
@@ -2607,9 +2588,9 @@ namespace DOTNET
                     point.Add(curve[index]);
 
                     // Кривая, состоящая из одной точки. Точка будет отмечена синим кругом
-                    LineItem curvePount = pane3.AddCurve("",
-                        new double[] { curve[index].X },
-                        new double[] { curve[index].Y },
+                    LineItem curvePount = _pane3.AddCurve("",
+                        new [] { curve[index].X },
+                        new [] { curve[index].Y },
                         Color.Blue,
                         SymbolType.Circle);
 
@@ -2625,21 +2606,21 @@ namespace DOTNET
                     // Размер круга
                     curvePount.Symbol.Size = 20;
 
-                    if (measPoint1Flag)
+                    if (_measPoint1Flag)
                     {
-                        curveToDelete1 = curvePount;
-                        measPointX1 = curve[index].X;
-                        measPointY1 = curve[index].Y;
-                        measPoint1Flag = false;
+                        _curveToDelete1 = curvePount;
+                        _measPointX1 = curve[index].X;
+                        _measPointY1 = curve[index].Y;
+                        _measPoint1Flag = false;
                     }
                     else
                     {
-                        curveToDelete2 = curvePount;
-                        measPointX2 = curve[index].X;
-                        measPointY2 = curve[index].Y;
-                        measPoint2Flag = false;
-                        tbTimeCounted.Text = Math.Abs((measPointX2 - measPointX1) / 1000000).ToString("F6");
-                        tbYCounted.Text = Math.Abs((measPointY2 - measPointY1)).ToString("F2");
+                        _curveToDelete2 = curvePount;
+                        _measPointX2 = curve[index].X;
+                        _measPointY2 = curve[index].Y;
+                        _measPoint2Flag = false;
+                        tbTimeCounted.Text = Math.Abs((_measPointX2 - _measPointX1) / 1000000).ToString("F6");
+                        tbYCounted.Text = Math.Abs((_measPointY2 - _measPointY1)).ToString("F2");
                     }
 
                 }
@@ -2650,34 +2631,31 @@ namespace DOTNET
         {
             try
             {
-                if (rbtnMeasureGraph1.Checked == true)
+                if (rbtnMeasureGraph1.Checked)
                 {
-                    pane1.CurveList.Remove(curveToDelete1);
-                    pane1.CurveList.Remove(curveToDelete2);
+                    _pane1.CurveList.Remove(_curveToDelete1);
+                    _pane1.CurveList.Remove(_curveToDelete2);
                 }
 
-                if (rbtnMeasureGraph2.Checked == true)
+                if (rbtnMeasureGraph2.Checked)
                 {
-                    pane2.CurveList.Remove(curveToDelete1);
-                    pane2.CurveList.Remove(curveToDelete2);
+                    _pane2.CurveList.Remove(_curveToDelete1);
+                    _pane2.CurveList.Remove(_curveToDelete2);
                 }
 
-                if (rbtnMeasureGraph3.Checked == true)
+                if (rbtnMeasureGraph3.Checked)
                 {
-                    pane3.CurveList.Remove(curveToDelete1);
-                    pane3.CurveList.Remove(curveToDelete2);
+                    _pane3.CurveList.Remove(_curveToDelete1);
+                    _pane3.CurveList.Remove(_curveToDelete2);
                 }
 
-            }
-            catch
-            {
             }
             finally
             {
-                measPointX1 = 0;
-                measPointX2 = 0;
-                measPoint1Flag = true;
-                measPoint2Flag = true;
+                _measPointX1 = 0;
+                _measPointX2 = 0;
+                _measPoint1Flag = true;
+                _measPoint2Flag = true;
                 zedGraph.Invalidate();
                 tbTimeCounted.Text = ""; 
                 tbYCounted.Text = "";
@@ -2686,7 +2664,7 @@ namespace DOTNET
         //Разрешить измерение времени
         private void checkBoxMeasuring_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxMeasuring.Checked == true)
+            if (checkBoxMeasuring.Checked)
             {
                 if(_amplShow)
                 rbtnMeasureGraph1.Enabled = true;

@@ -3,7 +3,7 @@ using System.Windows.Forms;
 // ReSharper disable All
 
 
-namespace DOTNET
+namespace BVKGraph
 {
     static class Program
     {

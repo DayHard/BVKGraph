@@ -1,4 +1,4 @@
-﻿namespace DOTNET
+﻿namespace BVKGraph
 {
     partial class WorkForm
     {
