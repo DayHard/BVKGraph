@@ -116,6 +116,7 @@
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.syncstatus_label = new System.Windows.Forms.Label();
             this.timeGraphName_label = new System.Windows.Forms.Label();
+            this.cbShowExtrems = new System.Windows.Forms.CheckBox();
             this.graph_groupBox.SuspendLayout();
             this.control_groupBox.SuspendLayout();
             this.com_tabControl.SuspendLayout();
@@ -755,6 +756,7 @@
             // 
             // measure_tabPage
             // 
+            this.measure_tabPage.Controls.Add(this.cbShowExtrems);
             this.measure_tabPage.Controls.Add(this.labLimitationLevel);
             this.measure_tabPage.Controls.Add(this.cbLimitationLevel);
             this.measure_tabPage.Controls.Add(this.cbAdmission);
@@ -805,7 +807,7 @@
             // cbAdmission
             // 
             this.cbAdmission.AutoSize = true;
-            this.cbAdmission.Location = new System.Drawing.Point(300, 18);
+            this.cbAdmission.Location = new System.Drawing.Point(305, 18);
             this.cbAdmission.Name = "cbAdmission";
             this.cbAdmission.Size = new System.Drawing.Size(90, 17);
             this.cbAdmission.TabIndex = 52;
@@ -1037,6 +1039,16 @@
             this.timeGraphName_label.TabIndex = 50;
             this.timeGraphName_label.Text = "Время, с";
             // 
+            // cbShowExtrems
+            // 
+            this.cbShowExtrems.AutoSize = true;
+            this.cbShowExtrems.Location = new System.Drawing.Point(305, 38);
+            this.cbShowExtrems.Name = "cbShowExtrems";
+            this.cbShowExtrems.Size = new System.Drawing.Size(91, 17);
+            this.cbShowExtrems.TabIndex = 55;
+            this.cbShowExtrems.Text = "Экстремумы";
+            this.cbShowExtrems.UseVisualStyleBackColor = true;
+            // 
             // WorkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1168,6 +1180,7 @@
         private System.Windows.Forms.Button btnFilter;
         private System.Windows.Forms.ComboBox cbLimitationLevel;
         private System.Windows.Forms.Label labLimitationLevel;
+        private System.Windows.Forms.CheckBox cbShowExtrems;
     }
 }
 

@@ -1061,20 +1061,19 @@ namespace BVKGraph
 
             pane1.Legend.FontSpec.Size = 7;
 
-            // Создадим список точек=> График номер 1
-            PointPairList list2 = new PointPairList();
+            if (cbShowExtrems.Checked)
             {
-                for (int i = 0; i < _croppedArray.Length; i++)
+                // Создадим список точек=> График номер 1
+                PointPairList list2 = new PointPairList();
                 {
-                    if (_croppedArray[i] != 0)
+                    for (int i = 0; i < _croppedArray.Length; i++)
                     {
-                        list2.Add(_timePoint[i], (Convert.ToDouble(_croppedArray[i])) - 1100); // / 10);
+                        if (_croppedArray[i] != 0)
+                        {
+                            list2.Add(_timePoint[i], (Convert.ToDouble(_croppedArray[i])) - 1100); // / 10);
+                        }
                     }
                 }
-            }
-
-            if (_engeneering)
-            {
                 // Создадим кривые ЭКСТРЕМУМОВ 
                 LineItem curve2 = pane1.AddCurve("", list2, Color.Red, SymbolType.Circle);
                 // У кривой линия будет невидимой
@@ -1087,22 +1086,17 @@ namespace BVKGraph
                 curve2.Symbol.Size = 15;
                 // Линия невидимая
                 curve2.Line.IsVisible = false;
-            }
-
-            // Точки лимитации
-            PointPairList list3 = new PointPairList();
-            {
-                for (int i = 0; i < _croppedArray2.Length; i++)
+                // Точки лимитации
+                PointPairList list3 = new PointPairList();
                 {
-                    if (_croppedArray2[i] != 0)
+                    for (int i = 0; i < _croppedArray2.Length; i++)
                     {
-                        list3.Add(_timePoint[i], (Convert.ToDouble(_croppedArray2[i])) - 1100); // / 10);
+                        if (_croppedArray2[i] != 0)
+                        {
+                            list3.Add(_timePoint[i], (Convert.ToDouble(_croppedArray2[i])) - 1100); // / 10);
+                        }
                     }
                 }
-            }
-
-            if (_engeneering)
-            {
                 // Точки лимитации
                 LineItem curve3 = pane1.AddCurve("", list3, Color.Green, SymbolType.Circle);
                 // У кривой линия будет невидимой
