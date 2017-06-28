@@ -1940,7 +1940,8 @@ namespace BVKGraph
                 }
                 //Выделение диапазонов графика согласно мощности
                 //Фильтрация в пределах 16-ти точек
-                double sumPower = 0;
+                // 20% от максимального значения
+                double maxValue = 0;
                 int counterPower = 0;
                 int startPossition = 0;
                 for (int i = 0; i < _croppedArray.Length; i++)
@@ -1949,26 +1950,60 @@ namespace BVKGraph
                     {
                         if (counterPower != 16)
                         {
-                            sumPower += _croppedArray[i] - 1100;
-                            counterPower++;
+                            if (maxValue < _croppedArray[i] - 1100)
+                            {
+                                maxValue = _croppedArray[i] - 1100;
+                            }                        
                         }
                         else
                         {
                             //Задает уровень учитываеммой мощности
-                            sumPower = sumPower / counterPower * 0.2;
+                            // 0.3 -  30% от максимального значения(порог отсечения)
+                            maxValue *= 0.3;
                             for (int j = startPossition; j < i; j++)
                             {
-                                if (sumPower > _croppedArray[j] - 1100 && _croppedArray[j] != 0)
+                                if (maxValue >= _croppedArray[j] - 1100 && _croppedArray[j] != 0)
                                 {
                                     _croppedArray[j] = 0;
                                 }
                             }
-                            sumPower = 0;
+                            maxValue = 0;
                             counterPower = 0;
                             startPossition = i;
                         }
+                        counterPower++;
                     }
                 }
+                //Нахождение среднего
+                //double sumPower = 0;
+                //int counterPower = 0;
+                //int startPossition = 0;
+                //for (int i = 0; i < _croppedArray.Length; i++)
+                //{
+                //    if (_croppedArray[i] != 0)
+                //    {
+                //        if (counterPower != 16)
+                //        {
+                //            sumPower += _croppedArray[i] - 1100;
+                //            counterPower++;
+                //        }
+                //        else
+                //        {
+                //            //Задает уровень учитываеммой мощности
+                //            sumPower = sumPower / counterPower * 0.2;
+                //            for (int j = startPossition; j < i; j++)
+                //            {
+                //                if (sumPower > _croppedArray[j] - 1100 && _croppedArray[j] != 0)
+                //                {
+                //                    _croppedArray[j] = 0;
+                //                }
+                //            }
+                //            sumPower = 0;
+                //            counterPower = 0;
+                //            startPossition = i;
+                //        }
+                //    }
+                //}
                 //Выделение памяти под массив лимитации
                 _croppedArray2 = new ushort[_croppedArray.Length];
                 //Выделение диапазонов графика согласно мощности
