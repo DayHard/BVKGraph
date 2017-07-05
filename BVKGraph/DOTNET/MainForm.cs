@@ -2111,7 +2111,7 @@ namespace BVKGraph
                 }
                 // Возможность отключения Фильтра
                 // Значение времени 10_000
-                if (_filter)
+                if (false)//_filter)
                 {
                     //Фильтрация ошибочных точек График 1
                     int counter1 = 0;
@@ -2141,6 +2141,27 @@ namespace BVKGraph
                         }
                     }
                 }
+                // Попытка реализации пункта 3 задания от 27.06
+                //значение переменной _filter изменено на false
+                //int l = 0;
+                //for (int i = 0; i < _timePoint.Length; i++)
+                //{
+                //    if (_timePoint[l] - _timePoint[i] >= 200_000)
+                //    {
+                //        double sum = 0;
+                //        int counter = 0;
+                //        for (int j = l; j < i; j++)
+                //        {
+                //            if (_dataGraph[j] > 0 && _dataGraph2[j] != BadPointConst)
+                //            {
+                //                sum += _dataGraph2[j];
+                //                counter++;
+                //            }
+                //        }
+                //        _dataGraph8Averaged[i] = (sum / counter);
+                //        l = i;
+                //    }
+                //} 
                 //Формирование графиков коррекции график 1
                 _dataGraph10Correction = new double[_dataGraph2.Length];
                 for (int i = 0; i < _dataGraph10Correction.Length; i++)
