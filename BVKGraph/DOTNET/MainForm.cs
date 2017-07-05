@@ -1147,7 +1147,6 @@ namespace BVKGraph
             //Лист точек для допуска
             PointPairList list8 = new PointPairList();
             {
-
                 list8.Add(35_000_000, 8.15D);
                 list8.Add(2_000_000, 8.15D);
                 list8.Add(1_000_000, 4.07D);
@@ -1181,7 +1180,10 @@ namespace BVKGraph
                 curve2.Symbol.Size = 7;
                 // Линия невидимая
                 curve2.Line.IsVisible = false;
-
+            }
+            //Экстремумы
+            if (cbShowExtrems.Checked)
+            {
                 LineItem curve10 = pane2.AddCurve("", list10, Color.Red, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
                 curve10.Symbol.Fill.Color = Color.Red;
@@ -1192,6 +1194,7 @@ namespace BVKGraph
                 // Линия невидимая
                 curve10.Line.IsVisible = false;
             }
+           
             //Служебный режим где виден только служебный кадр
             if (_service)
             {
@@ -1401,7 +1404,9 @@ namespace BVKGraph
                 curve3.Symbol.Size = 7;
                 // Линия невидимая
                 curve3.Line.IsVisible = false;
-
+            }
+            if (cbShowExtrems.Checked)
+            {
                 LineItem curve11 = pane3.AddCurve("", list11, Color.Red, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
                 curve11.Symbol.Fill.Color = Color.Red;
@@ -1411,8 +1416,8 @@ namespace BVKGraph
                 curve11.Symbol.Size = 15;
                 // Линия невидимая
                 curve11.Line.IsVisible = false;
-                // Лимитация
             }
+            // Лимитация
             //График лимитации
             if (_limitation)
             {
