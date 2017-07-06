@@ -2147,46 +2147,65 @@ namespace BVKGraph
                         }
                     }
                 }
-                // Попытка реализации пункта 3 задания от 27.06
-                //значение переменной _filter изменено на false
-                //int l = 0;
-                //for (int i = 0; i < _dataGraph2.Length; i++)
-                //{
-                //    if (_timePoint[l] - _timePoint[i] >= 200_000)
-                //    {
-                //        double sum = 0;
-                //        int counter = 0;
-                //        for (int j = l; j < i; j++)
-                //        {
-                //            if (_dataGraph[j] > 0 && _dataGraph2[j] != BadPointConst && (short)_dataGraph8Averaged[j] == BadPointConst)
-                //            {
-                //                sum += _dataGraph2[j];
-                //                counter++;
-                //            }
-                //        }
-                //        _dataGraph8Averaged[i] = (sum / counter);
-                //        l = i;
-                //    }
-                //}
-                //int l = 0;
-                //for (int i = 0; i < _timePoint.Length; i++)
-                //{
-                //    if (_timePoint[l] - _timePoint[i] >= 200_000)
-                //    {
-                //        double sum = 0;
-                //        int counter = 0;
-                //        for (int j = l; j < i; j++)
-                //        {
-                //            if (_dataGraph[j] > 0 && _dataGraph2[j] != BadPointConst)
-                //            {
-                //                sum += _dataGraph2[j];
-                //                counter++;
-                //            }
-                //        }
-                //        _dataGraph8Averaged[i] = (sum / counter);
-                //        l = i;
-                //    }
-                //}
+                // Отрисовка дополнительной лимитации
+                int l = 0;
+                for (int i = 0; i < _dataGraph2.Length; i++)
+                {
+                    if (_timePoint[i] - _timePoint[l] >= 200_000)
+                    {
+                        //Для лимитации 1
+                        double sum1 = 0;
+                        int counter1 = 0;
+                        bool cycle1 = true;
+                        for (int j = l; j < i; j++)
+                        {
+                            if ((short)_dataGraph8Averaged[j] == BadPointConst)
+                            {
+                                if (_dataGraph[j] > 0 && _dataGraph2[j] != BadPointConst)
+                                {
+                                    sum1 += _dataGraph2[j];
+                                    counter1++;
+                                }
+                            }
+                            else
+                            {
+                                cycle1 = false;
+                                break;
+                            }
+                        }
+                        if (cycle1 && counter1 != 0)
+                        {
+                            _dataGraph8Averaged[l] = (sum1 / counter1);
+                            _dataGraph8Averaged[l + 1] = (sum1 / counter1);
+                        }
+                        //Для лимитации 2
+                        double sum2 = 0;
+                        int counter2 = 0;
+                        bool cycle2 = true;
+                        for (int j = l; j < i; j++)
+                        {
+                            if ((short)_dataGraph9Averaged[j] == BadPointConst)
+                            {
+                                if (_dataGraph[j] > 0 && _dataGraph3[j] != BadPointConst)
+                                {
+                                    sum2 += _dataGraph3[j];
+                                    counter2++;
+                                }
+                            }
+                            else
+                            {
+                                cycle2 = false;
+                                break;
+                            }
+                        }
+                        if (cycle2 && counter2 != 0)
+                        {
+                            _dataGraph9Averaged[l] = (sum2 / counter2);
+                            _dataGraph9Averaged[l + 1] = (sum2 / counter2);
+                        }
+                        l = i;
+                    }
+                }
                 //Формирование графиков коррекции график 1
                 _dataGraph10Correction = new double[_dataGraph2.Length];
                 for (int i = 0; i < _dataGraph10Correction.Length; i++)
