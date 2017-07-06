@@ -69,6 +69,7 @@
             this.graph_groupBox = new System.Windows.Forms.GroupBox();
             this.btnResetGraph = new System.Windows.Forms.Button();
             this.control_groupBox = new System.Windows.Forms.GroupBox();
+            this.btnExtremsShow = new System.Windows.Forms.Button();
             this.btnServiceMode = new System.Windows.Forms.Button();
             this.Sync_checkBox = new System.Windows.Forms.CheckBox();
             this.com_tabControl = new System.Windows.Forms.TabControl();
@@ -116,7 +117,6 @@
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.syncstatus_label = new System.Windows.Forms.Label();
             this.timeGraphName_label = new System.Windows.Forms.Label();
-            this.cbShowExtrems = new System.Windows.Forms.CheckBox();
             this.graph_groupBox.SuspendLayout();
             this.control_groupBox.SuspendLayout();
             this.com_tabControl.SuspendLayout();
@@ -385,7 +385,7 @@
             // 
             this.engineeringmode_button.Location = new System.Drawing.Point(223, 17);
             this.engineeringmode_button.Name = "engineeringmode_button";
-            this.engineeringmode_button.Size = new System.Drawing.Size(75, 52);
+            this.engineeringmode_button.Size = new System.Drawing.Size(75, 23);
             this.engineeringmode_button.TabIndex = 34;
             this.engineeringmode_button.Text = "Инженер.";
             this.engineeringmode_button.UseVisualStyleBackColor = true;
@@ -503,6 +503,7 @@
             // 
             // control_groupBox
             // 
+            this.control_groupBox.Controls.Add(this.btnExtremsShow);
             this.control_groupBox.Controls.Add(this.btnServiceMode);
             this.control_groupBox.Controls.Add(this.Sync_checkBox);
             this.control_groupBox.Controls.Add(this.stopbvk_button);
@@ -521,6 +522,16 @@
             this.control_groupBox.TabIndex = 44;
             this.control_groupBox.TabStop = false;
             this.control_groupBox.Text = "Управление";
+            // 
+            // btnExtremsShow
+            // 
+            this.btnExtremsShow.Location = new System.Drawing.Point(223, 46);
+            this.btnExtremsShow.Name = "btnExtremsShow";
+            this.btnExtremsShow.Size = new System.Drawing.Size(75, 23);
+            this.btnExtremsShow.TabIndex = 52;
+            this.btnExtremsShow.Text = "Экстрем.";
+            this.btnExtremsShow.UseVisualStyleBackColor = true;
+            this.btnExtremsShow.Click += new System.EventHandler(this.btnExtremsShow_Click);
             // 
             // btnServiceMode
             // 
@@ -756,7 +767,6 @@
             // 
             // measure_tabPage
             // 
-            this.measure_tabPage.Controls.Add(this.cbShowExtrems);
             this.measure_tabPage.Controls.Add(this.labLimitationLevel);
             this.measure_tabPage.Controls.Add(this.cbLimitationLevel);
             this.measure_tabPage.Controls.Add(this.cbAdmission);
@@ -1039,16 +1049,6 @@
             this.timeGraphName_label.TabIndex = 50;
             this.timeGraphName_label.Text = "Время, с";
             // 
-            // cbShowExtrems
-            // 
-            this.cbShowExtrems.AutoSize = true;
-            this.cbShowExtrems.Location = new System.Drawing.Point(305, 38);
-            this.cbShowExtrems.Name = "cbShowExtrems";
-            this.cbShowExtrems.Size = new System.Drawing.Size(91, 17);
-            this.cbShowExtrems.TabIndex = 55;
-            this.cbShowExtrems.Text = "Экстремумы";
-            this.cbShowExtrems.UseVisualStyleBackColor = true;
-            // 
             // WorkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1180,7 +1180,7 @@
         private System.Windows.Forms.Button btnFilter;
         private System.Windows.Forms.ComboBox cbLimitationLevel;
         private System.Windows.Forms.Label labLimitationLevel;
-        private System.Windows.Forms.CheckBox cbShowExtrems;
+        private System.Windows.Forms.Button btnExtremsShow;
     }
 }
 

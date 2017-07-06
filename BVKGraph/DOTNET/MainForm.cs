@@ -113,6 +113,7 @@ namespace BVKGraph
         private bool _correction;
         private bool _limitAverage = true;
         private bool _filter = true;
+        private bool _extrems = false;
 
         //Флаг точек
         private bool _measPoint1Flag = true;
@@ -1061,7 +1062,7 @@ namespace BVKGraph
 
             pane1.Legend.FontSpec.Size = 7;
 
-            if (cbShowExtrems.Checked)
+            if (_extrems)
             {
                 // Создадим список точек=> График номер 1
                 PointPairList list2 = new PointPairList();
@@ -1182,7 +1183,7 @@ namespace BVKGraph
                 curve2.Line.IsVisible = false;
             }
             //Экстремумы
-            if (cbShowExtrems.Checked)
+            if (_extrems)
             {
                 LineItem curve10 = pane2.AddCurve("", list10, Color.Red, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
@@ -1405,7 +1406,7 @@ namespace BVKGraph
                 // Линия невидимая
                 curve3.Line.IsVisible = false;
             }
-            if (cbShowExtrems.Checked)
+            if (_extrems)
             {
                 LineItem curve11 = pane3.AddCurve("", list11, Color.Red, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
@@ -2116,7 +2117,7 @@ namespace BVKGraph
                 }
                 // Возможность отключения Фильтра
                 // Значение времени 10_000
-                if (false)//_filter)
+                if (_filter)
                 {
                     //Фильтрация ошибочных точек График 1
                     int counter1 = 0;
@@ -2149,6 +2150,25 @@ namespace BVKGraph
                 // Попытка реализации пункта 3 задания от 27.06
                 //значение переменной _filter изменено на false
                 //int l = 0;
+                //for (int i = 0; i < _dataGraph2.Length; i++)
+                //{
+                //    if (_timePoint[l] - _timePoint[i] >= 200_000)
+                //    {
+                //        double sum = 0;
+                //        int counter = 0;
+                //        for (int j = l; j < i; j++)
+                //        {
+                //            if (_dataGraph[j] > 0 && _dataGraph2[j] != BadPointConst && (short)_dataGraph8Averaged[j] == BadPointConst)
+                //            {
+                //                sum += _dataGraph2[j];
+                //                counter++;
+                //            }
+                //        }
+                //        _dataGraph8Averaged[i] = (sum / counter);
+                //        l = i;
+                //    }
+                //}
+                //int l = 0;
                 //for (int i = 0; i < _timePoint.Length; i++)
                 //{
                 //    if (_timePoint[l] - _timePoint[i] >= 200_000)
@@ -2166,7 +2186,7 @@ namespace BVKGraph
                 //        _dataGraph8Averaged[i] = (sum / counter);
                 //        l = i;
                 //    }
-                //} 
+                //}
                 //Формирование графиков коррекции график 1
                 _dataGraph10Correction = new double[_dataGraph2.Length];
                 for (int i = 0; i < _dataGraph10Correction.Length; i++)
@@ -2746,6 +2766,15 @@ namespace BVKGraph
                 tbYCounted.Text = "";
             }
         }
+
+        private void btnExtremsShow_Click(object sender, EventArgs e)
+        {
+            _extrems = !_extrems;
+            if (btnExtremsShow.UseVisualStyleBackColor)
+                btnExtremsShow.BackColor = Color.Khaki;
+            else btnExtremsShow.UseVisualStyleBackColor = true;
+        }
+
         //Разрешить измерение времени
         private void checkBoxMeasuring_CheckedChanged(object sender, EventArgs e)
         {
