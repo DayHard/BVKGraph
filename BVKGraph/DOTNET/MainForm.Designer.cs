@@ -135,7 +135,7 @@
             this.connect_Button.Name = "connect_Button";
             this.connect_Button.Size = new System.Drawing.Size(66, 37);
             this.connect_Button.TabIndex = 0;
-            this.connect_Button.Text = "Connect";
+            this.connect_Button.Text = "Подкл.";
             this.connect_Button.UseVisualStyleBackColor = true;
             this.connect_Button.Click += new System.EventHandler(this.connect_Button_Click);
             // 
@@ -153,9 +153,9 @@
             this.port_Label.AutoSize = true;
             this.port_Label.Location = new System.Drawing.Point(75, 24);
             this.port_Label.Name = "port_Label";
-            this.port_Label.Size = new System.Drawing.Size(26, 13);
+            this.port_Label.Size = new System.Drawing.Size(32, 13);
             this.port_Label.TabIndex = 2;
-            this.port_Label.Text = "Port";
+            this.port_Label.Text = "Порт";
             // 
             // baudrate_Combobox
             // 
@@ -178,9 +178,9 @@
             this.baudrate_label.AutoSize = true;
             this.baudrate_label.Location = new System.Drawing.Point(157, 24);
             this.baudrate_label.Name = "baudrate_label";
-            this.baudrate_label.Size = new System.Drawing.Size(30, 13);
+            this.baudrate_label.Size = new System.Drawing.Size(31, 13);
             this.baudrate_label.TabIndex = 4;
-            this.baudrate_label.Text = "Rate";
+            this.baudrate_label.Text = "Рейт";
             // 
             // parity_Combobox
             // 
@@ -195,9 +195,9 @@
             this.parity_Label.AutoSize = true;
             this.parity_Label.Location = new System.Drawing.Point(241, 24);
             this.parity_Label.Name = "parity_Label";
-            this.parity_Label.Size = new System.Drawing.Size(33, 13);
+            this.parity_Label.Size = new System.Drawing.Size(49, 13);
             this.parity_Label.TabIndex = 6;
-            this.parity_Label.Text = "Parity";
+            this.parity_Label.Text = "Паритет";
             // 
             // stopbits_Combobox
             // 
@@ -216,9 +216,9 @@
             this.stopbits_Label.AutoSize = true;
             this.stopbits_Label.Location = new System.Drawing.Point(322, 24);
             this.stopbits_Label.Name = "stopbits_Label";
-            this.stopbits_Label.Size = new System.Drawing.Size(48, 13);
+            this.stopbits_Label.Size = new System.Drawing.Size(59, 13);
             this.stopbits_Label.TabIndex = 8;
-            this.stopbits_Label.Text = "Stop bits";
+            this.stopbits_Label.Text = "Стоп биты";
             // 
             // databits_Combobox
             // 
@@ -238,9 +238,9 @@
             this.databits_Label.AutoSize = true;
             this.databits_Label.Location = new System.Drawing.Point(403, 24);
             this.databits_Label.Name = "databits_Label";
-            this.databits_Label.Size = new System.Drawing.Size(49, 13);
+            this.databits_Label.Size = new System.Drawing.Size(73, 13);
             this.databits_Label.TabIndex = 10;
-            this.databits_Label.Text = "Data bits";
+            this.databits_Label.Text = "Биты данных";
             // 
             // disconnect_Button
             // 
@@ -248,7 +248,7 @@
             this.disconnect_Button.Name = "disconnect_Button";
             this.disconnect_Button.Size = new System.Drawing.Size(76, 37);
             this.disconnect_Button.TabIndex = 13;
-            this.disconnect_Button.Text = "Disconnect";
+            this.disconnect_Button.Text = "Откл.";
             this.disconnect_Button.UseVisualStyleBackColor = true;
             this.disconnect_Button.Click += new System.EventHandler(this.disconnect_Button_Click);
             // 
@@ -350,9 +350,9 @@
             this.dataResiveCounterTest_label.AutoSize = true;
             this.dataResiveCounterTest_label.Location = new System.Drawing.Point(309, 693);
             this.dataResiveCounterTest_label.Name = "dataResiveCounterTest_label";
-            this.dataResiveCounterTest_label.Size = new System.Drawing.Size(105, 13);
+            this.dataResiveCounterTest_label.Size = new System.Drawing.Size(92, 13);
             this.dataResiveCounterTest_label.TabIndex = 30;
-            this.dataResiveCounterTest_label.Text = "Packages per sec: 0";
+            this.dataResiveCounterTest_label.Text = "Пакетов в сек: 0";
             // 
             // timerCount
             // 
@@ -452,19 +452,19 @@
             this.packages_counter_label.AutoSize = true;
             this.packages_counter_label.Location = new System.Drawing.Point(435, 693);
             this.packages_counter_label.Name = "packages_counter_label";
-            this.packages_counter_label.Size = new System.Drawing.Size(82, 13);
+            this.packages_counter_label.Size = new System.Drawing.Size(92, 13);
             this.packages_counter_label.TabIndex = 40;
-            this.packages_counter_label.Text = "Bytes resived: 0";
+            this.packages_counter_label.Text = "Байт получено: 0";
             // 
             // error_counter_label
             // 
             this.error_counter_label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.error_counter_label.AutoSize = true;
-            this.error_counter_label.Location = new System.Drawing.Point(559, 693);
+            this.error_counter_label.Location = new System.Drawing.Point(577, 693);
             this.error_counter_label.Name = "error_counter_label";
-            this.error_counter_label.Size = new System.Drawing.Size(46, 13);
+            this.error_counter_label.Size = new System.Drawing.Size(59, 13);
             this.error_counter_label.TabIndex = 41;
-            this.error_counter_label.Text = "Errors: 0";
+            this.error_counter_label.Text = "Ошибки: 0";
             // 
             // clean_error_linkLabel
             // 
@@ -636,7 +636,7 @@
             this.disconnect2_button.Name = "disconnect2_button";
             this.disconnect2_button.Size = new System.Drawing.Size(76, 37);
             this.disconnect2_button.TabIndex = 25;
-            this.disconnect2_button.Text = "Disconnect";
+            this.disconnect2_button.Text = "Откл.";
             this.disconnect2_button.UseVisualStyleBackColor = true;
             this.disconnect2_button.Click += new System.EventHandler(this.disconnect2_button_Click);
             // 
@@ -646,7 +646,7 @@
             this.connect2_button.Name = "connect2_button";
             this.connect2_button.Size = new System.Drawing.Size(66, 37);
             this.connect2_button.TabIndex = 14;
-            this.connect2_button.Text = "Connect";
+            this.connect2_button.Text = "Подкл.";
             this.connect2_button.UseVisualStyleBackColor = true;
             this.connect2_button.Click += new System.EventHandler(this.connect2_button_Click);
             // 
@@ -664,9 +664,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(75, 25);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(26, 13);
+            this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 16;
-            this.label1.Text = "Port";
+            this.label1.Text = "Порт";
             // 
             // baudrate2_Combobox
             // 
@@ -689,9 +689,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(157, 25);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(30, 13);
+            this.label2.Size = new System.Drawing.Size(31, 13);
             this.label2.TabIndex = 18;
-            this.label2.Text = "Rate";
+            this.label2.Text = "Рейт";
             // 
             // parity2_Combobox
             // 
@@ -706,9 +706,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(241, 25);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(33, 13);
+            this.label3.Size = new System.Drawing.Size(49, 13);
             this.label3.TabIndex = 20;
-            this.label3.Text = "Parity";
+            this.label3.Text = "Паритет";
             // 
             // stopbits2_Combobox
             // 
@@ -727,9 +727,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(322, 25);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(48, 13);
+            this.label4.Size = new System.Drawing.Size(59, 13);
             this.label4.TabIndex = 22;
-            this.label4.Text = "Stop bits";
+            this.label4.Text = "Стоп биты";
             // 
             // databits2_Combobox
             // 
@@ -749,9 +749,9 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(403, 25);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(49, 13);
+            this.label5.Size = new System.Drawing.Size(73, 13);
             this.label5.TabIndex = 24;
-            this.label5.Text = "Data bits";
+            this.label5.Text = "Биты данных";
             // 
             // control_tabPage
             // 
@@ -1014,9 +1014,9 @@
             this.comstatus2_label.AutoSize = true;
             this.comstatus2_label.Location = new System.Drawing.Point(156, 693);
             this.comstatus2_label.Name = "comstatus2_label";
-            this.comstatus2_label.Size = new System.Drawing.Size(140, 13);
+            this.comstatus2_label.Size = new System.Drawing.Size(129, 13);
             this.comstatus2_label.TabIndex = 48;
-            this.comstatus2_label.Text = "COM2 status: Disconnected";
+            this.comstatus2_label.Text = "COM2 статус: Отключен";
             // 
             // comstatus_label
             // 
@@ -1024,19 +1024,19 @@
             this.comstatus_label.AutoSize = true;
             this.comstatus_label.Location = new System.Drawing.Point(16, 693);
             this.comstatus_label.Name = "comstatus_label";
-            this.comstatus_label.Size = new System.Drawing.Size(134, 13);
+            this.comstatus_label.Size = new System.Drawing.Size(123, 13);
             this.comstatus_label.TabIndex = 47;
-            this.comstatus_label.Text = "COM status: Disconnected";
+            this.comstatus_label.Text = "COM статус: Отключен";
             // 
             // syncstatus_label
             // 
             this.syncstatus_label.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.syncstatus_label.AutoSize = true;
-            this.syncstatus_label.Location = new System.Drawing.Point(641, 693);
+            this.syncstatus_label.Location = new System.Drawing.Point(661, 693);
             this.syncstatus_label.Name = "syncstatus_label";
-            this.syncstatus_label.Size = new System.Drawing.Size(51, 13);
+            this.syncstatus_label.Size = new System.Drawing.Size(65, 13);
             this.syncstatus_label.TabIndex = 49;
-            this.syncstatus_label.Text = "Sync: No";
+            this.syncstatus_label.Text = "Синхр.: Нет";
             // 
             // timeGraphName_label
             // 

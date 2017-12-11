@@ -40,7 +40,9 @@ namespace BVKGraph
         private ushort[] _dataGraph2;
         private ushort[] _dataGraph3;
         private ushort[] _dataGraph4 = new ushort[600000];
-        private ushort[] _dataGraph5 = new ushort[600000];
+        private short[] _dataGraph5 = new short[600000];
+        private short[] _dataGraph13 = new short[600000];
+        private byte[] _dataGraph14 = new byte[60000];
 
         //Нахождение экстремумов мощности
         private ushort[] _croppedArray;
@@ -56,6 +58,8 @@ namespace BVKGraph
         private ulong[] _timePoint = new ulong[2100000];
         private ulong[] _timePoint4 = new ulong[2100000];
         private ulong[] _timePoint5 = new ulong[2100000];
+        private ulong[] _timePoint13 = new ulong[2100000];
+        private ulong[] _timePoint14 = new ulong[210000];
 
         // Усреднение 8 кадра
         private double[] _dataGraph10ServiceLimitation = new double[7500];
@@ -98,7 +102,7 @@ namespace BVKGraph
         private int _timerCounter;
         private int _readCounter;
         private int _possitionCounter;
-        private int _dataGraphCounter4, _dataGraphCounter5 ;
+        private int _dataGraphCounter4, _dataGraphCounter5, _dataGraphCounter13, _dataGraphCounter14;
         ulong _timebuffer;
         private byte _timer30Sec = 1;
         private int _errorCounter;
@@ -113,7 +117,7 @@ namespace BVKGraph
         private bool _correction;
         private bool _limitAverage = true;
         private bool _filter = true;
-        private bool _extrems = false;
+        private bool _extrems;
 
         //Флаг точек
         private bool _measPoint1Flag = true;
@@ -159,7 +163,6 @@ namespace BVKGraph
         /// Обработчик события, который вызывается, перед показом контекстного меню
         /// </summary>
         /// <param name="sender">Компонент ZedGraph</param>
-        /// <param name="menuStrip">Контекстное меню, которое будет показано</param>
         /// <param name="mousePt">Координаты курсора мыши</param>
         /// <param name="objState">Состояние контекстного меню. Описывает объект, на который кликнули.</param>
         public void zedGraph_ContextMenuBuilder(ZedGraphControl sender, ContextMenuStrip menuStrip, Point mousePt, ZedGraphControl.ContextMenuObjectState objState)
@@ -319,7 +322,7 @@ namespace BVKGraph
                 serialPort.ReceivedBytesThreshold = 1000;
                 serialPort.ReadBufferSize = 300000;
                 serialPort.Open();
-                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Connected to COM1";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + @" Подключено к COM1";
                 button_prop();
             }
             catch (Exception ex)
@@ -341,7 +344,7 @@ namespace BVKGraph
                 dataResiveProgressBar.Visible = false;
                 Thread.Sleep(10);
                 serialPort.Close();
-                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Disconnected from COM1";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + @" Отключено от COM1";
                 button_prop();
                 if (serialPort.IsOpen)
                 {
@@ -374,7 +377,7 @@ namespace BVKGraph
                 serialPort2.ReceivedBytesThreshold = 1;
                 serialPort2.Open();
                 button2_prop();
-                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Connected to COM2";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + @" Подключено к COM2";
             }
             catch (Exception ex)
             {
@@ -392,10 +395,10 @@ namespace BVKGraph
             {
                 serialPort2.Close();
                 button2_prop();
-                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Disconnected from COM2";
+                error_TextBox.Text += "\r\n [" + DateTime.Now + "]" + " Отключен от COM2";
                 _syncstatus = false;
-                Sync_checkBox.Text = "   Sync Off  ";
-                syncstatus_label.Text = "Sync: No";
+                Sync_checkBox.Text = "   Синхр. выкл.  ";
+                syncstatus_label.Text = "Синхр.: Нет";
             }
             catch (Exception ex)
             {
@@ -443,7 +446,7 @@ namespace BVKGraph
                 parity2_Combobox.Enabled = false;
                 stopbits2_Combobox.Enabled = false;
                 databits2_Combobox.Enabled = false;
-                comstatus2_label.Text = "COM2 status: Connected";
+                comstatus2_label.Text = @"COM2 статус: Подключен";
                 Sync_checkBox.Enabled = true;
             }
             else
@@ -455,7 +458,7 @@ namespace BVKGraph
                 parity2_Combobox.Enabled = true;
                 stopbits2_Combobox.Enabled = true;
                 databits2_Combobox.Enabled = true;
-                comstatus2_label.Text = "COM2 status: Disconnected";
+                comstatus2_label.Text = @"COM2 статус: Отключен";
                 Sync_checkBox.Enabled = false;
             }
         }
@@ -495,15 +498,11 @@ namespace BVKGraph
                     parity_Combobox.Enabled = false;
                     stopbits_Combobox.Enabled = false;
                     databits_Combobox.Enabled = false;
-                    comstatus_label.Text = "COM status: Connected";
+                    comstatus_label.Text = @"COM статус: Подключен";
                     startbvk_button.Enabled = true;
                     stopbvk_button.Enabled = true;
                     starttest_button.Enabled = true;
-                    //limitation_button.Enabled = true;
                     derivation_button.Enabled = true;
-                    //normalmode_button.Enabled = true;
-                    //engineeringmode_button.Enabled = true;
-                    //kdo_button.Enabled = true;
                     yac1_button.Enabled = true;
                     yac2_button.Enabled = true;
                 }
@@ -516,7 +515,7 @@ namespace BVKGraph
                     parity_Combobox.Enabled = true;
                     stopbits_Combobox.Enabled = true;
                     databits_Combobox.Enabled = true;
-                    comstatus_label.Text = "COM status: Disconnected";
+                    comstatus_label.Text = @"COM статус: Отключен";
                     startbvk_button.Enabled = false;
                     stopbvk_button.Enabled = false;
                     starttest_button.Enabled = false;
@@ -604,7 +603,7 @@ namespace BVKGraph
             starttest_button.Enabled = true;
             startbvk_button.Enabled = true;
             dataResiveProgressBar.Value = 1;
-            error_counter_label.Text = "Errors: 0";
+            error_counter_label.Text = @"Ошибки: 0";
             if (_scanningstatus)
                 DataProcessing();
             _scanningstatus = false;
@@ -787,8 +786,8 @@ namespace BVKGraph
                 if (_syncstatus)
                 {
                     _syncstatus = false;
-                    Sync_checkBox.Text = " Вкл. синхр. ";
-                    syncstatus_label.Text = "Sync: No";
+                    Sync_checkBox.Text = @" Вкл. синхр. ";
+                    syncstatus_label.Text = @"Синхр.: Нет";
                     Sync_checkBox.UseVisualStyleBackColor = true;
                 }
                 else
@@ -797,8 +796,8 @@ namespace BVKGraph
                     DataSend(commandprop);
                     serialPort.Write(_command, 0, 3);
                     _syncstatus = true;
-                    Sync_checkBox.Text = "Откл.синхр.";
-                    syncstatus_label.Text = "Sync: Yes";
+                    Sync_checkBox.Text = @"Откл.синхр.";
+                    syncstatus_label.Text = @"Синхр.: Да";
                     Sync_checkBox.BackColor = Color.SkyBlue;
                 }
             }
@@ -1116,7 +1115,7 @@ namespace BVKGraph
         private void Graph2(GraphPane pane2)
         {
 
-            // Создадим список точек=> График номер 2
+            // Создадим список точек => График номер 2
             PointPairList list2 = new PointPairList();
             {
                 for (int i = 0; i < _dataGraph2.Length; i++)
@@ -1134,7 +1133,6 @@ namespace BVKGraph
             {
                 // Служебный кадр
                 //Без расчета среднего значения
-
                 for (int i = 0; i < _dataGraphCounter4; i++)
                 {
                     if (_dataGraph4[i] != BadPointConst)
@@ -1143,7 +1141,28 @@ namespace BVKGraph
                         list4.Add(_timePoint4[i], _dataGraph4[i] - 32);
                     }
                 }
-
+            }
+            // Команда 0x70 кодировка
+            PointPairList list16 = new PointPairList();
+            {
+                // Служебный кадр
+                //Без расчета среднего значения
+                for (int i = 0; i < _dataGraphCounter13; i++)
+                {
+                    //if (_dataGraph6[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list16.Add(_timePoint13[i], _dataGraph13[i]);
+                    }
+                }
+            }
+            // Команда 0x70 кодировка A7
+            PointPairList list17 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter14; i++)
+                {
+                    list17.Add(_timePoint14[i], _dataGraph14[i]);
+                }
             }
             //Лист точек для допуска
             PointPairList list8 = new PointPairList();
@@ -1200,7 +1219,6 @@ namespace BVKGraph
             if (_service)
             {
                 LineItem curve4 = pane2.AddCurve("", list4, Color.BlueViolet, SymbolType.Diamond);
-
                 // Цвет заполнения отметок (ромбиков) - голубой
                 curve4.Symbol.Fill.Color = Color.BlueViolet;
                 // Тип заполнения - сплошная заливка
@@ -1209,6 +1227,26 @@ namespace BVKGraph
                 curve4.Symbol.Size = 7;
                 // Линия невидимая
                 curve4.Line.IsVisible = false;
+
+                LineItem curve16 = pane2.AddCurve("", list16, Color.DarkGoldenrod, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - голубой
+                curve16.Symbol.Fill.Color = Color.DarkGoldenrod;
+                // Тип заполнения - сплошная заливка
+                curve16.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve16.Symbol.Size = 7;
+                // Линия невидимая
+                curve16.Line.IsVisible = false;
+
+                LineItem curve17 = pane2.AddCurve("", list17, Color.Yellow, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - Желтый
+                curve17.Symbol.Fill.Color = Color.Yellow;
+                // Тип заполнения - сплошная заливка
+                curve17.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve17.Symbol.Size = 7;
+                // Линия невидимая
+                curve17.Line.IsVisible = false;
             }
             // Допуск
             if (cbAdmission.Checked)
@@ -1312,7 +1350,7 @@ namespace BVKGraph
                     if (_dataGraph5[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list5.Add(_timePoint5[i], _dataGraph5[i] - 32);
+                        list5.Add(_timePoint5[i], _dataGraph5[i]);
                     }
                 }
             }
@@ -1736,6 +1774,8 @@ namespace BVKGraph
 
         #region Data
         // Метод обработки данных
+
+            
         private void DataProcessing()
         {
             try
@@ -1775,6 +1815,8 @@ namespace BVKGraph
                     int z = 0;
                     int u = 0;
                     int c = 0;
+                    int v = 0;
+                    int b = 0;
                     byte errorPackagesCounter = 0;
                     for (int i = 0; i < _possitionCounter; i += 4)
                     {
@@ -1820,13 +1862,37 @@ namespace BVKGraph
                                     _dataGraphCounter4++;
                                     u++;
                                     break;
-                                // 0x5 (Крен)
+                                // 0x5 (Крен)(!!!)
                                 case 0x50:
-                                    _dataGraph5[c] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                    _dataGraph5[c] = (short) (Convert.ToInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
                                     _timePoint5[c] = _timePoint[z];
                                     _dataGraphCounter5++;
                                     c++;
                                     break;
+                                // 0x6 (Крен)
+                                case 0x60:
+                                    _dataGraph5[c] = (short)(Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) + 96);
+                                    _timePoint5[c] = _timePoint[z];
+                                    _dataGraphCounter5++;
+                                    c++;
+                                    break;
+                                case 0x70:
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) == 0)
+                                    {
+                                        _dataGraph14[b] = 7;
+                                        _timePoint14[b] = _timePoint[z];
+                                        _dataGraphCounter14++;
+                                        b++;
+                                    }
+                                    else
+                                    {
+                                        _dataGraph13[v] = (short) Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                        _timePoint13[v] = _timePoint[z];
+                                        _dataGraphCounter13++;
+                                        v++;
+                                    }
+ 
+                                    break;                                  
                             }
                             z++;
                         }
@@ -1841,7 +1907,7 @@ namespace BVKGraph
                             }
                             errorPackagesCounter++;
                             i -= 3;
-                            error_counter_label.Text = "Errors:" + _errorCounter;
+                            error_counter_label.Text = @"Ошибки:" + _errorCounter;
                         }
                     }
                     // Исправление ошибок графика амплитуда
@@ -1858,9 +1924,11 @@ namespace BVKGraph
                     // Для режимов
                     // Лимитация, Поправка, Служебный
                     DataTreatment();
-                    Thread graphThread = new Thread(GraphDraw);
-                    graphThread.Name = "Graph draw thread (open file)";
-                    graphThread.IsBackground = true;
+                    Thread graphThread = new Thread(GraphDraw)
+                    {
+                        Name = "Graph draw thread (open file)",
+                        IsBackground = true
+                    };
                     graphThread.Start();
                     _timer30Sec = 1;
                 }
@@ -1980,36 +2048,6 @@ namespace BVKGraph
                         counterPower++;
                     }
                 }
-                //Нахождение среднего
-                //double sumPower = 0;
-                //int counterPower = 0;
-                //int startPossition = 0;
-                //for (int i = 0; i < _croppedArray.Length; i++)
-                //{
-                //    if (_croppedArray[i] != 0)
-                //    {
-                //        if (counterPower != 16)
-                //        {
-                //            sumPower += _croppedArray[i] - 1100;
-                //            counterPower++;
-                //        }
-                //        else
-                //        {
-                //            //Задает уровень учитываеммой мощности
-                //            sumPower = sumPower / counterPower * 0.2;
-                //            for (int j = startPossition; j < i; j++)
-                //            {
-                //                if (sumPower > _croppedArray[j] - 1100 && _croppedArray[j] != 0)
-                //                {
-                //                    _croppedArray[j] = 0;
-                //                }
-                //            }
-                //            sumPower = 0;
-                //            counterPower = 0;
-                //            startPossition = i;
-                //        }
-                //    }
-                //}
                 //Выделение памяти под массив лимитации
                 _croppedArray2 = new ushort[_croppedArray.Length];
                 //Выделение диапазонов графика согласно мощности
@@ -2257,14 +2295,14 @@ namespace BVKGraph
                 {
                     if (_dataGraph5[i] == _dataGraph5[i + 1] && _dataGraph5[i] == _dataGraph5[i + 2])
                     {
-                        _dataGraph5[i + 1] = (ushort)BadPointConst;
-                        _dataGraph5[i + 2] = (ushort)BadPointConst;
+                        _dataGraph5[i + 1] = BadPointConst;
+                        _dataGraph5[i + 2] = BadPointConst;
                     }
                     else
                     {
-                        _dataGraph5[i] = (ushort)BadPointConst;
-                        _dataGraph5[i + 1] = (ushort)BadPointConst;
-                        _dataGraph5[i + 2] = (ushort)BadPointConst;
+                        _dataGraph5[i] = BadPointConst;
+                        _dataGraph5[i + 1] = BadPointConst;
+                        _dataGraph5[i + 2] = BadPointConst;
                     }
                 }
                 //Служебный
@@ -2347,7 +2385,7 @@ namespace BVKGraph
                             {
                                 if (_dataGraph5[k] != BadPointConst)
                                 {
-                                    _dataGraph5[k] = (ushort)sumService2;
+                                    _dataGraph5[k] = (short)sumService2;
                                     counter2++;
                                 }
                                 k--;
@@ -2396,7 +2434,7 @@ namespace BVKGraph
                         {
                             Invoke((MethodInvoker)delegate
                             {
-                                error_counter_label.Text = "Errors:" + _errorCounter;
+                                error_counter_label.Text = @"Ошибки:" + _errorCounter;
                                 if (errorPackagesCounter == 4)
                                 {
                                     errorPackagesCounter = 0;
@@ -2515,8 +2553,8 @@ namespace BVKGraph
         //! Таймер
         private void timerCount_Tick(object sender, EventArgs e)
         {
-            dataResiveCounterTest_label.Text = "Packages per sec: " + (_timerCounter);
-            packages_counter_label.Text = "Bytes resived: " + _possitionCounter;
+            dataResiveCounterTest_label.Text = @"Пакетов в сек: " + (_timerCounter);
+            packages_counter_label.Text = @"Байт получено: " + _possitionCounter;
             _timerCounter = 0;
             if (_scanningstatus)
             {
