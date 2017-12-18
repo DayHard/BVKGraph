@@ -233,10 +233,10 @@ namespace BVKGraph
                         case SerialError.Frame:
                             error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " the hardware detected a framing error";
                             break;
-                        case SerialError.Overrun:
-
-                            error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " a character-buffer overrun has occurred. The next character is lost";
-                            break;
+                            //Отключена за ненадобностью
+                        //case SerialError.Overrun:
+                        //    error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " a character-buffer overrun has occurred. The next character is lost";
+                        //    break;
                         case SerialError.RXOver:
                             error_TextBox.Text = " [" + DateTime.Now + "] " + "On port " + serialPort.PortName + " an input buffer overflow has occured."
                             + " There is either no room in the input buffer, or a character was received after the End-Of-File (EOF) character.\n";
@@ -2791,26 +2791,36 @@ namespace BVKGraph
         //Кнопка сдаления точек измерений на графике
         private void bntResetTimePoints_Click(object sender, EventArgs e)
         {
+            ResetPoints();
+        }
+        // Удаление отмеченныъ точек в случае переключения графика (График 1)
+        private void rbtnMeasureGraph1_CheckedChanged(object sender, EventArgs e)
+        {
+            ResetPoints();
+        }
+        // Удаление отмеченныъ точек в случае переключения графика (График 2)
+        private void rbtnMeasureGraph2_CheckedChanged(object sender, EventArgs e)
+        {
+            ResetPoints();
+        }
+        // Удаление отмеченныъ точек в случае переключения графика (График 3)
+        private void rbtnMeasureGraph3_CheckedChanged(object sender, EventArgs e)
+        {
+            ResetPoints();
+        }
+        //Очистка выделенных точек (Измерение)
+        private void ResetPoints()
+        {
             try
             {
-                if (rbtnMeasureGraph1.Checked)
-                {
-                    _pane1.CurveList.Remove(_curveToDelete1);
-                    _pane1.CurveList.Remove(_curveToDelete2);
-                }
+                _pane1.CurveList.Remove(_curveToDelete1);
+                _pane1.CurveList.Remove(_curveToDelete2);
 
-                if (rbtnMeasureGraph2.Checked)
-                {
-                    _pane2.CurveList.Remove(_curveToDelete1);
-                    _pane2.CurveList.Remove(_curveToDelete2);
-                }
+                _pane2.CurveList.Remove(_curveToDelete1);
+                _pane2.CurveList.Remove(_curveToDelete2);
 
-                if (rbtnMeasureGraph3.Checked)
-                {
-                    _pane3.CurveList.Remove(_curveToDelete1);
-                    _pane3.CurveList.Remove(_curveToDelete2);
-                }
-
+                _pane3.CurveList.Remove(_curveToDelete1);
+                _pane3.CurveList.Remove(_curveToDelete2);
             }
             finally
             {
@@ -2819,7 +2829,7 @@ namespace BVKGraph
                 _measPoint1Flag = true;
                 _measPoint2Flag = true;
                 zedGraph.Invalidate();
-                tbTimeCounted.Text = ""; 
+                tbTimeCounted.Text = "";
                 tbYCounted.Text = "";
             }
         }

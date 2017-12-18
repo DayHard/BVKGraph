@@ -971,6 +971,7 @@
             this.rbtnMeasureGraph3.TabIndex = 3;
             this.rbtnMeasureGraph3.Text = "Вертикаль. Крен";
             this.rbtnMeasureGraph3.UseVisualStyleBackColor = true;
+            this.rbtnMeasureGraph3.CheckedChanged += new System.EventHandler(this.rbtnMeasureGraph3_CheckedChanged);
             // 
             // rbtnMeasureGraph2
             // 
@@ -981,6 +982,7 @@
             this.rbtnMeasureGraph2.TabIndex = 2;
             this.rbtnMeasureGraph2.Text = "Горизонт. Задержка";
             this.rbtnMeasureGraph2.UseVisualStyleBackColor = true;
+            this.rbtnMeasureGraph2.CheckedChanged += new System.EventHandler(this.rbtnMeasureGraph2_CheckedChanged);
             // 
             // rbtnMeasureGraph1
             // 
@@ -993,6 +995,7 @@
             this.rbtnMeasureGraph1.TabStop = true;
             this.rbtnMeasureGraph1.Text = "Освещённость";
             this.rbtnMeasureGraph1.UseVisualStyleBackColor = true;
+            this.rbtnMeasureGraph1.CheckedChanged += new System.EventHandler(this.rbtnMeasureGraph1_CheckedChanged);
             // 
             // checkBoxMeasuring
             // 
