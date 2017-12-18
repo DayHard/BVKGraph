@@ -1228,9 +1228,9 @@ namespace BVKGraph
                 // Линия невидимая
                 curve4.Line.IsVisible = false;
 
-                LineItem curve16 = pane2.AddCurve("", list16, Color.DarkGoldenrod, SymbolType.Diamond);
+                LineItem curve16 = pane2.AddCurve("", list16, Color.CornflowerBlue, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - голубой
-                curve16.Symbol.Fill.Color = Color.DarkGoldenrod;
+                curve16.Symbol.Fill.Color = Color.CornflowerBlue;
                 // Тип заполнения - сплошная заливка
                 curve16.Symbol.Fill.Type = FillType.Solid;
                 // Размер ромбиков
@@ -1238,9 +1238,9 @@ namespace BVKGraph
                 // Линия невидимая
                 curve16.Line.IsVisible = false;
 
-                LineItem curve17 = pane2.AddCurve("", list17, Color.Yellow, SymbolType.Diamond);
+                LineItem curve17 = pane2.AddCurve("", list17, Color.DarkOrange, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - Желтый
-                curve17.Symbol.Fill.Color = Color.Yellow;
+                curve17.Symbol.Fill.Color = Color.DarkOrange;
                 // Тип заполнения - сплошная заливка
                 curve17.Symbol.Fill.Type = FillType.Solid;
                 // Размер ромбиков
@@ -1877,7 +1877,7 @@ namespace BVKGraph
                                     c++;
                                     break;
                                 case 0x70:
-                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) == 0)
+                                    if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) == 32)
                                     {
                                         _dataGraph14[b] = 7;
                                         _timePoint14[b] = _timePoint[z];
@@ -1886,7 +1886,7 @@ namespace BVKGraph
                                     }
                                     else
                                     {
-                                        _dataGraph13[v] = (short) Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                        _dataGraph13[v] = (short) ((short) Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
                                         _timePoint13[v] = _timePoint[z];
                                         _dataGraphCounter13++;
                                         v++;
