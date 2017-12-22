@@ -967,9 +967,9 @@
             this.rbtnMeasureGraph3.AutoSize = true;
             this.rbtnMeasureGraph3.Location = new System.Drawing.Point(174, 63);
             this.rbtnMeasureGraph3.Name = "rbtnMeasureGraph3";
-            this.rbtnMeasureGraph3.Size = new System.Drawing.Size(110, 17);
+            this.rbtnMeasureGraph3.Size = new System.Drawing.Size(109, 17);
             this.rbtnMeasureGraph3.TabIndex = 3;
-            this.rbtnMeasureGraph3.Text = "Вертикаль. Крен";
+            this.rbtnMeasureGraph3.Text = "Вертикаль. МПЗ";
             this.rbtnMeasureGraph3.UseVisualStyleBackColor = true;
             this.rbtnMeasureGraph3.CheckedChanged += new System.EventHandler(this.rbtnMeasureGraph3_CheckedChanged);
             // 

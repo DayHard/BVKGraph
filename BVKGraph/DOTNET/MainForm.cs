@@ -39,10 +39,13 @@ namespace BVKGraph
         // Статические массивы (для обработки принятых данных)
         private ushort[] _dataGraph2;
         private ushort[] _dataGraph3;
-        private ushort[] _dataGraph4 = new ushort[600000];
+        private short[] _dataGraph4 = new short[600000];
         private short[] _dataGraph5 = new short[600000];
         private short[] _dataGraph13 = new short[600000];
-        private byte[] _dataGraph14 = new byte[60000];
+        private short[] _dataGraph14 = new short[60000];
+        private short[] _dataGraph15 = new short[6000];
+        private short[] _dataGraph16 = new short[600000];
+        private short[] _dataGraph17 = new short[600000];
 
         //Нахождение экстремумов мощности
         private ushort[] _croppedArray;
@@ -60,6 +63,9 @@ namespace BVKGraph
         private ulong[] _timePoint5 = new ulong[2100000];
         private ulong[] _timePoint13 = new ulong[2100000];
         private ulong[] _timePoint14 = new ulong[210000];
+        private ulong[] _timePoint15 = new ulong[21000];
+        private ulong[] _timePoint16 = new ulong[2100000];
+        private ulong[] _timePoint17 = new ulong[210000];
 
         // Усреднение 8 кадра
         private double[] _dataGraph10ServiceLimitation = new double[7500];
@@ -102,7 +108,9 @@ namespace BVKGraph
         private int _timerCounter;
         private int _readCounter;
         private int _possitionCounter;
-        private int _dataGraphCounter4, _dataGraphCounter5, _dataGraphCounter13, _dataGraphCounter14;
+        private int _dataGraphCounter4, _dataGraphCounter5, _dataGraphCounter13,
+                    _dataGraphCounter14, _dataGraphCounter15, _dataGraphCounter16,
+                    _dataGraphCounter17;
         ulong _timebuffer;
         private byte _timer30Sec = 1;
         private int _errorCounter;
@@ -1138,7 +1146,7 @@ namespace BVKGraph
                     if (_dataGraph4[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
-                        list4.Add(_timePoint4[i], _dataGraph4[i] - 32);
+                        list4.Add(_timePoint4[i], _dataGraph4[i]); // - 32);
                     }
                 }
             }
@@ -1149,19 +1157,24 @@ namespace BVKGraph
                 //Без расчета среднего значения
                 for (int i = 0; i < _dataGraphCounter13; i++)
                 {
-                    //if (_dataGraph6[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
-                        list16.Add(_timePoint13[i], _dataGraph13[i]);
+                        if (_dataGraph13[i] <= 33 && _dataGraph13[i] >= -33)
+                        {
+                            // Отнимаем значение 33 для удобства отображения
+                            list16.Add(_timePoint13[i], _dataGraph13[i]);
+                        }
                     }
                 }
             }
             // Команда 0x70 кодировка A7
-            PointPairList list17 = new PointPairList();
+            PointPairList list18 = new PointPairList();
             {
                 for (int i = 0; i < _dataGraphCounter14; i++)
                 {
-                    list17.Add(_timePoint14[i], _dataGraph14[i]);
+                    if (_dataGraph14[i] <= 33 && _dataGraph14[i] >= -33)
+                    {
+                        list18.Add(_timePoint14[i], _dataGraph14[i]);
+                    }
                 }
             }
             //Лист точек для допуска
@@ -1185,6 +1198,26 @@ namespace BVKGraph
                     {
                         // Отнимаем значение 33 для удобства отображения
                         list10.Add(_timePoint[i], _dataGraph6Limit[i] - 32);
+                    }
+                }
+            }
+            // A5 Задержка (тз от 21.12.2017)
+           // Значения от 16 до 20
+            PointPairList list20 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter15; i++)
+                {
+                        list20.Add(_timePoint15[i], _dataGraph15[i]);
+                }
+            }
+            // Код 2 (тз от 22.12.2017)
+            PointPairList list22 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter16; i++)
+                {
+                    if (_dataGraph16[i] != BadPointConst)
+                    {
+                        list22.Add(_timePoint16[i], _dataGraph16[i]);
                     }
                 }
             }
@@ -1238,15 +1271,35 @@ namespace BVKGraph
                 // Линия невидимая
                 curve16.Line.IsVisible = false;
 
-                LineItem curve17 = pane2.AddCurve("", list17, Color.DarkOrange, SymbolType.Diamond);
+                LineItem curve18 = pane2.AddCurve("", list18, Color.DarkOrange, SymbolType.Diamond);
                 // Цвет заполнения отметок (ромбиков) - Желтый
-                curve17.Symbol.Fill.Color = Color.DarkOrange;
+                curve18.Symbol.Fill.Color = Color.DarkOrange;
                 // Тип заполнения - сплошная заливка
-                curve17.Symbol.Fill.Type = FillType.Solid;
+                curve18.Symbol.Fill.Type = FillType.Solid;
                 // Размер ромбиков
-                curve17.Symbol.Size = 7;
+                curve18.Symbol.Size = 7;
                 // Линия невидимая
-                curve17.Line.IsVisible = false;
+                curve18.Line.IsVisible = false;
+
+                LineItem curve20 = pane2.AddCurve("", list20, Color.LimeGreen, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - Желтый
+                curve20.Symbol.Fill.Color = Color.LimeGreen;
+                // Тип заполнения - сплошная заливка
+                curve20.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve20.Symbol.Size = 7;
+                // Линия невидимая
+                curve20.Line.IsVisible = false;
+
+                LineItem curve22 = pane2.AddCurve("", list22, Color.Firebrick, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - Желтый
+                curve22.Symbol.Fill.Color = Color.Firebrick;
+                // Тип заполнения - сплошная заливка
+                curve22.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve22.Symbol.Size = 7;
+                // Линия невидимая
+                curve22.Line.IsVisible = false;
             }
             // Допуск
             if (cbAdmission.Checked)
@@ -1344,13 +1397,25 @@ namespace BVKGraph
             {
                 //Служебный кадр
                 //Без расчета среднего значения
-
                 for (int i = 0; i < _dataGraphCounter5; i++)
                 {
                     if (_dataGraph5[i] != BadPointConst)
                     {
                         // Отнимаем значение 33 для удобства отображения
                         list5.Add(_timePoint5[i], _dataGraph5[i]);
+                    }
+                }
+            }
+            //Служебный кадр
+            // Код2 
+            PointPairList list17 = new PointPairList();
+            {
+                for (int i = 0; i < _dataGraphCounter17; i++)
+                {
+                    if (_dataGraph17[i] != BadPointConst)
+                    {
+                        // Отнимаем значение 33 для удобства отображения
+                        list17.Add(_timePoint17[i], _dataGraph17[i]);
                     }
                 }
             }
@@ -1379,6 +1444,17 @@ namespace BVKGraph
                 curve5.Symbol.Size = 7;
                 // Линия невидимая
                 curve5.Line.IsVisible = false;
+
+                // Создадим кривые 
+                LineItem curve17 = pane3.AddCurve("", list17, Color.Firebrick, SymbolType.Diamond);
+                // Цвет заполнения отметок (ромбиков) - бордовый
+                curve17.Symbol.Fill.Color = Color.Firebrick;
+                // Тип заполнения - сплошная заливка
+                curve17.Symbol.Fill.Type = FillType.Solid;
+                // Размер ромбиков
+                curve17.Symbol.Size = 7;
+                // Линия невидимая
+                curve17.Line.IsVisible = false;
             }
             // Допуск
             if (cbAdmission.Checked)
@@ -1522,7 +1598,7 @@ namespace BVKGraph
 
             pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
-            pane3.YAxis.Title.Text = "Вертикаль \r\n Крен";
+            pane3.YAxis.Title.Text = "Вертикаль \r\n МПЗ";
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
             pane1.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
@@ -1638,20 +1714,11 @@ namespace BVKGraph
             pane2.YAxis.Scale.Max = YScaleMax17;
             pane3.YAxis.Scale.Max = YScaleMax17;
 
-            //// Подпись по оси X невидимая
-            //pane1.XAxis.Title.FontSpec.FontColor = Color.White;
-            //pane2.XAxis.Title.FontSpec.FontColor = Color.White;
-            //pane3.XAxis.Title.FontSpec.FontColor = Color.White;
-            //pane1.XAxis.Title.FontSpec.is
-
             // Уберем отображение степени в подписи оси X
             pane1.XAxis.Title.IsOmitMag = true;
             pane2.XAxis.Title.IsOmitMag = true;
             pane3.XAxis.Title.IsOmitMag = true;
 
-            //pane1.XAxis.Scale.Mag = 6;
-            //pane2.XAxis.Scale.Mag = 6;
-            //pane3.XAxis.Scale.Mag = 6;
 
             zedGraph.Invalidate();
             zedGraph.AxisChange();
@@ -1670,11 +1737,7 @@ namespace BVKGraph
             pane3.Title.FontSpec.FontColor = Color.Green;
             pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
-            pane3.YAxis.Title.Text = "Вертикаль \r\n Крен";
-
-            //pane1.YAxis.Title.Text = "Значение Амплитуды";
-            //pane2.YAxis.Title.Text = "Значение Азимута\r\n";
-            //pane3.YAxis.Title.Text = "Значение Угла\r\n";
+            pane3.YAxis.Title.Text = "Вертикаль \r\n МПЗ";
 
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
@@ -1811,12 +1874,8 @@ namespace BVKGraph
                 if (_possitionCounter != 0)
                 {
                     // Формирование графиков
-                    int k = 0;
-                    int z = 0;
-                    int u = 0;
-                    int c = 0;
-                    int v = 0;
-                    int b = 0;
+                    int k = 0, z = 0, u = 0, c = 0, v = 0, b = 0, n = 0, m = 0, h = 0;
+
                     byte errorPackagesCounter = 0;
                     for (int i = 0; i < _possitionCounter; i += 4)
                     {
@@ -1857,24 +1916,53 @@ namespace BVKGraph
                                     break;
                                 // 0x4   (Служебный)
                                 case 0x40:
-                                    _dataGraph4[u] = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
-                                    _timePoint4[u] = _timePoint[z];
-                                    _dataGraphCounter4++;
-                                    u++;
+                                    var data = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
+                                    if (data >= 49 && data <= 53)
+                                    {
+                                        _dataGraph15[n] = (short)(data - 56);
+                                        _dataGraphCounter15++;
+                                        _timePoint15[n] = _timePoint[z];
+                                        n++;
+                                    }
+                                    else
+                                    {
+                                        if (data <= 34)
+                                        {
+                                            _dataGraph4[u] = (short)(data - 16);
+                                            _timePoint4[u] = _timePoint[z];
+                                            _dataGraphCounter4++;
+                                            u++;
+                                        }
+                                        else if (data >= 55)
+                                        {
+                                            _dataGraph16[m] = (short)(data - 80);
+                                            _dataGraphCounter16++;
+                                            _timePoint16[m] = _timePoint[z];
+                                            m++;
+                                        }
+                                        else
+                                        {
+                                            _dataGraph4[u] = (short)data;
+                                            _timePoint4[u] = _timePoint[z];
+                                            _dataGraphCounter4++;
+                                            u++;
+                                        }
+
+                                    }
                                     break;
-                                // 0x5 (Крен)(!!!)
+                                // 0x5 (Крен[МПЗ])
                                 case 0x50:
-                                    _dataGraph5[c] = (short) (Convert.ToInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
+                                    _dataGraph5[c] = (short)(Convert.ToInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
                                     _timePoint5[c] = _timePoint[z];
                                     _dataGraphCounter5++;
                                     c++;
                                     break;
-                                // 0x6 (Крен)
+                                // 0x6 (Крен[МПЗ])
                                 case 0x60:
-                                    _dataGraph5[c] = (short)(Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) + 96);
-                                    _timePoint5[c] = _timePoint[z];
-                                    _dataGraphCounter5++;
-                                    c++;
+                                    _dataGraph17[h] = (short)(Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
+                                    _timePoint17[h] = _timePoint[z];
+                                    _dataGraphCounter17++;
+                                    h++;
                                     break;
                                 case 0x70:
                                     if (Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) == 32)
@@ -1891,7 +1979,6 @@ namespace BVKGraph
                                         _dataGraphCounter13++;
                                         v++;
                                     }
- 
                                     break;                                  
                             }
                             z++;
@@ -2274,20 +2361,37 @@ namespace BVKGraph
                         _dataGraph11Correction[i] = _dataGraph3[i];
                     }
                 }
+
                 // Служебный
                 // Отсечение шумов Служебного графика 1
                 for (int i = 0; i < _dataGraphCounter4; i += 3)
                 {
                     if (_dataGraph4[i] == _dataGraph4[i + 1] && _dataGraph4[i] == _dataGraph4[i + 2])
                     {
-                        _dataGraph4[i + 1] = (ushort)BadPointConst;
-                        _dataGraph4[i + 2] = (ushort)BadPointConst;
+                        _dataGraph4[i + 1] = BadPointConst;
+                        _dataGraph4[i + 2] = BadPointConst;
                     }
                     else
                     {
-                        _dataGraph4[i] = (ushort)BadPointConst;
-                        _dataGraph4[i + 1] = (ushort)BadPointConst;
-                        _dataGraph4[i + 2] = (ushort)BadPointConst;
+                        _dataGraph4[i] = BadPointConst;
+                        _dataGraph4[i + 1] = BadPointConst;
+                        _dataGraph4[i + 2] = BadPointConst;
+                    }
+                }
+                // Служебный Код2
+                // Отсечение шумов Служебного графика 1
+                for (int i = 0; i < _dataGraphCounter16; i += 3)
+                {
+                    if (_dataGraph16[i] == _dataGraph16[i + 1] && _dataGraph16[i] == _dataGraph16[i + 2])
+                    {
+                        _dataGraph16[i + 1] = BadPointConst;
+                        _dataGraph16[i + 2] = BadPointConst;
+                    }
+                    else
+                    {
+                        _dataGraph16[i] = BadPointConst;
+                        _dataGraph16[i + 1] = BadPointConst;
+                        _dataGraph16[i + 2] = BadPointConst;
                     }
                 }
                 // Отсечение шумов Служебного графика 2
@@ -2305,6 +2409,23 @@ namespace BVKGraph
                         _dataGraph5[i + 2] = BadPointConst;
                     }
                 }
+                // Отсечение шумов Служебного графика 2
+                // Код 2
+                for (int i = 0; i < _dataGraphCounter17; i += 3)
+                {
+                    if (_dataGraph17[i] == _dataGraph17[i + 1] && _dataGraph17[i] == _dataGraph17[i + 2])
+                    {
+                        _dataGraph17[i + 1] = BadPointConst;
+                        _dataGraph17[i + 2] = BadPointConst;
+                    }
+                    else
+                    {
+                        _dataGraph17[i] = BadPointConst;
+                        _dataGraph17[i + 1] = BadPointConst;
+                        _dataGraph17[i + 2] = BadPointConst;
+                    }
+                }
+
                 //Служебный
                 // Усреднение график 1
                 int sumService = 0;
@@ -2341,13 +2462,59 @@ namespace BVKGraph
                             {
                                 if (_dataGraph4[j] != BadPointConst)
                                 {
-                                    _dataGraph4[j] = (ushort)sumService;
+                                    _dataGraph4[j] = (short) sumService;
                                     counter++;
                                 }
                                 j--;
                             }
                             sumService = 0;
                             sumCounter = 0;
+                        }
+                    }
+                }
+                // Усреднение график 1
+                // Код 2
+                int sumService3 = 0;
+                int sumCounter3 = 0;
+                for (int i = 0; i < _dataGraphCounter16; i++)
+                {
+                    if (_dataGraph16[i] != _dataGraph16[i + 1] ||
+                        _dataGraph16[i] != _dataGraph16[i + 2] ||
+                        _dataGraph16[i] != _dataGraph16[i + 3] ||
+                        _dataGraph16[i] != _dataGraph16[i + 4] ||
+                        _dataGraph16[i] != _dataGraph16[i + 5] ||
+                        _dataGraph16[i] != _dataGraph16[i + 6] ||
+                        _dataGraph16[i] != _dataGraph16[i + 7] ||
+                        _dataGraph16[i] != _dataGraph16[i + 8] ||
+                        _dataGraph16[i] != _dataGraph16[i + 9] ||
+                        _dataGraph16[i] != _dataGraph16[i + 10])
+                    {
+
+                        if (sumCounter3 < 10)
+                        {
+                            if (_dataGraph16[i] != BadPointConst)
+                            {
+                                sumService3 += _dataGraph16[i];
+                                sumCounter3++;
+                            }
+                        }
+                        else
+                        {
+                            sumService3 /= sumCounter3;
+
+                            int counter3 = 0;
+                            int x = i;
+                            while (counter3 < 10)
+                            {
+                                if (_dataGraph16[x] != BadPointConst)
+                                {
+                                    _dataGraph16[x] = (short)sumService3;
+                                    counter3++;
+                                }
+                                x--;
+                            }
+                            sumService3 = 0;
+                            sumCounter3 = 0;
                         }
                     }
                 }
@@ -2392,6 +2559,51 @@ namespace BVKGraph
                             }
                             sumService2 = 0;
                             sumCounter2 = 0;
+                        }
+                    }
+                }
+                // Усреднение график 2
+                // Код 2
+                int sumService4 = 0;
+                int sumCounter4 = 0;
+                for (int i = 0; i < _dataGraphCounter17; i++)
+                {
+                    if (_dataGraph17[i] != _dataGraph17[i + 1] ||
+                        _dataGraph17[i] != _dataGraph17[i + 2] ||
+                        _dataGraph17[i] != _dataGraph17[i + 3] ||
+                        _dataGraph17[i] != _dataGraph17[i + 4] ||
+                        _dataGraph17[i] != _dataGraph17[i + 5] ||
+                        _dataGraph17[i] != _dataGraph17[i + 6] ||
+                        _dataGraph17[i] != _dataGraph17[i + 7] ||
+                        _dataGraph17[i] != _dataGraph17[i + 8] ||
+                        _dataGraph17[i] != _dataGraph17[i + 9] ||
+                        _dataGraph17[i] != _dataGraph17[i + 10])
+                    {
+                        if (sumCounter4 < 10)
+                        {
+                            if (_dataGraph17[i] != BadPointConst)
+                            {
+                                sumService4 += _dataGraph17[i];
+                                sumCounter4++;
+                            }
+                        }
+                        else
+                        {
+                            sumService4 /= sumCounter4;
+
+                            int counter4 = 0;
+                            int h = i;
+                            while (counter4 < 10)
+                            {
+                                if (_dataGraph17[h] != BadPointConst)
+                                {
+                                    _dataGraph17[h] = (short)sumService4;
+                                    counter4++;
+                                }
+                                h--;
+                            }
+                            sumService4 = 0;
+                            sumCounter4 = 0;
                         }
                     }
                 }
@@ -2487,10 +2699,21 @@ namespace BVKGraph
                     Array.Clear(_dataGraph10Correction, 0, _dataGraph10Correction.Length);
                 if (_dataGraph11Correction != null)
                     Array.Clear(_dataGraph11Correction, 0, _dataGraph11Correction.Length);
+                if (_dataGraph13 != null)
+                    Array.Clear(_dataGraph13, 0 , _dataGraph13.Length);
+                if (_dataGraph14 != null)
+                    Array.Clear(_dataGraph14, 0, _dataGraph14.Length);
+                if (_dataGraph15 != null)
+                    Array.Clear(_dataGraph15, 0, _dataGraph15.Length);
+                if (_dataGraph16 != null)
+                    Array.Clear(_dataGraph16, 0, _dataGraph16.Length);
+                if (_dataGraph17 != null)
+                    Array.Clear(_dataGraph17, 0, _dataGraph17.Length);
                 if (_croppedArray != null)
                     Array.Clear(_croppedArray, 0, _croppedArray.Length);
                 if (_croppedArray2 != null)
                     Array.Clear(_croppedArray2, 0, _croppedArray2.Length);
+
 
                 Array.Clear(_dataGraph10ServiceLimitation, 0, _dataGraph10ServiceLimitation.Length);
                 Array.Clear(_dataGraph11ServiceLimitation, 0, _dataGraph11ServiceLimitation.Length);
@@ -2498,6 +2721,11 @@ namespace BVKGraph
                 Array.Clear(_timePoint, 0, _timePoint.Length);
                 Array.Clear(_timePoint4, 0, _timePoint4.Length);
                 Array.Clear(_timePoint5, 0, _timePoint5.Length);
+                Array.Clear(_timePoint13, 0, _timePoint13.Length);
+                Array.Clear(_timePoint14, 0, _timePoint14.Length);
+                Array.Clear(_timePoint15, 0, _timePoint15.Length);
+                Array.Clear(_timePoint16, 0, _timePoint16.Length);
+                Array.Clear(_timePoint17, 0, _timePoint17.Length);
                 Array.Clear(_timePoint10ServiceLimitation, 0, _timePoint10ServiceLimitation.Length);
                 Array.Clear(_timePoint11ServiceLimitation, 0, _timePoint11ServiceLimitation.Length);
 
@@ -2509,6 +2737,11 @@ namespace BVKGraph
                 _possitionCounter = 0;
                 _dataGraphCounter4 = 0;
                 _dataGraphCounter5 = 0;
+                _dataGraphCounter13 = 0;
+                _dataGraphCounter14 = 0;
+                _dataGraphCounter15 = 0;
+                _dataGraphCounter16 = 0;
+                _dataGraphCounter17 = 0;
                 _timebuffer = 0;
                 _timer30Sec = 1;
 
