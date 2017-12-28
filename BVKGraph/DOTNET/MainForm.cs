@@ -1156,14 +1156,12 @@ namespace BVKGraph
                 // Служебный кадр
                 //Без расчета среднего значения
                 for (int i = 0; i < _dataGraphCounter13; i++)
-                {
+                {                   
+                    if (_dataGraph13[i] != BadPointConst && _dataGraph13[i] <= 33 && _dataGraph13[i] >= -33)
                     {
-                        if (_dataGraph13[i] <= 33 && _dataGraph13[i] >= -33)
-                        {
-                            // Отнимаем значение 33 для удобства отображения
-                            list16.Add(_timePoint13[i], _dataGraph13[i]);
-                        }
-                    }
+                        // Отнимаем значение 33 для удобства отображения
+                        list16.Add(_timePoint13[i], _dataGraph13[i]);
+                    }              
                 }
             }
             // Команда 0x70 кодировка A7
@@ -1171,7 +1169,7 @@ namespace BVKGraph
             {
                 for (int i = 0; i < _dataGraphCounter14; i++)
                 {
-                    if (_dataGraph14[i] <= 33 && _dataGraph14[i] >= -33)
+                    if (_dataGraph14[i] != BadPointConst && _dataGraph14[i] <= 33 && _dataGraph14[i] >= -33)
                     {
                         list18.Add(_timePoint14[i], _dataGraph14[i]);
                     }
@@ -1207,7 +1205,10 @@ namespace BVKGraph
             {
                 for (int i = 0; i < _dataGraphCounter15; i++)
                 {
+                    if (_dataGraph15[i] != BadPointConst)
+                    {
                         list20.Add(_timePoint15[i], _dataGraph15[i]);
+                    }
                 }
             }
             // Код 2 (тз от 22.12.2017)
@@ -1598,7 +1599,7 @@ namespace BVKGraph
 
             pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
-            pane3.YAxis.Title.Text = "Вертикаль \r\n МПЗ";
+            pane3.YAxis.Title.Text = "Вертикаль \r\n Вектор МПЗ";
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
             pane1.XAxis.Scale.FontSpec.Size = LabelsXfontSize;
@@ -1737,7 +1738,7 @@ namespace BVKGraph
             pane3.Title.FontSpec.FontColor = Color.Green;
             pane1.YAxis.Title.Text = " \r\n Мощность";
             pane2.YAxis.Title.Text = "Горизонт \r\n Код. Задержка";
-            pane3.YAxis.Title.Text = "Вертикаль \r\n МПЗ";
+            pane3.YAxis.Title.Text = "Вертикаль \r\n Вектор МПЗ";
 
             // Параметры шрифтов для графика 1
             // Установим размеры шрифтов для меток вдоль осей
@@ -1919,7 +1920,7 @@ namespace BVKGraph
                                     var data = Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst);
                                     if (data >= 49 && data <= 53)
                                     {
-                                        _dataGraph15[n] = (short)(data - 56);
+                                        _dataGraph15[n] = (short)(data - 55);
                                         _dataGraphCounter15++;
                                         _timePoint15[n] = _timePoint[z];
                                         n++;
@@ -1928,14 +1929,14 @@ namespace BVKGraph
                                     {
                                         if (data <= 34)
                                         {
-                                            _dataGraph4[u] = (short)(data - 16);
+                                            _dataGraph4[u] = (short)(data - 15);
                                             _timePoint4[u] = _timePoint[z];
                                             _dataGraphCounter4++;
                                             u++;
                                         }
                                         else if (data >= 55)
                                         {
-                                            _dataGraph16[m] = (short)(data - 80);
+                                            _dataGraph16[m] = (short)(data - 79);
                                             _dataGraphCounter16++;
                                             _timePoint16[m] = _timePoint[z];
                                             m++;
@@ -1952,7 +1953,7 @@ namespace BVKGraph
                                     break;
                                 // 0x5 (Крен[МПЗ])
                                 case 0x50:
-                                    _dataGraph5[c] = (short)(Convert.ToInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
+                                    _dataGraph5[c] = (short)(Convert.ToInt16(_responce[i + 1] & MaskSecondByteConst) - 33);
                                     _timePoint5[c] = _timePoint[z];
                                     _dataGraphCounter5++;
                                     c++;
@@ -2607,6 +2608,59 @@ namespace BVKGraph
                         }
                     }
                 }
+
+                // Оранжевый
+                // A7 (Подрыв)
+                for (int i = 0; i < _dataGraphCounter14; i += 3)
+                {
+                    if (_dataGraph14[i] == _dataGraph14[i + 1] && _dataGraph14[i + 1] == _dataGraph14[i + 2] &&
+                        _timePoint14[i + 1] - _timePoint14[i] <= 70 && _timePoint14[i + 2] - _timePoint14[i + 1] <= 70)
+                    {
+                        _dataGraph14[i + 1] = _dataGraph14[i + 2] = BadPointConst;
+                    }
+                    else
+                    {
+                        _dataGraph14[i] = _dataGraph14[i + 1] = _dataGraph14[i + 2] = BadPointConst;
+                    }
+                }
+                // Синий
+                for (int i = 0; i < _dataGraphCounter13; i+=3)
+                {
+                    if (_dataGraph13[i] != BadPointConst)
+                    {
+                        var j = i + 1;
+                        while (_dataGraph13[j] == BadPointConst)
+                        {
+                            j++;
+                        }
+                        var k = j + 1;
+                        while (_dataGraph13[k] == BadPointConst)
+                        {
+                            k++;
+                        }
+
+                        if (_dataGraph13[i] == _dataGraph13[j] && _dataGraph13[i] == _dataGraph13[k])
+                        {
+                            _dataGraph13[j] = _dataGraph13[k] = BadPointConst;
+                        }
+                        else
+                        {
+                            _dataGraph13[i] = _dataGraph13[j] = _dataGraph13[k] = BadPointConst;
+                        }
+                    }
+                }
+                //LimeGreen
+                for (int i = 0; i < _dataGraphCounter15; i += 3)
+                {
+                    if (_dataGraph15[i] == _dataGraph15[i + 1] && _dataGraph15[i] == _dataGraph15[i + 2])
+                    {
+                        _dataGraph15[i + 1] = _dataGraph15[i + 2] = BadPointConst;
+                    }
+                    else
+                    {
+                        _dataGraph15[i] = _dataGraph15[i + 1] = _dataGraph15[i + 2] = BadPointConst;
+                    }
+                }              
             }
             catch (Exception ex)
             {
@@ -2699,16 +2753,13 @@ namespace BVKGraph
                     Array.Clear(_dataGraph10Correction, 0, _dataGraph10Correction.Length);
                 if (_dataGraph11Correction != null)
                     Array.Clear(_dataGraph11Correction, 0, _dataGraph11Correction.Length);
-                if (_dataGraph13 != null)
+
                     Array.Clear(_dataGraph13, 0 , _dataGraph13.Length);
-                if (_dataGraph14 != null)
                     Array.Clear(_dataGraph14, 0, _dataGraph14.Length);
-                if (_dataGraph15 != null)
                     Array.Clear(_dataGraph15, 0, _dataGraph15.Length);
-                if (_dataGraph16 != null)
                     Array.Clear(_dataGraph16, 0, _dataGraph16.Length);
-                if (_dataGraph17 != null)
                     Array.Clear(_dataGraph17, 0, _dataGraph17.Length);
+
                 if (_croppedArray != null)
                     Array.Clear(_croppedArray, 0, _croppedArray.Length);
                 if (_croppedArray2 != null)
