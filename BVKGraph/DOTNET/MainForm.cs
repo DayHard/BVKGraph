@@ -1419,8 +1419,17 @@ namespace BVKGraph
                 {
                     if (_dataGraph5[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
-                        list5.Add(_timePoint5[i], _dataGraph5[i]);
+                        if (_engeneering)
+                        {
+                            list5.Add(_timePoint5[i], _dataGraph5[i]);
+                        }
+                        else
+                        {
+                            if (_dataGraph5[i] < 33 && _dataGraph5[i] > -33)
+                            {
+                                list5.Add(_timePoint5[i], _dataGraph5[i]);
+                            }
+                        }
                     }
                 }
             }
@@ -1432,8 +1441,17 @@ namespace BVKGraph
                 {
                     if (_dataGraph17[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
-                        list17.Add(_timePoint17[i], _dataGraph17[i]);
+                        if (_engeneering)
+                        {
+                            list17.Add(_timePoint17[i], _dataGraph17[i]);
+                        }
+                        else
+                        {
+                            if (_dataGraph17[i] < 33 && _dataGraph17[i] > -33)
+                            {
+                                list17.Add(_timePoint17[i], _dataGraph17[i]);
+                            }
+                        }
                     }
                 }
             }
@@ -2600,25 +2618,6 @@ namespace BVKGraph
                         _dataGraph15[i] = _dataGraph15[i + 1] = _dataGraph15[i + 2] = BadPointConst;
                     }
                 }
-                //// Бордовый и Фиолетовый
-                //// Фильтр отброс начение больше 33 и меньше -33
-                //if (!_engeneering)
-                //{
-                //    for (int i = 0; i < _dataGraphCounter4; i++)
-                //    {
-                //        if (_dataGraph4[i] > 33 || _dataGraph4[i] < -33)
-                //        {
-                //            _dataGraph4[i] = BadPointConst;
-                //        }  
-                //    }
-                //    for (int i = 0; i < _dataGraphCounter16; i++)
-                //    {
-                //        if (_dataGraph16[i] > 33 || _dataGraph16[i] < -33)
-                //        {
-                //            _dataGraph16[i] = BadPointConst;
-                //        }
-                //    }
-                //}
 
                 #region DisabledFilters
 
