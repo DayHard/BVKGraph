@@ -2462,8 +2462,6 @@ namespace BVKGraph
                     }
                 }
 
-
-
                 // Усреднение график 2
                 int sumService2 = 0;
                 int sumCounter2 = 0;
@@ -2569,17 +2567,17 @@ namespace BVKGraph
                     }
                 }
                 // Синий
-                for (int i = 0; i < _dataGraphCounter13; i+=3)
+                for (int i = 0; i < _dataGraphCounter13; i += 3)
                 {
                     if (_dataGraph13[i] != BadPointConst)
                     {
                         var j = i + 1;
-                        while (_dataGraph13[j] == BadPointConst)
+                        while (_dataGraph13[j] == BadPointConst || _dataGraph13[j] <= 33 || _dataGraph13[j] >= -33)
                         {
                             j++;
                         }
                         var k = j + 1;
-                        while (_dataGraph13[k] == BadPointConst)
+                        while (_dataGraph13[k] == BadPointConst || _dataGraph13[k] < 33 || _dataGraph13[k] > -33)
                         {
                             k++;
                         }
