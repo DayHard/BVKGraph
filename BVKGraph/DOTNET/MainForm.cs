@@ -1161,12 +1161,10 @@ namespace BVKGraph
             PointPairList list16 = new PointPairList();
             {
                 // Служебный кадр
-                //Без расчета среднего значения
                 for (int i = 0; i < _dataGraphCounter13; i++)
                 {                   
-                    if (_dataGraph13[i] != BadPointConst && _dataGraph13[i] <= 33 && _dataGraph13[i] >= -33)
+                    if (_dataGraph13[i] != BadPointConst)
                     {
-                        // Отнимаем значение 33 для удобства отображения
                         list16.Add(_timePoint13[i], _dataGraph13[i]);
                     }              
                 }
@@ -2567,17 +2565,27 @@ namespace BVKGraph
                     }
                 }
                 // Синий
-                for (int i = 0; i < _dataGraphCounter13; i += 3)
+                // Рабочий диапазон +- 33, остальное отсеивается
+                for (int i = 0; i < _dataGraphCounter13; i++)
+                {
+                    if (_dataGraph13[i] >= 33 || _dataGraph13[i] <= -33)
+                    {
+                        _dataGraph13[i] = BadPointConst;
+                    }
+                }
+                // Синий
+                // Если три точки одинаковые, отображаем 1, иначе отбрасываем все 3
+                for (int i = 0; i < _dataGraphCounter13; i ++)
                 {
                     if (_dataGraph13[i] != BadPointConst)
                     {
                         var j = i + 1;
-                        while (_dataGraph13[j] == BadPointConst || _dataGraph13[j] <= 33 || _dataGraph13[j] >= -33)
+                        while (_dataGraph13[j] == BadPointConst)
                         {
                             j++;
                         }
                         var k = j + 1;
-                        while (_dataGraph13[k] == BadPointConst || _dataGraph13[k] < 33 || _dataGraph13[k] > -33)
+                        while (_dataGraph13[k] == BadPointConst)
                         {
                             k++;
                         }
