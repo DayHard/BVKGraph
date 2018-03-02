@@ -141,7 +141,6 @@ namespace BVKGraph
         private bool _amplShow;
 
         #endregion
-
         public WorkForm()
         {
             InitializeComponent();
@@ -2460,95 +2459,98 @@ namespace BVKGraph
                     }
                 }
 
-                // Усреднение график 2
-                int sumService2 = 0;
-                int sumCounter2 = 0;
-                for (int i = 0; i < _dataGraphCounter5; i++)
-                {
-                    if (_dataGraph5[i] != _dataGraph5[i + 1] ||
-                        _dataGraph5[i] != _dataGraph5[i + 2] ||
-                        _dataGraph5[i] != _dataGraph5[i + 3] ||
-                        _dataGraph5[i] != _dataGraph5[i + 4] ||
-                        _dataGraph5[i] != _dataGraph5[i + 5] ||
-                        _dataGraph5[i] != _dataGraph5[i + 6] ||
-                        _dataGraph5[i] != _dataGraph5[i + 7] ||
-                        _dataGraph5[i] != _dataGraph5[i + 8] ||
-                        _dataGraph5[i] != _dataGraph5[i + 9] ||
-                        _dataGraph5[i] != _dataGraph5[i + 10])
-                    {
-                        if (sumCounter2 < 10)
-                        {
-                            if (_dataGraph5[i] != BadPointConst)
-                            {
-                                sumService2 += _dataGraph5[i];
-                                sumCounter2++;
-                            }
-                        }
-                        else
-                        {
-                            sumService2 /= sumCounter2;
+                #region Служебный фильтр Отключен 02.03.2018
+                //// Усреднение график 2
+                //int sumService2 = 0;
+                //int sumCounter2 = 0;
+                //for (int i = 0; i < _dataGraphCounter5; i++)
+                //{
+                //    if (_dataGraph5[i] != _dataGraph5[i + 1] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 2] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 3] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 4] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 5] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 6] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 7] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 8] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 9] ||
+                //        _dataGraph5[i] != _dataGraph5[i + 10])
+                //    {
+                //        if (sumCounter2 < 10)
+                //        {
+                //            if (_dataGraph5[i] != BadPointConst)
+                //            {
+                //                sumService2 += _dataGraph5[i];
+                //                sumCounter2++;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            sumService2 /= sumCounter2;
 
-                            int counter2 = 0;
-                            int k = i;
-                            while (counter2 < 10)
-                            {
-                                if (_dataGraph5[k] != BadPointConst)
-                                {
-                                    _dataGraph5[k] = (short)sumService2;
-                                    counter2++;
-                                }
-                                k--;
-                            }
-                            sumService2 = 0;
-                            sumCounter2 = 0;
-                        }
-                    }
-                }
-                // Усреднение график 2
-                // Код 2
-                int sumService4 = 0;
-                int sumCounter4 = 0;
-                for (int i = 0; i < _dataGraphCounter17; i++)
-                {
-                    if (_dataGraph17[i] != _dataGraph17[i + 1] ||
-                        _dataGraph17[i] != _dataGraph17[i + 2] ||
-                        _dataGraph17[i] != _dataGraph17[i + 3] ||
-                        _dataGraph17[i] != _dataGraph17[i + 4] ||
-                        _dataGraph17[i] != _dataGraph17[i + 5] ||
-                        _dataGraph17[i] != _dataGraph17[i + 6] ||
-                        _dataGraph17[i] != _dataGraph17[i + 7] ||
-                        _dataGraph17[i] != _dataGraph17[i + 8] ||
-                        _dataGraph17[i] != _dataGraph17[i + 9] ||
-                        _dataGraph17[i] != _dataGraph17[i + 10])
-                    {
-                        if (sumCounter4 < 10)
-                        {
-                            if (_dataGraph17[i] != BadPointConst)
-                            {
-                                sumService4 += _dataGraph17[i];
-                                sumCounter4++;
-                            }
-                        }
-                        else
-                        {
-                            sumService4 /= sumCounter4;
+                //            int counter2 = 0;
+                //            int k = i;
+                //            while (counter2 < 10)
+                //            {
+                //                if (_dataGraph5[k] != BadPointConst)
+                //                {
+                //                    _dataGraph5[k] = (short)sumService2;
+                //                    counter2++;
+                //                }
+                //                k--;
+                //            }
+                //            sumService2 = 0;
+                //            sumCounter2 = 0;
+                //        }
+                //    }
+                //}
 
-                            int counter4 = 0;
-                            int h = i;
-                            while (counter4 < 10)
-                            {
-                                if (_dataGraph17[h] != BadPointConst)
-                                {
-                                    _dataGraph17[h] = (short)sumService4;
-                                    counter4++;
-                                }
-                                h--;
-                            }
-                            sumService4 = 0;
-                            sumCounter4 = 0;
-                        }
-                    }
-                }
+                //// Усреднение график 2
+                //// Код 2
+                //int sumService4 = 0;
+                //int sumCounter4 = 0;
+                //for (int i = 0; i < _dataGraphCounter17; i++)
+                //{
+                //    if (_dataGraph17[i] != _dataGraph17[i + 1] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 2] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 3] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 4] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 5] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 6] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 7] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 8] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 9] ||
+                //        _dataGraph17[i] != _dataGraph17[i + 10])
+                //    {
+                //        if (sumCounter4 < 10)
+                //        {
+                //            if (_dataGraph17[i] != BadPointConst)
+                //            {
+                //                sumService4 += _dataGraph17[i];
+                //                sumCounter4++;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            sumService4 /= sumCounter4;
+
+                //            int counter4 = 0;
+                //            int h = i;
+                //            while (counter4 < 10)
+                //            {
+                //                if (_dataGraph17[h] != BadPointConst)
+                //                {
+                //                    _dataGraph17[h] = (short)sumService4;
+                //                    counter4++;
+                //                }
+                //                h--;
+                //            }
+                //            sumService4 = 0;
+                //            sumCounter4 = 0;
+                //        }
+                //    }
+                //}
+                #endregion
 
                 // Оранжевый
                 // A7 (Подрыв)
