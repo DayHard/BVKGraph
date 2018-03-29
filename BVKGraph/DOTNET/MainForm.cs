@@ -2007,7 +2007,7 @@ namespace BVKGraph
                                     }
                                     else
                                     {
-                                        _dataGraph13[v] = (short) ((short) Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) - 32);
+                                        _dataGraph13[v] = (short) ((short) Convert.ToUInt16(_responce[i + 1] & MaskSecondByteConst) - 33);
                                         _timePoint13[v] = _timePoint[z];
                                         _dataGraphCounter13++;
                                         v++;
@@ -2624,6 +2624,22 @@ namespace BVKGraph
                     else
                     {
                         _dataGraph15[i] = _dataGraph15[i + 1] = _dataGraph15[i + 2] = BadPointConst;
+                    }
+                }
+
+                // 26.03.2018 Добавлено отсечение по диапазону +- 16
+                for (int i = 0; i < _dataGraph10Correction.Length; i++)
+                {
+                    if (_dataGraph10Correction[i] >= 47 || _dataGraph10Correction[i] <= 16)
+                    {
+                        _dataGraph10Correction[i] = BadPointConst;
+                    }
+                }
+                for (int i = 0; i < _dataGraph11Correction.Length; i++)
+                {
+                    if (_dataGraph11Correction[i] >= 47 || _dataGraph11Correction[i] <= 16)
+                    {
+                        _dataGraph11Correction[i] = BadPointConst;
                     }
                 }
 
