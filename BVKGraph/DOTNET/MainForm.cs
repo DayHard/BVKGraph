@@ -2630,14 +2630,14 @@ namespace BVKGraph
                 // 26.03.2018 Добавлено отсечение по диапазону +- 16
                 for (int i = 0; i < _dataGraph10Correction.Length; i++)
                 {
-                    if (_dataGraph10Correction[i] >= 47 || _dataGraph10Correction[i] <= 16)
+                    if (_dataGraph10Correction[i] >= 49 || _dataGraph10Correction[i] <= 15)
                     {
                         _dataGraph10Correction[i] = BadPointConst;
                     }
                 }
                 for (int i = 0; i < _dataGraph11Correction.Length; i++)
                 {
-                    if (_dataGraph11Correction[i] >= 47 || _dataGraph11Correction[i] <= 16)
+                    if (_dataGraph11Correction[i] >= 49 || _dataGraph11Correction[i] <= 15)
                     {
                         _dataGraph11Correction[i] = BadPointConst;
                     }
